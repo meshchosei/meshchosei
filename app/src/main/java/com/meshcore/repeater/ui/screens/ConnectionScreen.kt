@@ -111,6 +111,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
+            .imePadding()
             .padding(16.dp)
     ) {
         // Active Connection Header Card

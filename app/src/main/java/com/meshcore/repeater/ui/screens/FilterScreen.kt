@@ -81,14 +81,10 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
     val bColors = LocalBauhausColors.current
     val stats by viewModel.filterStats.collectAsState()
     androidx.compose.runtime.LaunchedEffect(Unit) {
-        viewModel.sendCommand("filter")
-        kotlinx.coroutines.delay(350)
-        viewModel.sendCommand("filter stats")
+        viewModel.refreshAllFiltersFromNode()
     }
     androidx.compose.runtime.LaunchedEffect(Unit) {
-        viewModel.sendCommand("filter")
-        kotlinx.coroutines.delay(350)
-        viewModel.sendCommand("filter stats")
+        viewModel.refreshAllFiltersFromNode()
     }
     val cap by viewModel.deviceCapabilities.collectAsState()
     val preview by viewModel.offlinePreviewEnabled.collectAsState()
@@ -136,7 +132,7 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
         // =====================================================================
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Text(stringResource(R.string.filter_header), style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            androidx.compose.material3.OutlinedButton(onClick = { viewModel.sendCommand("filter") }) { Text("Status laden", fontSize = 11.sp) }
+            androidx.compose.material3.OutlinedButton(onClick = { viewModel.refreshAllFiltersFromNode() }) { Text("Status laden", fontSize = 11.sp) }
         }
         Spacer(modifier = Modifier.height(8.dp))
 

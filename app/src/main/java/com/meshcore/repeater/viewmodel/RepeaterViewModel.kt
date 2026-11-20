@@ -198,6 +198,29 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     private fun parseIncomingLine(line: String) {
         RepeaterProtocol.parseVersion(line)?.let { ver -> _hardwareInfo.value = _hardwareInfo.value.copy(firmwareVersion = ver); _deviceCapabilities.value = _deviceCapabilities.value.copy(firmwareVersion = ver) }
         _filterStats.value = RepeaterProtocol.parseFilterStats(line, _filterStats.value)
+        val trimmed = line.trim()
+        if (trimmed.isNotEmpty() && !trimmed.startsWith(">") && !trimmed.lowercase().startsWith("filter") && !trimmed.lowercase().contains("none") && !trimmed.lowercase().contains("empty")) {
+            val clean = trimmed.removePrefix("-").removePrefix("*").trim()
+            if (clean.startsWith("#") || lastFilterQuery.contains("channel")) {
+                val chName = clean.split(" ").firstOrNull() ?: clean
+                if (chName.isNotBlank() && !chName.contains(":")) {
+                    if (lastFilterQuery.contains("wl")) {
+                        if (_whitelistChannels.value.none { it.name == chName }) _whitelistChannels.value += WhitelistChannel(chName)
+                    } else if (lastFilterQuery.contains("channel")) {
+                        if (_blockedChannels.value.none { it.name == chName }) _blockedChannels.value += BlockedChannel(chName)
+                    }
+                }
+            } else if (lastFilterQuery.contains("path")) {
+                val hex = clean.split(" ").firstOrNull()?.uppercase() ?: ""
+                if (hex.matches(Regex("^[0-9A-F]{2,12}$"))) {
+                    if (lastFilterQuery.contains("wl")) {
+                        if (_whitelistPaths.value.none { it.prefixHex == hex }) _whitelistPaths.value += WhitelistPath(hex)
+                    } else {
+                        if (_blockedPaths.value.none { it.prefixHex == hex }) _blockedPaths.value += BlockedPath(hex)
+                    }
+                }
+            }
+        }
         val lo = line.lowercase()
         if (lo.contains("filter") || lo.contains("[list|add|del]") || lo.contains("wl")) _deviceCapabilities.value = _deviceCapabilities.value.copy(hasFilterBlacklist = lo.contains("channel") || lo.contains("sender") || lo.contains("filter"), hasFilterWhitelistMode = lo.contains(" wl") || lo.contains("[wl"), hasFilterModeSwitch = lo.contains("mode"))
         if (lo.contains("unknown command") || lo.contains("unknown cmd")) _deviceCapabilities.value = _deviceCapabilities.value.copy(hasFilterWhitelistMode = false, hasFilterModeSwitch = false)
@@ -232,6 +255,17 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     fun setFilterMode(mode: FilterMode) { _filterStats.value = _filterStats.value.copy(mode = mode); sendCommand(if (mode == FilterMode.WHITELIST) RepeaterProtocol.CMD_FILTER_MODE_WHITELIST else RepeaterProtocol.CMD_FILTER_MODE_BLACKLIST) }
     fun setFilterMaxHops(hops: Int) { _filterStats.value = _filterStats.value.copy(maxHops = hops); sendCommand(RepeaterProtocol.buildFilterHops(0, hops)) }
     fun setFilterAge(mins: Int) { sendCommand(RepeaterProtocol.buildFilterAge(mins)) }
+    private var lastFilterQuery = ""
+    fun refreshAllFiltersFromNode() {
+        viewModelScope.launch {
+            val d = if (_selectedConnectionType.value == ConnectionType.BLE_COMPANION) 1100L else 280L
+            for (q in listOf("filter", "filter channel list", "filter path list", "filter wl channel list", "filter wl path list")) {
+                lastFilterQuery = q
+                sendCommand(q)
+                delay(d)
+            }
+        }
+    }
     fun executeFilterReset() { sendCommand(RepeaterProtocol.CMD_FILTER_RESET); _blockedChannels.value = emptyList(); _blockedPaths.value = emptyList(); _whitelistChannels.value = emptyList(); _whitelistPaths.value = emptyList() }
     fun addWhitelistChannel(name: String, isPreset: Boolean = false) { _whitelistChannels.value += WhitelistChannel(name, isPreset = isPreset); sendCommand(RepeaterProtocol.buildWlChannelAdd(name)) }
     fun removeWhitelistChannel(ch: WhitelistChannel) { _whitelistChannels.value = _whitelistChannels.value.filterNot { it.name == ch.name }; sendCommand(RepeaterProtocol.buildWlChannelDel(ch.name)) }

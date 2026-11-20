@@ -264,7 +264,7 @@ fun AppDrawerSheet(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -296,7 +296,7 @@ fun AppDrawerSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp)
+                .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
             Text(
                 text = stringResource(R.string.drawer_section_appearance),
@@ -361,29 +361,6 @@ fun AppDrawerSheet(
             }
         }
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
-
-        // === Footer ===
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = if (firmwareVersion.isNotBlank()) "FW: $firmwareVersion" else "FW: —",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "Repeater Configurator v0.5 • GPLv3",
-                    fontSize = 10.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }

@@ -258,10 +258,14 @@ class BleConnectionManager(
         }
 
         scope.launch(Dispatchers.IO) {
-            @Suppress("DEPRECATION")
-            rx.value = frame
-            @Suppress("DEPRECATION")
-            gatt.writeCharacteristic(rx)
+            synchronized(this@BleConnectionManager) {
+                rx.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                @Suppress("DEPRECATION")
+                rx.value = frame
+                @Suppress("DEPRECATION")
+                gatt.writeCharacteristic(rx)
+                Thread.sleep(95)
+            }
         }
     }
 
