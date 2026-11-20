@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.heightIn
@@ -369,7 +370,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                             Icon(
                                                 imageVector = Icons.Default.SignalCellularAlt,
                                                 contentDescription = null,
-                                                tint = if (ble.rssi > -70) bColors.signalRed else bColors.ochre
+                                                tint = when { ble.rssi >= -72 -> Color(0xFF4CAF50); ble.rssi >= -86 -> bColors.ochre; else -> bColors.signalRed }
                                             )
                                             Spacer(modifier = Modifier.width(12.dp))
                                             Column(modifier = Modifier.weight(1f)) {

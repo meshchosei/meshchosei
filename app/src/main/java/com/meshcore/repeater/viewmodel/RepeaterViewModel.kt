@@ -162,7 +162,14 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         val s = _remoteAdminSession.value; val t = s.targetRepeater ?: return
         bleManager.sendBytes(RepeaterProtocol.buildLoginFrame(t.pubKey, s.savedPassword))
         _remoteAdminSession.value = s.copy(isLoggingIn = true, sessionStatus = "Login gesendet...")
-        viewModelScope.launch { delay(5000L); if (_remoteAdminSession.value.isLoggingIn) _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggingIn = false, sessionStatus = "Keine Antwort (Timeout)") }
+        viewModelScope.launch {
+            delay(900L)
+            sendCommand(RepeaterProtocol.CMD_VER)
+            delay(4500L)
+            if (_remoteAdminSession.value.isLoggingIn) {
+                _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggingIn = false, sessionStatus = "Keine Antwort (Timeout)")
+            }
+        }
     }
     fun sendCommand(cmd: String) {
         if (cmd.isBlank()) return
