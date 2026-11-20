@@ -137,6 +137,7 @@ class BleConnectionManager(
     @SuppressLint("MissingPermission")
     fun connect(address: String) {
         stopScan()
+        stopScan()
         val adapter = bluetoothAdapter ?: return
         val device = try {
             adapter.getRemoteDevice(address)

@@ -70,6 +70,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -477,6 +478,26 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                         }
                                     }
 
+                                    if (remoteAdmin.isLoggingIn) {
+                                        val infiniteTransition = androidx.compose.animation.core.rememberInfiniteTransition(label = "sync_pulse")
+                                        val pulseAlpha by infiniteTransition.animateFloat(
+                                            initialValue = 1f,
+                                            targetValue = 0.2f,
+                                            animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+                                                animation = androidx.compose.animation.core.tween(450),
+                                                repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+                                            ),
+                                            label = "pulse_alpha"
+                                        )
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(top = 6.dp).alpha(pulseAlpha),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Box(modifier = Modifier.size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(bColors.cobalt))
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text("Lade Daten vom Repeater...", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = bColors.cobalt)
+                                        }
+                                    }
                                     Spacer(modifier = Modifier.height(8.dp))
 
                                     // Password Input & Login Action
@@ -542,7 +563,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = if (isRefreshingContacts) "Lade Kontakte vom Companion-Node..."
+                                    text = if (isRefreshingContacts) "Lade..."
                                     else if (filterOnlyRepeaters) "Keine Repeater in der Kontaktliste.\nKlicke oben auf 'Neu laden'."
                                     else "Keine Kontakte empfangen.\nKlicke oben auf 'Neu laden'.",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
