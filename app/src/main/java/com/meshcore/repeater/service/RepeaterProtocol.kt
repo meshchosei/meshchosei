@@ -179,7 +179,7 @@ object RepeaterProtocol {
 
     // CMD_SEND_LOGIN: cmd(1) + pub_key(32) + password(N)
     fun buildLoginFrame(pubKey: ByteArray, password: String): ByteArray {
-        val pwBytes = (password + "\u0000").toByteArray(StandardCharsets.UTF_8)
+        val pwBytes = password.toByteArray(StandardCharsets.UTF_8)
         val frame = ByteArray(1 + PUB_KEY_SIZE + pwBytes.size)
         frame[0] = CMD_SEND_LOGIN
         val copyKeyLen = minOf(pubKey.size, PUB_KEY_SIZE)

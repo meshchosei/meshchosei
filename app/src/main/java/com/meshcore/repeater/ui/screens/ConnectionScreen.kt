@@ -146,7 +146,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
 
                 Spacer(modifier = Modifier.width(14.dp))
 
-                Column(modifier = Modifier.heightIn(max = 360.dp)) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = when (val state = connectionState) {
                             is ConnectionState.Connected -> state.deviceName
@@ -219,7 +219,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 360.dp)
+                .weight(1f)
                 .clip(RoundedCornerShape(12.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(12.dp)
@@ -246,7 +246,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(max = 360.dp),
+                                .weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -256,7 +256,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             )
                         }
                     } else {
-                        LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
+                        LazyColumn(modifier = Modifier.weight(1f)) {
                             items(usbDevices) { dev ->
                                 Card(
                                     modifier = Modifier
@@ -270,7 +270,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                             .padding(12.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Column(modifier = Modifier.heightIn(max = 360.dp)) {
+                                        Column(modifier = Modifier.weight(1f)) {
                                             Text(
                                                 text = dev.displayName,
                                                 fontWeight = FontWeight.SemiBold,
@@ -341,7 +341,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .heightIn(max = 360.dp),
+                                    .weight(1f),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -351,7 +351,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 )
                             }
                         } else {
-                            LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
+                            LazyColumn(modifier = Modifier.weight(1f)) {
                                 items(bleDevices) { ble ->
                                     Card(
                                         modifier = Modifier
@@ -371,7 +371,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                                 tint = if (ble.rssi > -70) bColors.signalRed else bColors.ochre
                                             )
                                             Spacer(modifier = Modifier.width(12.dp))
-                                            Column(modifier = Modifier.heightIn(max = 360.dp)) {
+                                            Column(modifier = Modifier.weight(1f)) {
                                                 Text(
                                                     text = ble.displayName,
                                                     fontWeight = FontWeight.SemiBold,
@@ -400,7 +400,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                     Column(modifier = Modifier.fillMaxSize()) {
                         // Section Header: Companion Contact List
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                            Column(modifier = Modifier.heightIn(max = 360.dp)) {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text("Repeater-Auswahl (${meshContacts.size})", style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold)
                                 Text("Companion Mesh-Kontakte", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
@@ -485,7 +485,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                         OutlinedTextField(
                                             value = remoteAdmin.savedPassword,
                                             onValueChange = { viewModel.setRemoteAdminPassword(it) },
-                                            modifier = Modifier.heightIn(max = 360.dp),
+                                            modifier = Modifier.weight(1f),
                                             label = { Text("Admin-Passwort (max 15 Zeichen)", fontSize = 11.sp) },
                                             singleLine = true,
                                             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Password, autoCorrect = false),
@@ -536,7 +536,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .heightIn(max = 360.dp),
+                                    .weight(1f),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -548,7 +548,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 )
                             }
                         } else {
-                            LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
+                            LazyColumn(modifier = Modifier.weight(1f)) {
                                 items(filteredContacts) { contact ->
                                     val isSelected = remoteAdmin.targetRepeater?.pubKeyHex == contact.pubKeyHex
                                     Card(
@@ -572,7 +572,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                                 tint = if (contact.isRepeater) bColors.signalRed else bColors.cobalt
                                             )
                                             Spacer(modifier = Modifier.width(10.dp))
-                                            Column(modifier = Modifier.heightIn(max = 360.dp)) {
+                                            Column(modifier = Modifier.weight(1f)) {
                                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                                     Text(
                                                         text = contact.name,

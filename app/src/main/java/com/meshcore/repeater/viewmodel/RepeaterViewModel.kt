@@ -216,7 +216,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         sendCommand(RepeaterProtocol.buildSetTx(rc.txPowerDbm.toInt()))
         notifyUser(if (testMode) "Temporärer Funk-Test ($testTimeoutMins Min.)" else "Funkwerte dauerhaft im Flash gespeichert!")
     }
-    fun startMeshCare(duration: WatchdogDuration, autoRollback: Boolean = true) {
+    fun startMeshCare(duration: WatchdogDuration, testTxPowerDbm: Double = 14.0) {
         meshCareJob?.cancel(); val t = duration.minutes * 60; _meshCareState.value = MeshCareState(isActive = true, remainingSeconds = t, totalSeconds = t)
         meshCareJob = viewModelScope.launch { while (_meshCareState.value.remainingSeconds > 0 && _meshCareState.value.isActive) { delay(1000L); _meshCareState.value = _meshCareState.value.copy(remainingSeconds = _meshCareState.value.remainingSeconds - 1) }; if (_meshCareState.value.isActive) stopMeshCare() }
     }
@@ -247,7 +247,27 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     fun removeTextRule(pattern: String) { _textRules.value = _textRules.value.filterNot { it.pattern == pattern }; sendCommand(RepeaterProtocol.buildTextRuleRemove(pattern)) }
     fun addWatchChannel(name: String) { _watchChannels.value += WatchChannel(name); sendCommand(RepeaterProtocol.buildWatchAdd(name)) }
     fun removeWatchChannel(name: String) { _watchChannels.value = _watchChannels.value.filterNot { it.name == name }; sendCommand(RepeaterProtocol.buildWatchRemove(name)) }
-    fun buildBackupScript(): String = listOf("# Backup", RepeaterProtocol.buildSetRadio(_radioConfig.value.frequencyMhz, _radioConfig.value.bandwidthKhz, _radioConfig.value.spreadingFactor, 5), RepeaterProtocol.buildSetTx(_radioConfig.value.txPowerDbm.toInt())).joinToString("\n")
+    fun buildBackupScript(): String {
+        val rc = _radioConfig.value; val fs = _filterStats.value
+        val cr = rc.codingRate.substringAfter('/').toIntOrNull() ?: 5
+        val lines = mutableListOf(
+            "# RepeaterConfigurator Voll-Backup",
+            RepeaterProtocol.buildSetRadio(rc.frequencyMhz, rc.bandwidthKhz, rc.spreadingFactor, cr),
+            RepeaterProtocol.buildSetTx(rc.txPowerDbm.toInt()),
+            RepeaterProtocol.buildSetFloodMax(rc.floodMax),
+            RepeaterProtocol.buildSetFloodAdvertInterval(rc.floodAdvertIntervalHours),
+            RepeaterProtocol.buildSetLed(_ledMode.value),
+            RepeaterProtocol.buildSetGps(_gpsMode.value),
+            if (fs.filterEnabled) RepeaterProtocol.CMD_FILTER_ON else RepeaterProtocol.CMD_FILTER_OFF,
+            if (fs.dryRun) RepeaterProtocol.CMD_FILTER_DRYRUN_ON else RepeaterProtocol.CMD_FILTER_DRYRUN_OFF,
+            if (fs.mode == FilterMode.WHITELIST) RepeaterProtocol.CMD_FILTER_MODE_WHITELIST else RepeaterProtocol.CMD_FILTER_MODE_BLACKLIST
+        )
+        _blockedChannels.value.forEach { lines.add(RepeaterProtocol.buildChannelAdd(it.name)) }
+        _blockedPaths.value.forEach { lines.add(RepeaterProtocol.buildPathAdd(it.prefixHex)) }
+        _whitelistChannels.value.forEach { lines.add(RepeaterProtocol.buildWlChannelAdd(it.name)) }
+        _whitelistPaths.value.forEach { lines.add(RepeaterProtocol.buildWlPathAdd(it.prefixHex)) }
+        return lines.joinToString("\n")
+    }
     fun restoreBackupScript(script: String) { val cmds = script.lines().map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }; viewModelScope.launch { for (c in cmds) { sendCommand(c); delay(400L) }; notifyUser("Profil eingespielt!") } }
     override fun onCleared() { super.onCleared(); serialManager.disconnect(); bleManager.disconnect() }
 }
