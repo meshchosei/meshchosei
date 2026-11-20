@@ -216,8 +216,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         sendCommand(RepeaterProtocol.buildSetTx(rc.txPowerDbm.toInt()))
         notifyUser(if (testMode) "Temporärer Funk-Test ($testTimeoutMins Min.)" else "Funkwerte dauerhaft im Flash gespeichert!")
     }
-    fun startMeshCare(minutes: Int = 15) {
-        meshCareJob?.cancel(); val t = minutes * 60; _meshCareState.value = MeshCareState(isActive = true, remainingSeconds = t, totalSeconds = t)
+    fun startMeshCare(duration: WatchdogDuration, autoRollback: Boolean = true) {
+        meshCareJob?.cancel(); val t = duration.minutes * 60; _meshCareState.value = MeshCareState(isActive = true, remainingSeconds = t, totalSeconds = t)
         meshCareJob = viewModelScope.launch { while (_meshCareState.value.remainingSeconds > 0 && _meshCareState.value.isActive) { delay(1000L); _meshCareState.value = _meshCareState.value.copy(remainingSeconds = _meshCareState.value.remainingSeconds - 1) }; if (_meshCareState.value.isActive) stopMeshCare() }
     }
     fun extendMeshCare(addMinutes: Int = 10) { val a = addMinutes * 60; _meshCareState.value = _meshCareState.value.copy(remainingSeconds = _meshCareState.value.remainingSeconds + a, totalSeconds = _meshCareState.value.totalSeconds + a) }
