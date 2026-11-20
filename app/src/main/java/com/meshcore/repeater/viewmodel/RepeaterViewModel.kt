@@ -117,7 +117,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         }
     )
 
-    private val bleManager: BleConnectionManager = BleConnectionManager(
+    private lateinit var bleManager: BleConnectionManager
+    init { bleManager = BleConnectionManager(
         context = application,
         scope = viewModelScope,
         onDataReceived = { line -> logTerminal(line, false); parseIncomingLine(line) },
@@ -139,7 +140,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     val bleDevices: StateFlow<List<BleDeviceItem>> = bleManager.scannedDevices
     val isScanningBle: StateFlow<Boolean> = bleManager.isScanning
 
-    init { refreshUsbDevices() }
+    refreshUsbDevices() }
 
     private fun logTerminal(text: String, isOutgoing: Boolean) { _terminalLogs.value = (_terminalLogs.value + TerminalEntry(text, isOutgoing)).takeLast(400) }
     private fun notifyUser(msg: String) { _uiEvents.tryEmit(msg) }
