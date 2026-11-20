@@ -194,9 +194,19 @@ class BleConnectionManager(
                             descriptor.value = android.bluetooth.BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
                             @Suppress("DEPRECATION")
                             gatt.writeDescriptor(descriptor)
+                        } else {
+                            scope.launch(Dispatchers.Main) { onConnectionChanged(true, gatt.device?.name ?: "MeshCore BLE") }
                         }
                     }
                 }
+            }
+        }
+
+        @SuppressLint("MissingPermission")
+        override fun onDescriptorWrite(gatt: BluetoothGatt?, descriptor: android.bluetooth.BluetoothGattDescriptor?, status: Int) {
+            try { gatt?.requestMtu(247) } catch (_: Exception) {}
+            scope.launch(Dispatchers.Main) {
+                onConnectionChanged(true, gatt?.device?.name ?: "MeshCore BLE")
             }
         }
 

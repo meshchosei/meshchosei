@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
@@ -75,6 +76,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -85,6 +87,23 @@ import com.meshcore.repeater.model.MeshContact
 import com.meshcore.repeater.ui.theme.AlertRed
 import com.meshcore.repeater.ui.theme.LocalBauhausColors
 import com.meshcore.repeater.viewmodel.RepeaterViewModel
+
+@Composable
+private fun AsciiSpinner(label: String, color: Color = Color(0xFF2196F3)) {
+    val frames = listOf("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
+    var idx by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(100L)
+            idx = (idx + 1) % frames.size
+        }
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(text = frames[idx], fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = color)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = color)
+    }
+}
 
 @Composable
 fun ConnectionScreen(viewModel: RepeaterViewModel) {
@@ -134,7 +153,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         .size(46.dp)
                         .clip(CircleShape)
                         .background(
-                            if (connectionState is ConnectionState.Connected) bColors.signalRed.copy(alpha = 0.2f)
+                            if (connectionState is ConnectionState.Connected) Color(0xFF4CAF50).copy(alpha = 0.2f)
                             else Color.Gray.copy(alpha = 0.2f)
                         ),
                     contentAlignment = Alignment.Center
@@ -142,7 +161,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = if (connectionState is ConnectionState.Connected) bColors.signalRed else Color.Gray,
+                        tint = if (connectionState is ConnectionState.Connected) Color(0xFF4CAF50) else Color.Gray,
                         modifier = Modifier.size(26.dp)
                     )
                 }
@@ -158,6 +177,8 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             is ConnectionState.Disconnected -> "Keine aktive Verbindung"
                         },
                         style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
@@ -173,11 +194,14 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             else -> "Wähle USB-OTG oder BLE-Companion (Mesh OTA)"
                         },
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (remoteAdmin.isLoggedIn) bColors.signalRed else MaterialTheme.colorScheme.onSurfaceVariant
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = if (remoteAdmin.isLoggedIn) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
                 if (connectionState is ConnectionState.Connected) {
+                    Spacer(modifier = Modifier.width(8.dp))
                     OutlinedButton(
                         onClick = { viewModel.disconnect() },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = AlertRed)
@@ -495,7 +519,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                         ) {
                                             Box(modifier = Modifier.size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(bColors.cobalt))
                                             Spacer(modifier = Modifier.width(8.dp))
-                                            Text("Lade Daten vom Repeater...", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = bColors.cobalt)
+                                            AsciiSpinner("Lade Daten vom Repeater...", bColors.cobalt)
                                         }
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))

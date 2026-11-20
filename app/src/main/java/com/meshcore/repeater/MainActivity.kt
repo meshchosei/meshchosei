@@ -163,7 +163,7 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
                 offlinePreviewEnabled = offlinePreview,
                 navigationAllowed = navigationAllowed,
                 onItemClick = { item ->
-                    if (item == NavDrawerItem.CONNECTION || navigationAllowed) {
+                    if ((item == NavDrawerItem.CONNECTION || item == NavDrawerItem.ABOUT) || navigationAllowed) {
                         if (navHistory.last() != item) navHistory.add(item)
                         scope.launch { drawerState.close() }
                     } else {
