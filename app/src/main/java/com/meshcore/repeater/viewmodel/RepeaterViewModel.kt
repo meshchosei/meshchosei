@@ -191,17 +191,18 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         if (data.isEmpty()) return
         when (data[0]) {
             RepeaterProtocol.PACKET_SELF_INFO -> refreshMeshContacts()
+            0x06.toByte() -> { if (_remoteAdminSession.value.isLoggingIn) { _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggedIn = true, isLoggingIn = false, sessionStatus = "Eingeloggt"); startCapabilityDetection() } }
             RepeaterProtocol.PACKET_CONTACT_START -> { _isRefreshingContacts.value = true; _meshContacts.value = emptyList() }
             RepeaterProtocol.PACKET_CONTACT -> RepeaterProtocol.parseContactFrame(data)?.let { ct -> val l = _meshContacts.value.toMutableList(); val i = l.indexOfFirst { it.pubKeyHex == ct.pubKeyHex }; if (i >= 0) l[i] = ct else l.add(ct); _meshContacts.value = l.sortedWith(compareByDescending<MeshContact> { it.isRepeater }.thenBy { it.name }) }
             RepeaterProtocol.PACKET_CONTACT_END -> _isRefreshingContacts.value = false
             RepeaterProtocol.PACKET_CONTACT_MSG_V3 -> RepeaterProtocol.parseContactMsgV3(data)?.let { (p, txt, snr) -> logTerminal("< [OTA ${RepeaterProtocol.bytesToHex(p, 4)} | SNR ${"%.1f".format(snr)}] $txt", false); onRemoteReply(txt) }
             0x07.toByte() -> if (data.size > 11) { val msg = String(data, 11, data.size - 11, StandardCharsets.UTF_8).trimEnd('\u0000', '\r', '\n'); logTerminal("< [OTA] $msg", false); onRemoteReply(msg) }
-            0x12.toByte() -> { _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggedIn = true, isLoggingIn = false, sessionStatus = "Admin aktiv (0x12)"); logTerminal("< [Mesh] Admin-Login bestätigt!", false); startCapabilityDetection() }
+            0x12.toByte() -> { _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggedIn = true, isLoggingIn = false, sessionStatus = "Eingeloggt"); logTerminal("< [Mesh] Admin-Login bestätigt!", false); startCapabilityDetection() }
             RepeaterProtocol.PACKET_CLI_REPLY -> { val r = String(data, 1, data.size - 1, StandardCharsets.UTF_8).trimEnd('\u0000', '\r', '\n'); logTerminal("< [Companion] $r", false); parseIncomingLine(r) }
             RepeaterProtocol.PACKET_ERROR -> { val code = if (data.size > 1) data[1].toInt() and 0xFF else -1; logTerminal("< [Fehler 0x01] Code=$code", false); if (_remoteAdminSession.value.isLoggingIn) _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggingIn = false, sessionStatus = "Fehler ($code)") }
         }
     }
-    private fun onRemoteReply(txt: String) { if (_remoteAdminSession.value.isLoggingIn) { _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggedIn = true, isLoggingIn = false, sessionStatus = "Admin aktiv"); startCapabilityDetection() }; parseIncomingLine(txt) }
+    private fun onRemoteReply(txt: String) { if (_remoteAdminSession.value.isLoggingIn) { _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggedIn = true, isLoggingIn = false, sessionStatus = "Eingeloggt"); startCapabilityDetection() }; parseIncomingLine(txt) }
     private fun parseIncomingLine(line: String) {
         RepeaterProtocol.parseVersion(line)?.let { ver -> _hardwareInfo.value = _hardwareInfo.value.copy(firmwareVersion = ver); _deviceCapabilities.value = _deviceCapabilities.value.copy(firmwareVersion = ver) }
         _filterStats.value = RepeaterProtocol.parseFilterStats(line, _filterStats.value)

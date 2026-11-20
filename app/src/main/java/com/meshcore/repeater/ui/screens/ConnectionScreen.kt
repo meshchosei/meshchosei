@@ -185,7 +185,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         text = when (val state = connectionState) {
                             is ConnectionState.Connected -> {
                                 if (state.connectionType == ConnectionType.BLE_COMPANION && remoteAdmin.targetRepeater != null) {
-                                    "Ziel: ${remoteAdmin.targetRepeater?.name} • ${remoteAdmin.sessionStatus}"
+                                    "${remoteAdmin.targetRepeater?.name} • ${if (remoteAdmin.isLoggedIn) "Eingeloggt" else remoteAdmin.sessionStatus}"
                                 } else {
                                     "${state.connectionType.displayName} • ${state.details}"
                                 }
@@ -277,7 +277,9 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Kein USB-Serial Adapter gefunden.\nBitte OTG-Kabel anstecken.",
+                                text = "Bitte OTG-Kabel anschließen",
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth(),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 style = MaterialTheme.typography.bodyMedium
                             )
@@ -445,7 +447,14 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             onValueChange = { contactSearchQuery = it },
                             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                             placeholder = { Text("Repeater suchen (Name oder Key)...", fontSize = 12.sp) },
-                            singleLine = true
+                            singleLine = true,
+                            trailingIcon = {
+                                if (contactSearchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { contactSearchQuery = "" }) {
+                                        Icon(Icons.Default.Clear, contentDescription = "Suche löschen", modifier = Modifier.size(18.dp))
+                                    }
+                                }
+                            }
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
