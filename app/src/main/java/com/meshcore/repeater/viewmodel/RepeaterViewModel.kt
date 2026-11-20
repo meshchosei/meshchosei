@@ -117,7 +117,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         }
     )
 
-    private val bleManager = BleConnectionManager(
+    private val bleManager: BleConnectionManager = BleConnectionManager(
         context = application,
         scope = viewModelScope,
         onDataReceived = { line -> logTerminal(line, false); parseIncomingLine(line) },
@@ -216,7 +216,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         notifyUser(if (testMode) "Temporärer Funk-Test ($testTimeoutMins Min.)" else "Funkwerte dauerhaft im Flash gespeichert!")
     }
     fun startMeshCare(minutes: Int = 15) {
-        meshCareJob?.cancel(); val t = minutes * 60; _meshCareState.value = MeshCareState(true, t, t)
+        meshCareJob?.cancel(); val t = minutes * 60; _meshCareState.value = MeshCareState(isActive = true, remainingSeconds = t, totalSeconds = t)
         meshCareJob = viewModelScope.launch { while (_meshCareState.value.remainingSeconds > 0 && _meshCareState.value.isActive) { delay(1000L); _meshCareState.value = _meshCareState.value.copy(remainingSeconds = _meshCareState.value.remainingSeconds - 1) }; if (_meshCareState.value.isActive) stopMeshCare() }
     }
     fun extendMeshCare(addMinutes: Int = 10) { val a = addMinutes * 60; _meshCareState.value = _meshCareState.value.copy(remainingSeconds = _meshCareState.value.remainingSeconds + a, totalSeconds = _meshCareState.value.totalSeconds + a) }
@@ -230,12 +230,12 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     fun setFilterDryRun(dryRun: Boolean) { _filterStats.value = _filterStats.value.copy(dryRun = dryRun); sendCommand(if (dryRun) RepeaterProtocol.CMD_FILTER_DRYRUN_ON else RepeaterProtocol.CMD_FILTER_DRYRUN_OFF) }
     fun setFilterMode(mode: FilterMode) { _filterStats.value = _filterStats.value.copy(mode = mode); sendCommand(if (mode == FilterMode.WHITELIST) RepeaterProtocol.CMD_FILTER_MODE_WHITELIST else RepeaterProtocol.CMD_FILTER_MODE_BLACKLIST) }
     fun setFilterMaxHops(hops: Int) { _filterStats.value = _filterStats.value.copy(maxHops = hops); sendCommand(RepeaterProtocol.buildFilterHops(0, hops)) }
-    fun setFilterAge(mins: Int) { _filterStats.value = _filterStats.value.copy(ageTimeoutMinutes = mins); sendCommand(RepeaterProtocol.buildFilterAge(mins)) }
+    fun setFilterAge(mins: Int) { sendCommand(RepeaterProtocol.buildFilterAge(mins)) }
     fun executeFilterReset() { sendCommand(RepeaterProtocol.CMD_FILTER_RESET); _blockedChannels.value = emptyList(); _blockedPaths.value = emptyList(); _whitelistChannels.value = emptyList(); _whitelistPaths.value = emptyList() }
     fun addWhitelistChannel(name: String, isPreset: Boolean = false) { _whitelistChannels.value += WhitelistChannel(name, isPreset = isPreset); sendCommand(RepeaterProtocol.buildWlChannelAdd(name)) }
-    fun removeWhitelistChannel(name: String) { _whitelistChannels.value = _whitelistChannels.value.filterNot { it.name == name }; sendCommand(RepeaterProtocol.buildWlChannelDel(name)) }
+    fun removeWhitelistChannel(ch: WhitelistChannel) { _whitelistChannels.value = _whitelistChannels.value.filterNot { it.name == ch.name }; sendCommand(RepeaterProtocol.buildWlChannelDel(ch.name)) }
     fun addWhitelistPath(prefix: String, comment: String = "") { _whitelistPaths.value += WhitelistPath(prefix, comment); sendCommand(RepeaterProtocol.buildWlPathAdd(prefix)) }
-    fun removeWhitelistPath(prefix: String) { _whitelistPaths.value = _whitelistPaths.value.filterNot { it.prefixHex == prefix }; sendCommand(RepeaterProtocol.buildWlPathDel(prefix)) }
+    fun removeWhitelistPath(p: WhitelistPath) { _whitelistPaths.value = _whitelistPaths.value.filterNot { it.prefixHex == p.prefixHex }; sendCommand(RepeaterProtocol.buildWlPathDel(p.prefixHex)) }
     fun addBlockedChannel(name: String) { _blockedChannels.value += BlockedChannel(name); sendCommand(RepeaterProtocol.buildChannelAdd(name)) }
     fun removeBlockedChannel(name: String) { _blockedChannels.value = _blockedChannels.value.filterNot { it.name == name }; sendCommand(RepeaterProtocol.buildChannelRemove(name)) }
     fun addBlockedPath(prefix: String, comment: String = "") { _blockedPaths.value += BlockedPath(prefix, comment); sendCommand(RepeaterProtocol.buildPathAdd(prefix)) }
