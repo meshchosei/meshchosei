@@ -137,11 +137,10 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         }
     )
 
-    val bleDevices: StateFlow<List<BleDeviceItem>> get() = bleManager.scannedDevices
-    val isScanningBle: StateFlow<Boolean> get() = bleManager.isScanning
-
     refreshUsbDevices()
     }
+    val bleDevices: StateFlow<List<BleDeviceItem>> get() = bleManager.scannedDevices
+    val isScanningBle: StateFlow<Boolean> get() = bleManager.isScanning
 
     private fun logTerminal(text: String, isOutgoing: Boolean) { _terminalLogs.value = (_terminalLogs.value + TerminalEntry(text, isOutgoing)).takeLast(400) }
     private fun notifyUser(msg: String) { _uiEvents.tryEmit(msg) }
