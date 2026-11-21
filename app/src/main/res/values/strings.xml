@@ -3,7 +3,7 @@
     <string name="app_name">Repeater Configurator</string>
     <string name="app_title_repeater">REPEATER</string>
     <string name="app_title_configurator">CONFIGURATOR</string>
-    <string name="app_edition_subtitle">ZephCore BW2 Edition</string>
+    <string name="app_edition_subtitle">ZephCore &amp; DDMC (Dutch MeshCore) BW2 Edition</string>
     <string name="app_version_tag">v1.18.2 • Dutch-MeshCore Filter</string>
     <string name="action_ok">OK</string>
     <string name="action_cancel">Cancel</string>
@@ -93,7 +93,7 @@
     <string name="radio_compliance_unlocked">WARNING: Compliance lock disabled!</string>
     <string name="radio_compliance_switch">Unlock Legal Power Limit</string>
 
-    <!-- Filter Screen (ZephCore BW2) -->
+    <!-- Filter Screen (ZephCore &amp; DDMC (Dutch MeshCore) BW2) -->
     <string name="filter_header">PACKET FILTER &amp; RULES</string>
     <string name="filter_master_switch">Packet filter active (filter on/off)</string>
     <string name="filter_master_on_desc">Filter engine running</string>
@@ -168,14 +168,14 @@
     <string name="disclaimer_point_liability">This software is provided AS-IS without any warranty. The developers accept no liability for damage to hardware, network disruptions, or regulatory violations caused by use of this app.</string>
     <string name="disclaimer_point_regulations">You are solely responsible for complying with all applicable radio regulations in your country. In Germany and the EU, the EU868 band is subject to ETSI EN 300 220 and BNetzA frequency plans. Exceeding allowed ERP/EIRP levels is illegal and may result in fines.</string>
     <string name="disclaimer_point_responsibility">Use this app at your own risk. Always verify that your repeater configuration complies with local radio law before transmitting.</string>
-    <string name="disclaimer_accept_note">By tapping \'Accept\', you confirm that you have read, understood, and agree to all conditions above.</string>
-    <string name="disclaimer_accept_btn">I Accept — Use at Own Risk</string>
+    <string name="disclaimer_accept_note">By tapping \'Confirm\', you confirm that you have read, understood, and agree to all conditions above.</string>
+    <string name="disclaimer_accept_btn">I Confirm — Use at Own Risk</string>
 
     <!-- Device Capability Labels -->
     <string name="caps_unsupported">Not supported by this firmware</string>
     <string name="caps_detecting">Detecting firmware capabilities…</string>
     <string name="caps_no_gps">GPS not available on this hardware</string>
-    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore BW2 firmware</string>
+    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore &amp; DDMC (Dutch MeshCore) BW2 firmware</string>
     <string name="offline_preview_label">Offline Preview Mode</string>
 
     <!-- Connection Gate -->
@@ -205,8 +205,9 @@
     <string name="about_license_title">License: GNU GPLv3 (Free Software)</string>
     <string name="about_license_body">Free and Open Source Software licensed under GNU GPLv3. Everyone may use, study, modify, and redistribute it under GPLv3 terms. Provided WITHOUT ANY WARRANTY ("AS IS").</string>
     <string name="about_ai_title">AI-Assisted Development</string>
-    <string name="about_ai_body">Created with AI assistance for the MeshCore &amp; ZephCore community. The operator remains solely responsible for complying with local RF regulations.</string>
+    <string name="about_ai_body">Created with AI assistance for the MeshCore &amp; ZephCore &amp; DDMC (Dutch MeshCore) community. The operator remains solely responsible for complying with local RF regulations.</string>
     <string name="about_credits_title">Open-Source Components</string>
-    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT License)\n• MeshCore / ZephCore CLI Protocol</string>
+    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT License)\n• MeshCore / ZephCore &amp; DDMC (Dutch MeshCore) CLI Protocol</string>
     <string name="about_show_disclaimer">Show Startup Disclaimer Again</string>
+    <string name="lang_nl">NL</string>
 </resources>

@@ -84,7 +84,7 @@ fun AppDrawerSheet(
         // === Drawer Header ===
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(20.dp)
         ) {
@@ -251,55 +251,14 @@ fun AppDrawerSheet(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
-
-        // === Offline-Vorschau Schalter ===
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.offline_preview_label),
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = if (offlinePreviewEnabled) "Aktiv – keine Daten werden gesendet" else "Deaktiviert",
-                    fontSize = 11.sp,
-                    color = if (offlinePreviewEnabled) bColors.ochre else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Switch(
-                checked = offlinePreviewEnabled,
-                onCheckedChange = onOfflinePreviewChange,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = bColors.ochre,
-                    checkedTrackColor = bColors.ochre.copy(alpha = 0.35f)
-                )
-            )
-        }
-
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
-
+        Spacer(modifier = Modifier.weight(1f))
         // === Bauhaus Erscheinungsbild & Sprache ===
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
-            Text(
-                text = stringResource(R.string.drawer_section_appearance),
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                letterSpacing = 0.8.sp
-            )
 
-            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -308,7 +267,7 @@ fun AppDrawerSheet(
             ) {
                 // Farbmodus-Icons: Auto (Zahnrad+A) | Hell (Sonne) | Dunkel (Mond)
                 Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)) {
-                    ThemeMode.values().forEach { mode ->
+                    listOf(ThemeMode.LIGHT, ThemeMode.DARK).forEach { mode ->
                         val isActive = themeMode == mode
                         Box(
                             modifier = Modifier
@@ -334,7 +293,7 @@ fun AppDrawerSheet(
 
                 // Sprach-Flaggen: Auto (Globus+A) | DE | EN
                 Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)) {
-                    AppLanguage.values().forEach { lang ->
+                    listOf(AppLanguage.DE, AppLanguage.EN, AppLanguage.NL).forEach { lang ->
                         val isActive = appLanguage == lang
                         Box(
                             modifier = Modifier
@@ -353,6 +312,7 @@ fun AppDrawerSheet(
                                 }
                                 AppLanguage.DE -> Text("🇩🇪", fontSize = 18.sp)
                                 AppLanguage.EN -> Text("🇬🇧", fontSize = 18.sp)
+                                AppLanguage.NL -> Text("🇳🇱", fontSize = 18.sp)
                             }
                         }
                     }

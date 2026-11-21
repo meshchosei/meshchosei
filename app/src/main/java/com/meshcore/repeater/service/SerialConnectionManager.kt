@@ -25,7 +25,9 @@ class SerialConnectionManager(
     private val scope: CoroutineScope,
     private val onDataReceived: (String) -> Unit,
     private val onError: (String) -> Unit,
-    private val onConnectionChanged: (Boolean, String?) -> Unit
+    private val onConnectionChanged: (Boolean, String?) -> Unit,
+    private val onFrameReceived: (ByteArray) -> Unit = {},
+    private val onDevicesChanged: () -> Unit = {}
 ) {
     companion object {
         private const val TAG = "SerialConnMgr"
@@ -41,6 +43,13 @@ class SerialConnectionManager(
 
     private val usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
+            if (intent?.action == UsbManager.ACTION_USB_DEVICE_ATTACHED || intent?.action == UsbManager.ACTION_USB_DEVICE_DETACHED) {
+                scope.launch(Dispatchers.Main) {
+                    if (intent.action == UsbManager.ACTION_USB_DEVICE_DETACHED && usbSerialPort != null) disconnect()
+                    onDevicesChanged()
+                }
+                return
+            }
             if (intent?.action == ACTION_USB_PERMISSION) {
                 synchronized(this) {
                     val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -62,7 +71,7 @@ class SerialConnectionManager(
     }
 
     init {
-        val filter = IntentFilter(ACTION_USB_PERMISSION)
+        val filter = IntentFilter(ACTION_USB_PERMISSION).apply { addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED); addAction(UsbManager.ACTION_USB_DEVICE_DETACHED) }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.registerReceiver(usbReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
@@ -157,13 +166,32 @@ class SerialConnectionManager(
         readJob = scope.launch(Dispatchers.IO) {
             val buffer = ByteArray(2048)
             val lineBuffer = StringBuilder()
+            val rawBytes = java.io.ByteArrayOutputStream()
 
             while (isActive && usbSerialPort != null) {
                 try {
                     val len = port.read(buffer, 100)
                     if (len > 0) {
-                        val chunk = String(buffer, 0, len, Charsets.UTF_8)
-                        lineBuffer.append(chunk)
+                        rawBytes.write(buffer, 0, len)
+                        var arr = rawBytes.toByteArray()
+                        var offset = 0
+                        while (offset + 3 <= arr.size && arr[offset] == 0x3E.toByte()) {
+                            val pLen = (arr[offset + 1].toInt() and 0xFF) or ((arr[offset + 2].toInt() and 0xFF) shl 8)
+                            if (offset + 3 + pLen <= arr.size) {
+                                val payload = arr.copyOfRange(offset + 3, offset + 3 + pLen)
+                                scope.launch(Dispatchers.Main) { onFrameReceived(payload) }
+                                offset += 3 + pLen
+                            } else break
+                        }
+                        if (offset > 0) {
+                            rawBytes.reset()
+                            if (offset < arr.size) rawBytes.write(arr, offset, arr.size - offset)
+                            continue
+                        }
+                        if (arr.isNotEmpty() && arr[0] != 0x3E.toByte()) {
+                            rawBytes.reset()
+                            val chunk = String(arr, Charsets.UTF_8)
+                            lineBuffer.append(chunk)
 
                         while (lineBuffer.contains("\n")) {
                             val line = lineBuffer.substring(0, lineBuffer.indexOf("\n")).trimEnd('\r')
@@ -186,6 +214,20 @@ class SerialConnectionManager(
                 }
                 delay(20)
             }
+        }
+    }
+
+    fun sendBytes(frame: ByteArray) {
+        val port = usbSerialPort ?: return
+        scope.launch(Dispatchers.IO) {
+            try {
+                val wrapped = ByteArray(3 + frame.size)
+                wrapped = 0x3C.toByte()
+                wrapped = (frame.size and 0xFF).toByte()
+                wrapped = ((frame.size shr 8) and 0xFF).toByte()
+                System.arraycopy(frame, 0, wrapped, 3, frame.size)
+                port.write(wrapped, 500)
+            } catch (e: Exception) { Log.e(TAG, "USB frame write error", e) }
         }
     }
 

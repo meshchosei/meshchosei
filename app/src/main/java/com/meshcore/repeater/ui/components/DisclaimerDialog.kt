@@ -100,13 +100,7 @@ fun DisclaimerDialog(
                         modifier = Modifier.padding(12.dp),
                         verticalAlignment = Alignment.Top
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            tint = bColors.signalRed,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+
                         Text(
                             text = stringResource(R.string.disclaimer_ai_notice),
                             fontSize = 13.sp,
