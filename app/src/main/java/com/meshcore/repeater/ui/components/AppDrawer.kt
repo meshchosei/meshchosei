@@ -81,7 +81,7 @@ fun AppDrawerSheet(
     ModalDrawerSheet(
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerContentColor = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.width(316.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())
+        modifier = Modifier.width(316.dp).fillMaxHeight()
     ) {
         // === Drawer Header ===
         Column(
@@ -258,14 +258,57 @@ fun AppDrawerSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp)
+                .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                listOf(ThemeMode.LIGHT, ThemeMode.DARK).forEach { mode ->
+                    val isActive = themeMode == mode
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .alpha(if (isActive) 1f else 0.35f)
+                            .clip(BauhausCornerShape)
+                            .background(if (isActive) bColors.signalRed.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant)
+                            .border(if (isActive) 2.dp else 1.dp, if (isActive) bColors.signalRed else MaterialTheme.colorScheme.outline, BauhausCornerShape)
+                            .clickable { onThemeChange(mode) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (mode == ThemeMode.LIGHT) Icon(Icons.Default.LightMode, contentDescription = "Hell", tint = bColors.ochre, modifier = Modifier.size(18.dp))
+                        else Icon(Icons.Default.DarkMode, contentDescription = "Dunkel", tint = bColors.cobalt, modifier = Modifier.size(18.dp))
+                    }
+                }
+                listOf(
+                    AppLanguage.DE to "🇩🇪",
+                    AppLanguage.EN to "🇬🇧",
+                    AppLanguage.NL to "🇳🇱",
+                    AppLanguage.FR to "🇫🇷"
+                ).forEach { (lang, flag) ->
+                    val isActive = appLanguage == lang
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .alpha(if (isActive) 1f else 0.35f)
+                            .clip(BauhausCornerShape)
+                            .background(if (isActive) bColors.cobalt.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant)
+                            .border(if (isActive) 2.dp else 1.dp, if (isActive) bColors.cobalt else MaterialTheme.colorScheme.outline, BauhausCornerShape)
+                            .clickable { onLanguageChange(lang) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(flag, fontSize = 16.sp)
+                    }
+                }
+            }
 
+            Spacer(modifier = Modifier.height(8.dp))
 
             val paletteState = com.meshcore.repeater.ui.theme.LocalBauhausPalette.current
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 com.meshcore.repeater.ui.theme.BauhausPalette.values().forEach { pal ->
@@ -273,10 +316,9 @@ fun AppDrawerSheet(
                     Row(
                         modifier = Modifier
                             .weight(1f)
-                            .height(26.dp)
+                            .height(if (selected) 7.dp else 4.dp)
                             .alpha(if (selected) 1f else 0.45f)
                             .clip(BauhausCornerShape)
-                            .border(if (selected) 2.dp else 1.dp, if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline, BauhausCornerShape)
                             .clickable { paletteState.value = pal }
                     ) {
                         Box(Modifier.weight(1f).fillMaxHeight().background(pal.primary))
@@ -285,67 +327,6 @@ fun AppDrawerSheet(
                     }
                 }
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Farbmodus-Icons: Auto (Zahnrad+A) | Hell (Sonne) | Dunkel (Mond)
-                Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)) {
-                    listOf(ThemeMode.LIGHT, ThemeMode.DARK).forEach { mode ->
-                        val isActive = themeMode == mode
-                        Box(
-                            modifier = Modifier
-                                .size(38.dp)
-                                .alpha(if (isActive) 1f else 0.38f)
-                                .clip(BauhausCornerShape)
-                                .background(if (isActive) bColors.signalRed.copy(alpha = 0.22f) else MaterialTheme.colorScheme.surfaceVariant)
-                                .border(if (isActive) 2.dp else 1.dp, if (isActive) bColors.signalRed else MaterialTheme.colorScheme.outline, BauhausCornerShape)
-                                .clickable { onThemeChange(mode) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            when (mode) {
-                                ThemeMode.SYSTEM -> {
-                                    Icon(Icons.Default.Settings, contentDescription = "Auto", tint = bColors.signalRed, modifier = Modifier.size(20.dp))
-                                    Text("A", fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, modifier = Modifier.align(Alignment.BottomEnd).padding(2.dp).background(bColors.signalRed, BauhausCornerShape).padding(horizontal = 2.dp))
-                                }
-                                ThemeMode.LIGHT -> Icon(Icons.Default.LightMode, contentDescription = "Hell", tint = bColors.ochre, modifier = Modifier.size(20.dp))
-                                ThemeMode.DARK -> Icon(Icons.Default.DarkMode, contentDescription = "Dunkel", tint = bColors.cobalt, modifier = Modifier.size(20.dp))
-                            }
-                        }
-                    }
-                }
-
-                // Sprach-Flaggen: Auto (Globus+A) | DE | EN
-                Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)) {
-                    listOf(AppLanguage.DE, AppLanguage.EN, AppLanguage.NL).forEach { lang ->
-                        val isActive = appLanguage == lang
-                        Box(
-                            modifier = Modifier
-                                .size(38.dp)
-                                .alpha(if (isActive) 1f else 0.38f)
-                                .clip(BauhausCornerShape)
-                                .background(if (isActive) bColors.cobalt.copy(alpha = 0.22f) else MaterialTheme.colorScheme.surfaceVariant)
-                                .border(if (isActive) 2.dp else 1.dp, if (isActive) bColors.cobalt else MaterialTheme.colorScheme.outline, BauhausCornerShape)
-                                .clickable { onLanguageChange(lang) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            when (lang) {
-                                AppLanguage.SYSTEM -> {
-                                    Icon(Icons.Default.Language, contentDescription = "Auto", tint = bColors.cobalt, modifier = Modifier.size(20.dp))
-                                    Text("A", fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, modifier = Modifier.align(Alignment.BottomEnd).padding(2.dp).background(bColors.cobalt, BauhausCornerShape).padding(horizontal = 2.dp))
-                                }
-                                AppLanguage.DE -> Text("🇩🇪", fontSize = 18.sp)
-                                AppLanguage.EN -> Text("🇬🇧", fontSize = 18.sp)
-                                AppLanguage.NL -> Text("🇳🇱", fontSize = 18.sp)
-                            }
-                        }
-                    }
-                }
-            }
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }

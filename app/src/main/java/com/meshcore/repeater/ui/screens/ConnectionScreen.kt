@@ -323,6 +323,30 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             }
                         }
                     }
+                    if (connectionState is ConnectionState.Connected && capabilities.deviceRole == "companion") {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text("Repeater im Mesh (${meshContacts.size})", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                            IconButton(onClick = { viewModel.refreshMeshContacts() }) { Icon(Icons.Default.Refresh, contentDescription = null, tint = bColors.cobalt) }
+                        }
+                        LazyColumn(modifier = Modifier.weight(1f)) {
+                            items(meshContacts) { contact ->
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).clickable { viewModel.selectTargetRepeater(contact) },
+                                    colors = CardDefaults.cardColors(containerColor = if (remoteAdmin.targetRepeater?.pubKeyHex == contact.pubKeyHex) bColors.cobalt.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant)
+                                ) {
+                                    Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.Router, contentDescription = null, tint = bColors.cobalt, modifier = Modifier.size(18.dp))
+                                        Spacer(Modifier.width(8.dp))
+                                        Column(Modifier.weight(1f)) {
+                                            Text(contact.name, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                                            Text("Key: ${contact.keyPrefix}...", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             } else {
                 // BLE Companion / Mesh OTA Workflow

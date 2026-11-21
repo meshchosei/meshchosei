@@ -210,4 +210,5 @@
     <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT-Lizenz)\n• MeshCore / ZephCore &amp; DDMC (Dutch MeshCore) CLI-Protokoll</string>
     <string name="about_show_disclaimer">Erststart-Disclaimer erneut anzeigen</string>
     <string name="lang_nl">NL</string>
+    <string name="lang_fr">FR</string>
 </resources>

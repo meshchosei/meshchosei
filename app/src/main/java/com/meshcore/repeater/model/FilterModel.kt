@@ -67,5 +67,6 @@ enum class AppLanguage(val code: String, val titleRes: Int) {
     SYSTEM("system", R.string.lang_system),
     DE("de", R.string.lang_de),
     EN("en", R.string.lang_en),
-    NL("nl", R.string.lang_nl)
+    NL("nl", R.string.lang_nl),
+    FR("fr", R.string.lang_fr)
 }
