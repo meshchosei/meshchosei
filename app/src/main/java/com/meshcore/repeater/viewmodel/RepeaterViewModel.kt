@@ -156,7 +156,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     fun connectBle(address: String) { _connectionState.value = ConnectionState.Connecting("Verbinde BLE..."); bleManager.connect(address) }
     fun disconnect() { serialManager.disconnect(); bleManager.disconnect(); _connectionState.value = ConnectionState.Disconnected }
     fun refreshMeshContacts() { _isRefreshingContacts.value = true; bleManager.sendBytes(RepeaterProtocol.buildGetContactsFrame()) }
-    fun selectTargetRepeater(contact: MeshContact) { _remoteAdminSession.value = RemoteAdminSession(targetRepeater = contact, savedPassword = prefs.getString("pwd_${contact.pubKeyHex}", "") ?: "") }
+    fun selectTargetRepeater(contact: MeshContact?) {
+        if (contact == null) { _remoteAdminSession.value = _remoteAdminSession.value.copy(targetRepeater = null, isLoggedIn = false); return } _remoteAdminSession.value = RemoteAdminSession(targetRepeater = contact, savedPassword = prefs.getString("pwd_${contact.pubKeyHex}", "") ?: "") }
     fun setRemoteAdminPassword(password: String) { val t = _remoteAdminSession.value.targetRepeater ?: return; prefs.edit().putString("pwd_${t.pubKeyHex}", password).apply(); _remoteAdminSession.value = _remoteAdminSession.value.copy(savedPassword = password) }
     fun startRemoteLogin() {
         val s = _remoteAdminSession.value; val t = s.targetRepeater ?: return
