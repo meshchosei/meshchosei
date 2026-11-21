@@ -155,14 +155,18 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     fun stopBleScan() { bleManager.stopScan() }
     fun connectBle(address: String) { _connectionState.value = ConnectionState.Connecting("Verbinde BLE..."); bleManager.connect(address) }
     fun disconnect() { serialManager.disconnect(); bleManager.disconnect(); _connectionState.value = ConnectionState.Disconnected }
-    fun refreshMeshContacts() { _isRefreshingContacts.value = true; bleManager.sendBytes(RepeaterProtocol.buildGetContactsFrame()) }
+    private fun sendCompanionBytes(frame: ByteArray) {
+        if (_selectedConnectionType.value == ConnectionType.USB_SERIAL) serialManager.sendBytes(frame)
+        else bleManager.sendBytes(frame)
+    }
+    fun refreshMeshContacts() { _isRefreshingContacts.value = true; sendCompanionBytes(RepeaterProtocol.buildGetContactsFrame()) }
     fun selectTargetRepeater(contact: MeshContact?) {
         if (contact == null) { _remoteAdminSession.value = _remoteAdminSession.value.copy(targetRepeater = null, isLoggedIn = false); return }
         _remoteAdminSession.value = RemoteAdminSession(targetRepeater = contact, savedPassword = prefs.getString("pwd_${contact.pubKeyHex}", "") ?: "") }
     fun setRemoteAdminPassword(password: String) { val t = _remoteAdminSession.value.targetRepeater ?: return; prefs.edit().putString("pwd_${t.pubKeyHex}", password).apply(); _remoteAdminSession.value = _remoteAdminSession.value.copy(savedPassword = password) }
     fun startRemoteLogin() {
         val s = _remoteAdminSession.value; val t = s.targetRepeater ?: return
-        bleManager.sendBytes(RepeaterProtocol.buildLoginFrame(t.pubKey, s.savedPassword))
+        sendCompanionBytes(RepeaterProtocol.buildLoginFrame(t.pubKey, s.savedPassword))
         _remoteAdminSession.value = s.copy(isLoggingIn = true, sessionStatus = "Login gesendet...")
         viewModelScope.launch {
             delay(900L)
@@ -175,11 +179,11 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     }
     fun sendCommand(cmd: String) {
         if (cmd.isBlank()) return
-        if (_selectedConnectionType.value == ConnectionType.USB_SERIAL) { logTerminal("> $cmd", true); serialManager.send(cmd) }
+        if (_selectedConnectionType.value == ConnectionType.USB_SERIAL && _deviceCapabilities.value.deviceRole != "companion") { logTerminal("> $cmd", true); serialManager.send(cmd) }
         else {
             val t = _remoteAdminSession.value.targetRepeater
-            if (t != null) { logTerminal("> [OTA -> ${t.name}] $cmd", true); bleManager.sendBytes(RepeaterProtocol.buildRemoteCliFrame(t.pubKey.copyOfRange(0, minOf(6, t.pubKey.size)), cmd)) }
-            else { logTerminal("> [Companion] $cmd", true); bleManager.sendBytes(RepeaterProtocol.buildLocalCliFrame(cmd)) }
+            if (t != null) { logTerminal("> [OTA -> ${t.name}] $cmd", true); sendCompanionBytes(RepeaterProtocol.buildRemoteCliFrame(t.pubKey.copyOfRange(0, minOf(6, t.pubKey.size)), cmd)) }
+            else { logTerminal("> [Companion] $cmd", true); sendCompanionBytes(RepeaterProtocol.buildLocalCliFrame(cmd)) }
         }
     }
     private fun startCapabilityDetection() {

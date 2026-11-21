@@ -265,7 +265,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(12.dp)
         ) {
-            if (selectedType == ConnectionType.USB_SERIAL) {
+            if (selectedType == ConnectionType.USB_SERIAL && !(connectionState is ConnectionState.Connected && caps.deviceRole == "companion")) {
                 // USB Serial Device List
                 Column(modifier = Modifier.fillMaxSize()) {
                     Row(
@@ -431,8 +431,8 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             }
                         }
                     }
-                } else {
-                    // Connected to BLE Companion: Entweder Liste ODER Login-Karte (kein Quetschen!)
+                } else if (connectionState is ConnectionState.Connected) {
+                    // Connected to Companion (BLE oder USB): Entweder Liste ODER Login-Karte (kein Quetschen!)
                     Column(modifier = Modifier.fillMaxSize()) {
                         if (remoteAdmin.targetRepeater == null) {
                         // Section Header: Companion Contact List
