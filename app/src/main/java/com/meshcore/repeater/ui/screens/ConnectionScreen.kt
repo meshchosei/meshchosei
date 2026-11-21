@@ -432,8 +432,9 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         }
                     }
                 } else {
-                    // Connected to BLE Companion: Show Mesh Contact List and Remote-Admin Panel!
+                    // Connected to BLE Companion: Entweder Liste ODER Login-Karte (kein Quetschen!)
                     Column(modifier = Modifier.fillMaxSize()) {
+                        if (remoteAdmin.targetRepeater == null) {
                         // Section Header: Companion Contact List
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             Column(modifier = Modifier.weight(1f)) {
@@ -466,14 +467,23 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // Target Repeater Selection Card & Password Input
-                        if (remoteAdmin.targetRepeater != null) {
+                        } else {
                             val target = remoteAdmin.targetRepeater!!
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Repeater-Login", style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold)
+                                OutlinedButton(onClick = { viewModel.selectTargetRepeater(null) }) {
+                                    Text("← Zurück zur Liste", fontSize = 12.sp)
+                                }
+                            }
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .border(1.dp, if (remoteAdmin.isLoggedIn) bColors.signalRed else bColors.cobalt, RoundedCornerShape(10.dp)),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFF141C1A))
+                                    .border(1.dp, if (remoteAdmin.isLoggedIn) Color(0xFF4CAF50) else bColors.cobalt, RoundedCornerShape(10.dp)),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
                                     Row(
@@ -586,6 +596,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
+                        if (remoteAdmin.targetRepeater == null) {
                         // Contact List
                         val filteredContacts = meshContacts.filter { ct ->
                             val typeOk = !filterOnlyRepeaters || ct.isRepeater || ct.isRoomServer
