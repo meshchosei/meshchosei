@@ -356,14 +356,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
 
                             if (isScanningBle) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(16.dp),
-                                        color = bColors.cobalt,
-                                        strokeWidth = 2.dp
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Scannt...", fontSize = 12.sp, color = bColors.cobalt)
-                                    Spacer(modifier = Modifier.width(8.dp))
+
                                     OutlinedButton(onClick = { viewModel.stopBleScan() }) {
                                         Text("Stop", fontSize = 12.sp)
                                     }

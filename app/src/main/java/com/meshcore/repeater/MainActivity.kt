@@ -159,7 +159,7 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
             onDismissRequest = { showExitDialog = false },
             title = { androidx.compose.material3.Text("App beenden?") },
             text = { androidx.compose.material3.Text("Möchtest du den Repeater Konfigurator wirklich schließen?") },
-            confirmButton = { androidx.compose.material3.TextButton(onClick = { showExitDialog = false; viewModel.disconnect(); act?.finishAndRemoveTask() }) { androidx.compose.material3.Text("Beenden") } },
+            confirmButton = { androidx.compose.material3.TextButton(onClick = { showExitDialog = false; try { viewModel.disconnect() } catch (_: Exception) {}; act?.finishAffinity(); kotlin.system.exitProcess(0) }) { androidx.compose.material3.Text("Beenden") } },
             dismissButton = { androidx.compose.material3.TextButton(onClick = { showExitDialog = false }) { androidx.compose.material3.Text("Abbrechen") } }
         )
     }
