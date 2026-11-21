@@ -28,7 +28,7 @@ fun AboutScreen(viewModel: RepeaterViewModel, onShowDisclaimer: () -> Unit) {
         Card(Modifier.fillMaxWidth(), shape = BauhausCornerShape, border = BorderStroke(1.dp, bColors.signalRed), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
             Column(Modifier.padding(16.dp)) {
                 Text(stringResource(R.string.about_title), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = bColors.signalRed)
-                Text("v0.5 • FW: ${cap.firmwareVersion.ifBlank { "—" }}", fontFamily = FontFamily.Monospace, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(if (cap.firmwareVersion.isNotBlank()) "v0.21 • FW: ${cap.firmwareVersion}" else "v0.21", fontFamily = FontFamily.Monospace, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         Card(Modifier.fillMaxWidth(), shape = BauhausCornerShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {

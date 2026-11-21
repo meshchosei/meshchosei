@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -78,6 +79,7 @@ fun AppDrawerSheet(
     val bColors = LocalBauhausColors.current
 
     ModalDrawerSheet(
+        modifier = Modifier.fillMaxHeight(),
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerContentColor = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.width(316.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())
@@ -260,6 +262,30 @@ fun AppDrawerSheet(
                 .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
 
+
+            val paletteState = com.meshcore.repeater.ui.theme.LocalBauhausPalette.current
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                com.meshcore.repeater.ui.theme.BauhausPalette.values().forEach { pal ->
+                    val selected = paletteState.value == pal
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(26.dp)
+                            .alpha(if (selected) 1f else 0.45f)
+                            .clip(BauhausCornerShape)
+                            .border(if (selected) 2.dp else 1.dp, if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline, BauhausCornerShape)
+                            .clickable { paletteState.value = pal }
+                    ) {
+                        Box(Modifier.weight(1f).fillMaxHeight().background(pal.primary))
+                        Box(Modifier.weight(1f).fillMaxHeight().background(pal.secondary))
+                        Box(Modifier.weight(1f).fillMaxHeight().background(pal.tertiary))
+                    }
+                }
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

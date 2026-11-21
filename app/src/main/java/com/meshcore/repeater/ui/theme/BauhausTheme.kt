@@ -17,6 +17,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.meshcore.repeater.model.ThemeMode
 
+enum class BauhausPalette(val primary: Color, val secondary: Color, val tertiary: Color) {
+    BAUHAUS(Color(0xFFE53935), Color(0xFF1E88E5), Color(0xFFFBC02D)),
+    TACTICAL(Color(0xFFFF9800), Color(0xFF43A047), Color(0xFFFFD54F)),
+    NORDIC(Color(0xFF00ACC1), Color(0xFF3949AB), Color(0xFF26A69A)),
+    STEALTH(Color(0xFFAB47BC), Color(0xFF00BCD4), Color(0xFFFF7043))
+}
+
+val LocalBauhausPalette = androidx.compose.runtime.compositionLocalOf { androidx.compose.runtime.mutableStateOf(BauhausPalette.BAUHAUS) }
+
 @Immutable
 data class BauhausCustomColors(
     val signalRed: Color,
@@ -31,9 +40,9 @@ data class BauhausCustomColors(
 
 val LocalBauhausColors = staticCompositionLocalOf {
     BauhausCustomColors(
-        signalRed = BauhausDarkSignalRed,
-        ochre = BauhausDarkOchre,
-        cobalt = BauhausDarkCobalt,
+        signalRed = activePalette.primary,
+        ochre = activePalette.tertiary,
+        cobalt = activePalette.secondary,
         successGreen = BauhausDarkGreen,
         cardBackground = BauhausDarkCard,
         cardBorder = BauhausDarkOutline,
@@ -54,13 +63,13 @@ val BauhausShapes = Shapes(
 )
 
 private val BauhausDarkColorScheme = darkColorScheme(
-    primary = BauhausDarkSignalRed,
+    primary = activePalette.primary,
     onPrimary = Color.White,
     primaryContainer = BauhausDarkSurfaceVariant,
     onPrimaryContainer = BauhausDarkSignalRed,
-    secondary = BauhausDarkCobalt,
+    secondary = activePalette.secondary,
     onSecondary = Color.White,
-    tertiary = BauhausDarkOchre,
+    tertiary = activePalette.tertiary,
     onTertiary = BauhausDarkCarbon,
     background = BauhausDarkCarbon,
     onBackground = BauhausDarkTextPrimary,
@@ -75,13 +84,13 @@ private val BauhausDarkColorScheme = darkColorScheme(
 )
 
 private val BauhausLightColorScheme = lightColorScheme(
-    primary = BauhausLightSignalRed,
+    primary = activePalette.primary,
     onPrimary = Color.White,
     primaryContainer = BauhausLightSurfaceVariant,
     onPrimaryContainer = BauhausLightSignalRed,
-    secondary = BauhausLightCobalt,
+    secondary = activePalette.secondary,
     onSecondary = Color.White,
-    tertiary = BauhausLightOchre,
+    tertiary = activePalette.tertiary,
     onTertiary = Color.White,
     background = BauhausLightOffWhite,
     onBackground = BauhausLightTextPrimary,
@@ -100,6 +109,7 @@ fun BauhausTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
     content: @Composable () -> Unit
 ) {
+    val activePalette = LocalBauhausPalette.current.value
     val isDark = when (themeMode) {
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
         ThemeMode.LIGHT -> false
@@ -110,9 +120,9 @@ fun BauhausTheme(
 
     val customColors = if (isDark) {
         BauhausCustomColors(
-            signalRed = BauhausDarkSignalRed,
-            ochre = BauhausDarkOchre,
-            cobalt = BauhausDarkCobalt,
+            signalRed = activePalette.primary,
+            ochre = activePalette.tertiary,
+            cobalt = activePalette.secondary,
             successGreen = BauhausDarkGreen,
             cardBackground = BauhausDarkCard,
             cardBorder = BauhausDarkOutline,
@@ -121,9 +131,9 @@ fun BauhausTheme(
         )
     } else {
         BauhausCustomColors(
-            signalRed = BauhausLightSignalRed,
-            ochre = BauhausLightOchre,
-            cobalt = BauhausLightCobalt,
+            signalRed = activePalette.primary,
+            ochre = activePalette.tertiary,
+            cobalt = activePalette.secondary,
             successGreen = BauhausLightGreen,
             cardBackground = BauhausLightCard,
             cardBorder = BauhausLightOutline,
