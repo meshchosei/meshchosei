@@ -108,12 +108,11 @@ private fun AsciiSpinner(label: String, color: Color = Color(0xFF2196F3)) {
 @Composable
 fun ConnectionScreen(viewModel: RepeaterViewModel) {
     val connectionState by viewModel.connectionState.collectAsState()
-    val caps by viewModel.deviceCapabilities.collectAsState()
-    val isScanning by viewModel.isScanning.collectAsState()
     val selectedType by viewModel.selectedConnectionType.collectAsState()
     val usbDevices by viewModel.usbDevices.collectAsState()
     val bleDevices by viewModel.bleDevices.collectAsState()
     val isScanningBle by viewModel.isScanningBle.collectAsState()
+    val caps by viewModel.deviceCapabilities.collectAsState()
     val meshContacts by viewModel.meshContacts.collectAsState()
     val isRefreshingContacts by viewModel.isRefreshingContacts.collectAsState()
     val remoteAdmin by viewModel.remoteAdminSession.collectAsState()
