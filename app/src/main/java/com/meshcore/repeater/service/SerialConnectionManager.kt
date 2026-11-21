@@ -202,6 +202,7 @@ class SerialConnectionManager(
                                 }
                             }
                         }
+                        }
                     }
                 } catch (e: IOException) {
                     if (isActive) {
@@ -222,9 +223,9 @@ class SerialConnectionManager(
         scope.launch(Dispatchers.IO) {
             try {
                 val wrapped = ByteArray(3 + frame.size)
-                wrapped = 0x3C.toByte()
-                wrapped = (frame.size and 0xFF).toByte()
-                wrapped = ((frame.size shr 8) and 0xFF).toByte()
+                wrapped[0] = 0x3C.toByte()
+                wrapped[1] = (frame.size and 0xFF).toByte()
+                wrapped[2] = ((frame.size shr 8) and 0xFF).toByte()
                 System.arraycopy(frame, 0, wrapped, 3, frame.size)
                 port.write(wrapped, 500)
             } catch (e: Exception) { Log.e(TAG, "USB frame write error", e) }
