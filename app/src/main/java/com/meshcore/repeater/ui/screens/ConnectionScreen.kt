@@ -233,15 +233,22 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                 )
             }
         ) {
+            val isBusy = connectionState is ConnectionState.Connected || connectionState is ConnectionState.Connecting
+            val usbEnabled = !isBusy || selectedType == ConnectionType.USB_SERIAL
+            val bleEnabled = !isBusy || selectedType == ConnectionType.BLE_COMPANION
             Tab(
                 selected = selectedType == ConnectionType.USB_SERIAL,
-                onClick = { viewModel.selectConnectionType(ConnectionType.USB_SERIAL) },
+                enabled = usbEnabled,
+                onClick = { if (usbEnabled) viewModel.selectConnectionType(ConnectionType.USB_SERIAL) },
+                modifier = Modifier.alpha(if (usbEnabled) 1f else 0.35f),
                 text = { Text("USB-Serial (OTG)", fontWeight = FontWeight.SemiBold) },
                 icon = { Icon(Icons.Default.Usb, contentDescription = null) }
             )
             Tab(
                 selected = selectedType == ConnectionType.BLE_COMPANION,
-                onClick = { viewModel.selectConnectionType(ConnectionType.BLE_COMPANION) },
+                enabled = bleEnabled,
+                onClick = { if (bleEnabled) viewModel.selectConnectionType(ConnectionType.BLE_COMPANION) },
+                modifier = Modifier.alpha(if (bleEnabled) 1f else 0.35f),
                 text = { Text("BLE Companion (Mesh OTA)", fontWeight = FontWeight.SemiBold) },
                 icon = { Icon(Icons.Default.Bluetooth, contentDescription = null) }
             )
