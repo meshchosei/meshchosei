@@ -79,7 +79,7 @@ class BleConnectionManager(
 
         override fun onScanFailed(errorCode: Int) {
             _isScanning.value = false
-            onError("BLE-Scan fehlgeschlagen (Fehlercode $errorCode)")
+            if (errorCode != 1) onError("BLE-Scan fehlgeschlagen (Fehlercode $errorCode)")
         }
     }
 

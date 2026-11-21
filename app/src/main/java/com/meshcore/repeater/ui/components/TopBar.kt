@@ -61,31 +61,11 @@ fun RepeaterTopBar(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Erkennung läuft noch → kurzer Hinweis-Chip
-                if (!capabilities.detectionComplete && connectionState is ConnectionState.Connected) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .clip(BauhausCornerShape)
-                            .background(bColors.cobalt.copy(alpha = 0.18f))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.caps_detecting),
-                            color = bColors.cobalt,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-
                 // Schonmodus warning pill
                 if (meshCareState.isActive) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .padding(end = 8.dp)
                             .clip(BauhausCornerShape)
                             .background(bColors.ochre.copy(alpha = 0.18f))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -104,36 +84,6 @@ fun RepeaterTopBar(
                             fontWeight = FontWeight.Bold
                         )
                     }
-                }
-
-                // Connection status indicator pill
-                val (statusColor, statusText) = when (connectionState) {
-                    is ConnectionState.Connected -> Pair(bColors.successGreen, stringResource(R.string.status_connected))
-                    is ConnectionState.Connecting -> Pair(bColors.ochre, stringResource(R.string.status_connecting))
-                    is ConnectionState.Error -> Pair(bColors.signalRed, stringResource(R.string.status_error))
-                    is ConnectionState.Disconnected -> Pair(Color.Gray, stringResource(R.string.status_disconnected))
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(BauhausCornerShape)
-                        .background(statusColor.copy(alpha = 0.15f))
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(statusColor)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = statusText,
-                        color = statusColor,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
                 }
             }
         },

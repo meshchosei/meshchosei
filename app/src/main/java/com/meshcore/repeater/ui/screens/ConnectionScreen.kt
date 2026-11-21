@@ -181,10 +181,16 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Text(
+                    if (connectionState is ConnectionState.Connected && !deviceCapabilities.detectionComplete) {
+                        AsciiSpinner("Erkenne Gerät & Rolle...", bColors.cobalt)
+                    } else if (connectionState is ConnectionState.Connecting) {
+                        AsciiSpinner(connectionState.let { (it as ConnectionState.Connecting).message }, bColors.ochre)
+                    } else if (isBleScanning && connectionState is ConnectionState.Disconnected) {
+                        AsciiSpinner("Scanne nach BLE-Nodes...", bColors.cobalt)
+                    } else Text(
                         text = when (val state = connectionState) {
                             is ConnectionState.Connected -> {
-                                if (state.connectionType == ConnectionType.BLE_COMPANION && remoteAdmin.targetRepeater != null) {
+                                if (remoteAdmin.targetRepeater != null) {
                                     "${remoteAdmin.targetRepeater?.name} • ${if (remoteAdmin.isLoggedIn) "Eingeloggt" else remoteAdmin.sessionStatus}"
                                 } else {
                                     "${state.connectionType.displayName} • ${state.details}"
