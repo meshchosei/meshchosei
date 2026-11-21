@@ -170,30 +170,37 @@ fun DisclaimerDialog(
             }
         },
         confirmButton = {
-            Button(
-                onClick = onAccept,
-                colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed),
-                shape = BauhausCornerShape
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp)
             ) {
-                Text(
-                    text = stringResource(R.string.disclaimer_accept_btn),
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
-        },
-        dismissButton = if (!isForced && onDismiss != null) {
-            {
-                androidx.compose.material3.TextButton(
-                    onClick = onDismiss,
+                androidx.compose.material3.OutlinedButton(
+                    onClick = { onDismiss?.invoke() },
+                    modifier = Modifier.weight(1f),
                     shape = BauhausCornerShape
                 ) {
                     Text(
-                        text = stringResource(R.string.action_cancel),
+                        text = "Abbrechen",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                Button(
+                    onClick = onAccept,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed),
+                    shape = BauhausCornerShape
+                ) {
+                    Text(
+                        text = "Bestätigen",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
             }
-        } else null
+        }
     )
 }

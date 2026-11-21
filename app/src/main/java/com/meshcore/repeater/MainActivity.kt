@@ -111,11 +111,15 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
 
     // === Disclaimer Dialogs ===
     if (showDisclaimerForced) {
+        val ctx = androidx.compose.ui.platform.LocalContext.current
         DisclaimerDialog(
             isForced = true,
             onAccept = {
                 viewModel.acceptDisclaimer()
                 showDisclaimerForced = false
+            },
+            onDismiss = {
+                (ctx as? android.app.Activity)?.finishAffinity()
             }
         )
     }

@@ -41,8 +41,17 @@ fun AboutScreen(viewModel: RepeaterViewModel, onShowDisclaimer: () -> Unit) {
                 Text(stringResource(R.string.about_credits_body), fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        OutlinedButton(onClick = onShowDisclaimer, modifier = Modifier.fillMaxWidth(), shape = BauhausCornerShape, border = BorderStroke(1.dp, bColors.signalRed)) {
-            Icon(Icons.Default.Info, null, tint = bColors.signalRed); Spacer(Modifier.width(8.dp)); Text(stringResource(R.string.about_show_disclaimer), color = bColors.signalRed)
+        Card(Modifier.fillMaxWidth(), shape = BauhausCornerShape, border = BorderStroke(1.dp, bColors.ochre), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.disclaimer_title), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = bColors.ochre)
+                Text(stringResource(R.string.disclaimer_ai_notice), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = bColors.signalRed)
+                Text(stringResource(R.string.disclaimer_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                Text("• " + stringResource(R.string.disclaimer_point_liability), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("• " + stringResource(R.string.disclaimer_point_regulations), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("• " + stringResource(R.string.disclaimer_point_responsibility), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
+        Spacer(Modifier.height(16.dp))
     }
 }

@@ -19,6 +19,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CellTower
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Badge
 import androidx.compose.material3.HorizontalDivider
@@ -120,18 +124,7 @@ fun AppDrawerSheet(
                     )
                 }
 
-                // Info/Disclaimer Button
-                IconButton(
-                    onClick = onShowDisclaimer,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = "Haftungsausschluss anzeigen",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -308,54 +301,60 @@ fun AppDrawerSheet(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Theme Switcher: System | Hell | Dunkel
-            Text(stringResource(R.string.drawer_theme_title), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)) {
-                ThemeMode.values().forEach { mode ->
-                    val isActive = themeMode == mode
-                    Box(
-                        modifier = Modifier
-                            .clip(BauhausCornerShape)
-                            .background(if (isActive) bColors.signalRed.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant)
-                            .border(1.dp, if (isActive) bColors.signalRed else MaterialTheme.colorScheme.outline, BauhausCornerShape)
-                            .clickable { onThemeChange(mode) }
-                            .padding(horizontal = 10.dp, vertical = 5.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(mode.titleRes),
-                            fontSize = 11.sp,
-                            fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isActive) bColors.signalRed else MaterialTheme.colorScheme.onSurface
-                        )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Farbmodus-Icons: Auto (Zahnrad+A) | Hell (Sonne) | Dunkel (Mond)
+                Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)) {
+                    ThemeMode.values().forEach { mode ->
+                        val isActive = themeMode == mode
+                        Box(
+                            modifier = Modifier
+                                .size(38.dp)
+                                .alpha(if (isActive) 1f else 0.38f)
+                                .clip(BauhausCornerShape)
+                                .background(if (isActive) bColors.signalRed.copy(alpha = 0.22f) else MaterialTheme.colorScheme.surfaceVariant)
+                                .border(if (isActive) 2.dp else 1.dp, if (isActive) bColors.signalRed else MaterialTheme.colorScheme.outline, BauhausCornerShape)
+                                .clickable { onThemeChange(mode) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            when (mode) {
+                                ThemeMode.SYSTEM -> {
+                                    Icon(Icons.Default.Settings, contentDescription = "Auto", tint = bColors.signalRed, modifier = Modifier.size(20.dp))
+                                    Text("A", fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, modifier = Modifier.align(Alignment.BottomEnd).padding(2.dp).background(bColors.signalRed, BauhausCornerShape).padding(horizontal = 2.dp))
+                                }
+                                ThemeMode.LIGHT -> Icon(Icons.Default.LightMode, contentDescription = "Hell", tint = bColors.ochre, modifier = Modifier.size(20.dp))
+                                ThemeMode.DARK -> Icon(Icons.Default.DarkMode, contentDescription = "Dunkel", tint = bColors.cobalt, modifier = Modifier.size(20.dp))
+                            }
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Language Switcher: System | DE | EN
-            Text(stringResource(R.string.drawer_language_title), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)) {
-                AppLanguage.values().forEach { lang ->
-                    val isActive = appLanguage == lang
-                    Box(
-                        modifier = Modifier
-                            .clip(BauhausCornerShape)
-                            .background(if (isActive) bColors.cobalt.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant)
-                            .border(1.dp, if (isActive) bColors.cobalt else MaterialTheme.colorScheme.outline, BauhausCornerShape)
-                            .clickable { onLanguageChange(lang) }
-                            .padding(horizontal = 10.dp, vertical = 5.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(lang.titleRes),
-                            fontSize = 11.sp,
-                            fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isActive) bColors.cobalt else MaterialTheme.colorScheme.onSurface
-                        )
+                // Sprach-Flaggen: Auto (Globus+A) | DE | EN
+                Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)) {
+                    AppLanguage.values().forEach { lang ->
+                        val isActive = appLanguage == lang
+                        Box(
+                            modifier = Modifier
+                                .size(38.dp)
+                                .alpha(if (isActive) 1f else 0.38f)
+                                .clip(BauhausCornerShape)
+                                .background(if (isActive) bColors.cobalt.copy(alpha = 0.22f) else MaterialTheme.colorScheme.surfaceVariant)
+                                .border(if (isActive) 2.dp else 1.dp, if (isActive) bColors.cobalt else MaterialTheme.colorScheme.outline, BauhausCornerShape)
+                                .clickable { onLanguageChange(lang) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            when (lang) {
+                                AppLanguage.SYSTEM -> {
+                                    Icon(Icons.Default.Language, contentDescription = "Auto", tint = bColors.cobalt, modifier = Modifier.size(20.dp))
+                                    Text("A", fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, modifier = Modifier.align(Alignment.BottomEnd).padding(2.dp).background(bColors.cobalt, BauhausCornerShape).padding(horizontal = 2.dp))
+                                }
+                                AppLanguage.DE -> Text("🇩🇪", fontSize = 18.sp)
+                                AppLanguage.EN -> Text("🇬🇧", fontSize = 18.sp)
+                            }
+                        }
                     }
                 }
             }
