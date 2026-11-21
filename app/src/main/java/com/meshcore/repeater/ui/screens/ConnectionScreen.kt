@@ -265,7 +265,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(12.dp)
         ) {
-            if (selectedType == ConnectionType.USB_SERIAL && !(connectionState is ConnectionState.Connected && caps.deviceRole == "companion")) {
+            if (selectedType == ConnectionType.USB_SERIAL && !(connectionState is ConnectionState.Connected && caps.isCompanion)) {
                 // USB Serial Device List
                 Column(modifier = Modifier.fillMaxSize()) {
                     Row(
