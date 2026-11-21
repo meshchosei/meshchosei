@@ -443,7 +443,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             }
                             IconButton(onClick = { viewModel.refreshMeshContacts() }, enabled = !isRefreshingContacts) {
                                 if (isRefreshingContacts) CircularProgressIndicator(modifier = Modifier.size(18.dp), color = bColors.cobalt, strokeWidth = 2.dp)
-                                else Icon(Icons.Default.Refresh, contentDescription = "Neu laden", tint = bColors.cobalt)
+                                else Icon(Icons.Default.Refresh, contentDescription = "Neu laden", tint = bColors.cobalt, modifier = Modifier.size(22.dp))
                             }
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
