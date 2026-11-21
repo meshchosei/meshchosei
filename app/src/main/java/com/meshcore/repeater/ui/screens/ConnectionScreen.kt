@@ -108,6 +108,7 @@ private fun AsciiSpinner(label: String, color: Color = Color(0xFF2196F3)) {
 @Composable
 fun ConnectionScreen(viewModel: RepeaterViewModel) {
     val connectionState by viewModel.connectionState.collectAsState()
+    val caps by viewModel.deviceCapabilities.collectAsState()
     val selectedType by viewModel.selectedConnectionType.collectAsState()
     val usbDevices by viewModel.usbDevices.collectAsState()
     val bleDevices by viewModel.bleDevices.collectAsState()
@@ -181,11 +182,11 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    if (connectionState is ConnectionState.Connected && !deviceCapabilities.detectionComplete) {
+                    if (connectionState is ConnectionState.Connected && !caps.detectionComplete) {
                         AsciiSpinner("Erkenne Gerät & Rolle...", bColors.cobalt)
                     } else if (connectionState is ConnectionState.Connecting) {
                         AsciiSpinner(connectionState.let { (it as ConnectionState.Connecting).message }, bColors.ochre)
-                    } else if (isBleScanning && connectionState is ConnectionState.Disconnected) {
+                    } else if (isScanning && connectionState is ConnectionState.Disconnected) {
                         AsciiSpinner("Scanne nach BLE-Nodes...", bColors.cobalt)
                     } else Text(
                         text = when (val state = connectionState) {
