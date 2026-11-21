@@ -1,0 +1,213 @@
+<resources>
+    <!-- App & General -->
+    <string name="app_name">Repeater Configurator</string>
+    <string name="app_title_repeater">REPEATER</string>
+    <string name="app_title_configurator">CONFIGURATOR</string>
+    <string name="app_edition_subtitle">ZephCore &amp; DDMC (Dutch MeshCore) BW2 Edition</string>
+    <string name="app_version_tag">v1.18.2 • Dutch-MeshCore Filter</string>
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="action_save">Speichern</string>
+    <string name="action_delete">Löschen</string>
+    <string name="action_add">Hinzufügen</string>
+    <string name="action_refresh">Aktualisieren</string>
+    <string name="action_connect">Verbinden</string>
+    <string name="action_disconnect">Trennen</string>
+    <string name="action_apply">Einstellungen senden</string>
+    <string name="action_reboot">Neu starten</string>
+
+    <!-- Theme & Language -->
+    <string name="drawer_section_appearance">Design &amp; Sprache</string>
+    <string name="drawer_theme_title">Farbmodus</string>
+    <string name="drawer_language_title">App-Sprache</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
+    <string name="lang_system">System</string>
+    <string name="lang_de">Deutsch</string>
+    <string name="lang_en">English</string>
+
+    <!-- Navigation Menu -->
+    <string name="menu_connection">Verbindung</string>
+    <string name="menu_connection_sub">USB-Serial OTG &amp; BLE-Companion</string>
+    <string name="menu_radio">Funk, Land &amp; Antenne</string>
+    <string name="menu_radio_sub">EU868 Presets, EIRP &amp; Compliance</string>
+    <string name="menu_filter">Filter &amp; Whitelist</string>
+    <string name="menu_filter_sub">Paket-Filter &amp; Regeln</string>
+    <string name="menu_mesh_care">Mesh-Schonmodus</string>
+    <string name="menu_mesh_care_sub">Auto-Revert Watchdog (5/10 min)</string>
+    <string name="menu_hardware">Hardware &amp; Status</string>
+    <string name="menu_hardware_sub">LEDs, GPS &amp; Solar/Batterie</string>
+
+    <!-- TopBar & Status -->
+    <string name="status_connected">Verbunden</string>
+    <string name="status_connecting">Verbinde...</string>
+    <string name="status_disconnected">Getrennt</string>
+    <string name="status_error">Fehler</string>
+    <string name="status_no_device">Kein Gerät gekoppelt</string>
+    <string name="status_active">Aktiv</string>
+    <string name="status_care_mode">Schonmodus</string>
+    <string name="topbar_menu_desc">Menü öffnen</string>
+
+    <!-- Connection Screen -->
+    <string name="conn_physical_interface">PHYSISCHE SCHNITTSTELLE</string>
+    <string name="conn_usb_label">USB-Serial OTG (115200 Baud)</string>
+    <string name="conn_ble_label">BLE-Companion (Drahtlos NUS)</string>
+    <string name="conn_usb_available">Verfügbare USB-Geräte (%d)</string>
+    <string name="conn_usb_none">Keine USB-OTG-Geräte erkannt. OTG-Adapter und Kabel prüfen.</string>
+    <string name="conn_ble_available">Gefundene BLE-Companion Nodes (%d)</string>
+    <string name="conn_ble_none">Keine BLE-Companion Nodes in der Nähe gefunden.</string>
+    <string name="conn_ble_scan_start">BLE suchen</string>
+    <string name="conn_ble_scan_stop">Scan stoppen</string>
+    <string name="conn_active_title">AKTIVE VERBINDUNG</string>
+    <string name="conn_ota_title">MESH OTA / REMOTE-ADMIN</string>
+    <string name="conn_ota_desc">Drahtlose Fernwartung entfernter Outdoor-Repeater über MeshCore BLE-Companion.</string>
+    <string name="conn_ota_contacts">Empfangene Nodes in Companion-Kontaktliste (%d)</string>
+    <string name="conn_ota_contacts_none">Noch keine Kontakte empfangen. Auf Aktualisieren tippen.</string>
+    <string name="conn_ota_target">Ziel-Repeater:</string>
+    <string name="conn_ota_select_prompt">Einen Repeater aus der oberen Kontaktliste auswählen</string>
+    <string name="conn_ota_pwd_label">Repeater-Admin-Passwort</string>
+    <string name="conn_ota_login_btn">Am Remote-Node anmelden</string>
+    <string name="conn_ota_status_label">OTA-Sitzungsstatus:</string>
+    <string name="conn_terminal_title">LIVE-TERMINAL &amp; KONSOLEN-MONITOR</string>
+    <string name="conn_terminal_placeholder">CLI-Befehl senden (z.B. ver, board, power)</string>
+    <string name="conn_terminal_clear">Leeren</string>
+
+    <!-- Radio & Antenna Screen -->
+    <string name="radio_section_presets">LÄNDER- &amp; REGIONAL-PRESETS</string>
+    <string name="radio_section_params">FUNK- &amp; NETZWERK-PARAMETER</string>
+    <string name="radio_freq">Frequenz (MHz)</string>
+    <string name="radio_bw">Bandbreite (kHz)</string>
+    <string name="radio_sf">Spreading Factor (SF)</string>
+    <string name="radio_cr">Coding Rate (CR)</string>
+    <string name="radio_flood_max">Max Hops (flood.max)</string>
+    <string name="radio_advert_interval">Flood Advert (Stunden)</string>
+    <string name="radio_section_antenna">ANTENNEN-PRESET &amp; EIRP-COMPLIANCE</string>
+    <string name="radio_antenna_preset_label">Antennen-Preset auswählen:</string>
+    <string name="radio_antenna_gain">Antennengewinn (dBi)</string>
+    <string name="radio_cable_loss">Kabeldämpfung (dB)</string>
+    <string name="radio_tx_power">TX-Sendeleistung (dBm)</string>
+    <string name="radio_calc_erp">Berechnete Strahlungsleistung (ERP):</string>
+    <string name="radio_legal_limit">Gesetzliches ERP-Limit in %s:</string>
+    <string name="radio_compliance_locked">Konform: TX-Leistung durch Antennengewinn begrenzt</string>
+    <string name="radio_compliance_unlocked">ACHTUNG: Gesetzliche Sendeleistungs-Sperre aufgehoben!</string>
+    <string name="radio_compliance_switch">Gesetzliche Begrenzung aufheben</string>
+
+    <!-- Filter Screen (ZephCore &amp; DDMC (Dutch MeshCore) BW2) -->
+    <string name="filter_header">PAKET-FILTER &amp; REGELN</string>
+    <string name="filter_master_switch">Paketfilter aktiv (filter on/off)</string>
+    <string name="filter_master_on_desc">Filter-Engine läuft</string>
+    <string name="filter_master_off_desc">Deaktiviert: Alles wird durchgeleitet</string>
+    <string name="filter_dryrun_switch">Dry-Run Testmodus (filter dryrun on)</string>
+    <string name="filter_dryrun_on_desc">Zählt Treffer nur, verwirft noch keine Pakete</string>
+    <string name="filter_dryrun_off_desc">Scharfer Modus: Ungewollte Pakete werden verworfen</string>
+    <string name="filter_mode_select">Filter-Modus wählen:</string>
+    <string name="filter_mode_blacklist">Blacklist-Modus</string>
+    <string name="filter_mode_blacklist_desc">Standard Blacklist-Modus: Alles wird weitergeleitet, außer gesperrte Regeln.</string>
+    <string name="filter_mode_whitelist">Whitelist-Modus (Streng)</string>
+    <string name="filter_mode_whitelist_desc">Strenger Whitelist-Modus: Nur eingetragene Kanäle und Pfade werden weitergeleitet.</string>
+    <string name="filter_banner_whitelist">Strenger Whitelist-Modus: Nur eingetragene Kanäle und Pfade werden weitergeleitet.</string>
+    <string name="filter_banner_blacklist">Standard Blacklist-Modus: Alles wird weitergeleitet, außer gesperrte Regeln.</string>
+
+    <!-- Whitelist Controls -->
+    <string name="filter_wl_channel_header">WHITELIST KANAL-FREIGABEN</string>
+    <string name="filter_wl_presets_title">Schnell-Auswahl gängiger Kanäle:</string>
+    <string name="filter_wl_channel_input_hint">Kanalname (z.B. #regional oder Public)</string>
+    <string name="filter_wl_channels_count">Freigegebene Kanäle (%d):</string>
+    <string name="filter_wl_path_header">WHITELIST PFAD-PRÄFIXE (2-8 HEX)</string>
+    <string name="filter_wl_path_input_hint">Pfad-Hex-Präfix (z.B. a1b2)</string>
+    <string name="filter_wl_path_comment_hint">Node-Beschreibung (optional)</string>
+    <string name="filter_wl_paths_count">Freigegebene Pfade (%d):</string>
+
+    <!-- Blacklist Controls (Filter.cpp) -->
+    <string name="filter_bl_channel_header">GESPERRTE KANÄLE (filter channel add/remove)</string>
+    <string name="filter_bl_channel_input_hint">Zu sperrender Kanalname (z.B. #spam)</string>
+    <string name="filter_bl_channels_count">Gesperrte Kanäle (%d):</string>
+    <string name="filter_bl_path_header">GESPERRTE PFAD-PRÄFIXE (filter path add/remove)</string>
+    <string name="filter_bl_path_input_hint">Störer-Pfadpräfix (2-8 Hex-Stellen)</string>
+    <string name="filter_bl_paths_count">Gesperrte Pfade (%d):</string>
+    <string name="filter_rules_header">INHALTSREGELN: ABSENDER &amp; TEXT (filter sender/text)</string>
+    <string name="filter_sender_sub">Gesperrte Absender</string>
+    <string name="filter_text_sub">Gesperrte Textinhalte</string>
+    <string name="filter_pattern_hint">Muster (z.B. bad_bot oder spam_wort)</string>
+    <string name="filter_secs_hint">Dauer (s, 0=dauerhaft)</string>
+    <string name="filter_prob_hint">Drop % (1-100)</string>
+    <string name="filter_watch_header">WATCH-KANÄLE (filter watch add/remove)</string>
+    <string name="filter_watch_desc">Kanäle, die vom Repeater entschlüsselt werden, um Absender-/Textregeln und Altersgrenzen anzuwenden.</string>
+    <string name="filter_watch_input_hint">Watch-Kanalname (z.B. #notfunk)</string>
+    <string name="filter_watch_count">Überwachte Kanäle (%d):</string>
+    <string name="filter_params_header">ALTERSGRENZE &amp; HOP-LIMIT (filter age / hops)</string>
+    <string name="filter_age_label">Max. Nachrichtenalter (Minuten, 0=aus):</string>
+    <string name="filter_hops_label">Max. erlaubte Hops (0-64):</string>
+
+    <!-- Filter Stats & Reset -->
+    <string name="filter_stats_header">FILTER-STATISTIKEN &amp; TREFFER</string>
+    <string name="filter_stats_allowed">Durchgelassen</string>
+    <string name="filter_stats_dropped">Verworfen</string>
+    <string name="filter_stats_droprate">Droprate</string>
+    <string name="filter_stats_airtime">Airtime gespart</string>
+    <string name="filter_reset_header">KRITISCHE AKTION: FILTER VOLLSTÄNDIG ZURÜCKSETZEN</string>
+    <string name="filter_reset_desc">Setzt sämtliche Regeln, Whitelist-Einträge und Treffer-Zähler auf 0 zurück und schaltet den Filter aus. Sendet den Befehl \'filter RESET\'.</string>
+    <string name="filter_reset_slide_text">Nach rechts wischen für \'filter RESET\'</string>
+
+    <!-- Mesh Care Screen -->
+    <string name="care_header">MESH-SCHONMODUS (WATCHDOG)</string>
+    <string name="care_desc">Temporäre Sendeleistungs-Drosselung bei Tests vor Ort, um das lokale Mesh nicht zu überlasten.</string>
+    <string name="care_duration_title">Dauer wählen:</string>
+    <string name="care_tx_title">Gedrosselte Sendeleistung:</string>
+    <string name="care_btn_start">Schonmodus starten</string>
+    <string name="care_btn_extend">Um %s verlängern</string>
+    <string name="care_btn_stop">Schonmodus beenden &amp; Leistung wiederherstellen</string>
+    <string name="care_remaining_title">Watchdog-Timer verbleibend:</string>
+    <string name="care_active_badge">Aktiv</string>
+
+    <!-- Disclaimer Dialog (Erststart) -->
+    <string name="disclaimer_title">⚠ Wichtiger Hinweis</string>
+    <string name="disclaimer_ai_notice">Dies ist KI-generierte Software — ohne jegliche Gewährleistung.</string>
+    <string name="disclaimer_body">Bitte lies die folgenden Hinweise sorgfältig, bevor du diese App zur Konfiguration von LoRa-Repeater-Hardware einsetzt.</string>
+    <string name="disclaimer_point_liability">Diese Software wird OHNE JEGLICHE GEWÄHRLEISTUNG bereitgestellt. Die Entwickler übernehmen keinerlei Haftung für Hardware-Schäden, Netzwerkstörungen oder Verstöße gegen Funkregelungen, die durch die Nutzung entstehen.</string>
+    <string name="disclaimer_point_regulations">Du bist allein verantwortlich für die Einhaltung aller geltenden Funkvorschriften in deinem Land. In Deutschland und der EU ist das EU868-Band nach ETSI EN 300 220 und dem BNetzA-Frequenzplan geregelt. Das Überschreiten erlaubter ERP/EIRP-Grenzwerte ist illegal und kann Bußgelder nach sich ziehen.</string>
+    <string name="disclaimer_point_responsibility">Die Nutzung erfolgt auf eigene Gefahr. Stelle stets sicher, dass deine Repeater-Konfiguration dem lokalen Funkrecht entspricht, bevor du sendest.</string>
+    <string name="disclaimer_accept_note">Mit Tippen auf \'Bestätigen\' bestätigst du, dass du alle obigen Bedingungen gelesen, verstanden und akzeptiert hast.</string>
+    <string name="disclaimer_accept_btn">Bestätigen — Nutzung auf eigene Gefahr</string>
+
+    <!-- Gerätefähigkeits-Labels -->
+    <string name="caps_unsupported">Von dieser Firmware nicht unterstützt</string>
+    <string name="caps_detecting">Erkenne Firmware-Fähigkeiten…</string>
+    <string name="caps_no_gps">GPS auf dieser Hardware nicht verfügbar</string>
+    <string name="caps_no_filter_wl">Whitelist-Modus erfordert ZephCore &amp; DDMC (Dutch MeshCore) BW2 Firmware</string>
+    <string name="offline_preview_label">Offline-Vorschau-Modus</string>
+
+    <!-- Verbindungs-Gate -->
+    <string name="gate_offline_banner">⚠ Offline-Vorschau — Kein Gerät verbunden. Änderungen werden nicht übertragen.</string>
+
+    <!-- Hardware &amp; Status Screen -->
+    <string name="hw_header">HARDWARE-STEUERUNG &amp; STATUS</string>
+    <string name="hw_led_title">LED-Modus (get leds / leds ...)</string>
+    <string name="hw_gps_title">GPS-Intervall (get gps / gps ...)</string>
+    <string name="hw_telemetry_header">BATTERIE- &amp; SOLAR-TELEMETRIE</string>
+    <string name="hw_voltage">Batteriespannung</string>
+    <string name="hw_current">Stromverbrauch</string>
+    <string name="hw_solar">Solar-Einspeisung</string>
+    <string name="hw_battery_level">Ladezustand</string>
+    <string name="hw_temp">Temperatur</string>
+    <string name="hw_actions_header">HARDWARE-AKTIONEN</string>
+    <string name="hw_btn_save">Im Flash sichern (save)</string>
+    <string name="hw_btn_reboot">Repeater neu starten (reboot)</string>
+    <string name="hw_reboot_dialog_title">Neustart bestätigen</string>
+    <string name="hw_reboot_dialog_desc">Möchtest du den Repeater wirklich neu starten? Die aktive Verbindung wird dabei kurz getrennt.</string>
+
+    <string name="menu_cli">CLI-Konsole</string>
+    <string name="menu_cli_sub">Direktes Befehls-Terminal &amp; Log</string>
+    <string name="menu_about">Über &amp; Lizenz</string>
+    <string name="menu_about_sub">GNU GPLv3, Open Source &amp; Info</string>
+    <string name="about_title">Repeater Konfigurator</string>
+    <string name="about_license_title">Lizenz: GNU GPLv3 (Freie Software)</string>
+    <string name="about_license_body">Freie Open-Source-Software unter GNU GPLv3. Jeder darf sie kostenlos nutzen, einsehen, anpassen und unter denselben freien Bedingungen weitergeben. Bereitstellung OHNE GEWÄHRLEISTUNG ("AS IS").</string>
+    <string name="about_ai_title">KI-gestützte Entwicklung</string>
+    <string name="about_ai_body">Entwickelt mit KI-Unterstützung für die MeshCore- und ZephCore &amp; DDMC (Dutch MeshCore)-Community. Der Betreiber bleibt selbst für die Einhaltung der gesetzlichen Funkvorgaben verantwortlich.</string>
+    <string name="about_credits_title">Verwendete Open-Source-Komponenten</string>
+    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT-Lizenz)\n• MeshCore / ZephCore &amp; DDMC (Dutch MeshCore) CLI-Protokoll</string>
+    <string name="about_show_disclaimer">Erststart-Disclaimer erneut anzeigen</string>
+    <string name="lang_nl">NL</string>
+</resources>
