@@ -16,6 +16,7 @@ data class DeviceCapabilities(
     val hasBatteryTelemetry: Boolean = true,
     /** true = Fähigkeitserkennung abgeschlossen */
     val detectionComplete: Boolean = false,
+    val isCompanion: Boolean = false,
     /** Firmware-Version als String (aus 'ver'-Antwort) */
     val firmwareVersion: String = "",
     /** Letzter Rohtext der 'filter help'-Antwort, für weitere Erkennung */

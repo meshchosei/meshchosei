@@ -442,7 +442,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 Text("Companion Mesh-Kontakte", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             IconButton(onClick = { viewModel.refreshMeshContacts() }, enabled = !isRefreshingContacts) {
-                                if (isRefreshingContacts) CircularProgressIndicator(modifier = Modifier.size(18.dp), color = bColors.cobalt, strokeWidth = 2.dp)
+                                if (isRefreshingContacts) CircularProgressIndicator(modifier = Modifier.size(22.dp), color = bColors.cobalt, strokeWidth = 2.5.dp)
                                 else Icon(Icons.Default.Refresh, contentDescription = "Neu laden", tint = bColors.cobalt, modifier = Modifier.size(22.dp))
                             }
                         }
