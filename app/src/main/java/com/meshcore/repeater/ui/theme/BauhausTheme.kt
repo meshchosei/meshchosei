@@ -40,9 +40,9 @@ data class BauhausCustomColors(
 
 val LocalBauhausColors = staticCompositionLocalOf {
     BauhausCustomColors(
-        signalRed = activePalette.primary,
-        ochre = activePalette.tertiary,
-        cobalt = activePalette.secondary,
+        signalRed = BauhausDarkSignalRed,
+        ochre = BauhausDarkOchre,
+        cobalt = BauhausDarkCobalt,
         successGreen = BauhausDarkGreen,
         cardBackground = BauhausDarkCard,
         cardBorder = BauhausDarkOutline,
@@ -63,13 +63,13 @@ val BauhausShapes = Shapes(
 )
 
 private val BauhausDarkColorScheme = darkColorScheme(
-    primary = activePalette.primary,
+    primary = BauhausDarkSignalRed,
     onPrimary = Color.White,
     primaryContainer = BauhausDarkSurfaceVariant,
     onPrimaryContainer = BauhausDarkSignalRed,
-    secondary = activePalette.secondary,
+    secondary = BauhausDarkCobalt,
     onSecondary = Color.White,
-    tertiary = activePalette.tertiary,
+    tertiary = BauhausDarkOchre,
     onTertiary = BauhausDarkCarbon,
     background = BauhausDarkCarbon,
     onBackground = BauhausDarkTextPrimary,
@@ -84,13 +84,13 @@ private val BauhausDarkColorScheme = darkColorScheme(
 )
 
 private val BauhausLightColorScheme = lightColorScheme(
-    primary = activePalette.primary,
+    primary = BauhausLightSignalRed,
     onPrimary = Color.White,
     primaryContainer = BauhausLightSurfaceVariant,
     onPrimaryContainer = BauhausLightSignalRed,
-    secondary = activePalette.secondary,
+    secondary = BauhausLightCobalt,
     onSecondary = Color.White,
-    tertiary = activePalette.tertiary,
+    tertiary = BauhausLightOchre,
     onTertiary = Color.White,
     background = BauhausLightOffWhite,
     onBackground = BauhausLightTextPrimary,
@@ -116,7 +116,7 @@ fun BauhausTheme(
         ThemeMode.DARK -> true
     }
 
-    val colorScheme = if (isDark) BauhausDarkColorScheme else BauhausLightColorScheme
+    val colorScheme = (if (isDark) BauhausDarkColorScheme else BauhausLightColorScheme).copy(primary = activePalette.primary, secondary = activePalette.secondary, tertiary = activePalette.tertiary)
 
     val customColors = if (isDark) {
         BauhausCustomColors(

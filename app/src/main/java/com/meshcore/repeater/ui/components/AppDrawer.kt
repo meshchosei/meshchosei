@@ -79,7 +79,6 @@ fun AppDrawerSheet(
     val bColors = LocalBauhausColors.current
 
     ModalDrawerSheet(
-        modifier = Modifier.fillMaxHeight(),
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerContentColor = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.width(316.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())
