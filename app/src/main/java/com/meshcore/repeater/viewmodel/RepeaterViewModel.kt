@@ -179,7 +179,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     }
     fun sendCommand(cmd: String) {
         if (cmd.isBlank()) return
-        if (_selectedConnectionType.value == ConnectionType.USB_SERIAL && _deviceCapabilities.value.!isCompanion) { logTerminal("> $cmd", true); serialManager.send(cmd) }
+        if (_selectedConnectionType.value == ConnectionType.USB_SERIAL && !_deviceCapabilities.value.isCompanion) { logTerminal("> $cmd", true); serialManager.send(cmd) }
         else {
             val t = _remoteAdminSession.value.targetRepeater
             if (t != null) { logTerminal("> [OTA -> ${t.name}] $cmd", true); sendCompanionBytes(RepeaterProtocol.buildRemoteCliFrame(t.pubKey.copyOfRange(0, minOf(6, t.pubKey.size)), cmd)) }
