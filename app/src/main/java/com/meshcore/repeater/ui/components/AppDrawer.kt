@@ -81,7 +81,7 @@ fun AppDrawerSheet(
     ModalDrawerSheet(
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerContentColor = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.width(316.dp).fillMaxHeight()
+        modifier = Modifier.width(316.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())
     ) {
         // === Drawer Header ===
         Column(
@@ -129,42 +129,6 @@ fun AppDrawerSheet(
 
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Connection status pill
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .clip(BauhausCornerShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, BauhausCornerShape)
-                    .padding(horizontal = 10.dp, vertical = 5.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(
-                            when (connectionState) {
-                                is ConnectionState.Connected -> bColors.successGreen
-                                is ConnectionState.Connecting -> bColors.ochre
-                                is ConnectionState.Error -> bColors.signalRed
-                                else -> Color.Gray
-                            }
-                        )
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = when (connectionState) {
-                        is ConnectionState.Connected -> connectionState.deviceName
-                        is ConnectionState.Connecting -> stringResource(R.string.status_connecting)
-                        is ConnectionState.Error -> stringResource(R.string.status_error)
-                        else -> stringResource(R.string.status_no_device)
-                    },
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         }
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
@@ -254,69 +218,69 @@ fun AppDrawerSheet(
         Spacer(modifier = Modifier.height(12.dp))
 
         Spacer(modifier = Modifier.weight(1f))
-        // === Bauhaus Erscheinungsbild & Sprache ===
+        Spacer(modifier = Modifier.weight(1f))
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 listOf(ThemeMode.LIGHT, ThemeMode.DARK).forEach { mode ->
                     val isActive = themeMode == mode
                     Box(
                         modifier = Modifier
-                            .size(34.dp)
-                            .alpha(if (isActive) 1f else 0.35f)
+                            .weight(1f)
+                            .height(34.dp)
+                            .alpha(if (isActive) 1f else 0.4f)
                             .clip(BauhausCornerShape)
                             .background(if (isActive) bColors.signalRed.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant)
                             .border(if (isActive) 2.dp else 1.dp, if (isActive) bColors.signalRed else MaterialTheme.colorScheme.outline, BauhausCornerShape)
                             .clickable { onThemeChange(mode) },
                         contentAlignment = Alignment.Center
                     ) {
-                        if (mode == ThemeMode.LIGHT) Icon(Icons.Default.LightMode, contentDescription = "Hell", tint = bColors.ochre, modifier = Modifier.size(18.dp))
-                        else Icon(Icons.Default.DarkMode, contentDescription = "Dunkel", tint = bColors.cobalt, modifier = Modifier.size(18.dp))
+                        Icon(
+                            imageVector = if (mode == ThemeMode.LIGHT) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = null,
+                            tint = if (mode == ThemeMode.LIGHT) bColors.ochre else bColors.cobalt,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
-                listOf(
-                    AppLanguage.DE to "🇩🇪",
-                    AppLanguage.EN to "🇬🇧",
-                    AppLanguage.NL to "🇳🇱",
-                    AppLanguage.FR to "🇫🇷"
-                ).forEach { (lang, flag) ->
+                listOf(AppLanguage.DE to "🇩🇪", AppLanguage.EN to "🇬🇧", AppLanguage.NL to "🇳🇱", AppLanguage.FR to "🇫🇷").forEach { (lang, flag) ->
                     val isActive = appLanguage == lang
                     Box(
                         modifier = Modifier
-                            .size(34.dp)
-                            .alpha(if (isActive) 1f else 0.35f)
+                            .weight(1f)
+                            .height(34.dp)
+                            .alpha(if (isActive) 1f else 0.4f)
                             .clip(BauhausCornerShape)
                             .background(if (isActive) bColors.cobalt.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant)
                             .border(if (isActive) 2.dp else 1.dp, if (isActive) bColors.cobalt else MaterialTheme.colorScheme.outline, BauhausCornerShape)
                             .clickable { onLanguageChange(lang) },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(flag, fontSize = 16.sp)
+                        Text(text = flag, fontSize = 16.sp)
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             val paletteState = com.meshcore.repeater.ui.theme.LocalBauhausPalette.current
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)
             ) {
                 com.meshcore.repeater.ui.theme.BauhausPalette.values().forEach { pal ->
                     val selected = paletteState.value == pal
                     Row(
                         modifier = Modifier
                             .weight(1f)
-                            .height(if (selected) 7.dp else 4.dp)
+                            .height(5.dp)
                             .alpha(if (selected) 1f else 0.45f)
                             .clip(BauhausCornerShape)
                             .clickable { paletteState.value = pal }

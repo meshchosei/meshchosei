@@ -48,6 +48,11 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: RepeaterViewModel by viewModels()
 
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        try { viewModel.refreshUsbDevices() } catch (_: Exception) {}
+    }
+
     override fun onResume() {
         super.onResume()
         try { viewModel.refreshUsbDevices() } catch (_: Exception) {}
