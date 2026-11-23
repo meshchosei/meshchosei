@@ -8,3 +8,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+.aider*
+
+build/
+app/build/
+.gradle/
+
