@@ -19,3 +19,9 @@ build/
 app/build/
 .gradle/
 
+
+build/
+app/build/
+.gradle/
+.aider*
+
