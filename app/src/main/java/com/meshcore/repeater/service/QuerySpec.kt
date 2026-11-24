@@ -69,9 +69,14 @@ object QuerySpec {
         "get guest.password" -> { v -> v.length <= 32 && !RADIO.matches(v) && !v.contains("(Build:", true) }
         // Filter-Erkennung: jede "filter…"-Antwort annehmen (auch "Filter: command error"), Auswertung in isBlacklistHelp/isWhitelistHelp
         "filter help", "filter wl help" -> { v -> v.startsWith("filter", true) }
+        // Status-Zusammenfassung (FilterStat::formatSummary): "> Filter on: Blocked [ … ]" – nicht "Filter: on" (Befehlsantwort)
+        "filter" -> { v -> Regex("""^filter (on|off)\b""", RegexOption.IGNORE_CASE).containsMatchIn(v) }
         "filter mode" -> { v -> v.contains("mode", true) }
         // Listen: nur das jeweilige Listenformat bzw. "None" annehmen – keine verspäteten Status-/OK-Zeilen
-        "filter channel list", "filter wl channel list", "filter path list", "filter wl path list" -> { v -> FilterListParser.isValidListReply(cmd, v) }
+        "filter channel list", "filter wl channel list", "filter path list", "filter wl path list",
+        "filter sender list", "filter text list", "filter watch list" -> { v -> FilterListParser.isValidListReply(cmd, v) }
+        // Filter.cpp: "> Filter: dry-run on|off"
+        "filter dryrun" -> { v -> Regex("""dry-?run (on|off)""", RegexOption.IGNORE_CASE).containsMatchIn(v) }
         // Regionen (CommonCLI::handleRegionCmd): Baum beginnt immer mit der Wildcard "*"
         "region" -> { v -> v.trimStart().startsWith("*") }
         "region home" -> { v -> v.contains("home is", true) }

@@ -7,7 +7,10 @@ import org.json.JSONObject
 
 /**
  * MeshCore/PEmesh-kompatibles JSON-Backup:
- * { "vars": { "name": ..., "radio": {freq,bw,sf,cr}, ... }, "regions": { "default", "home", "list": [{name,parent,flood}] } }
+ * { "vars": { "name": ..., "radio": {freq,bw,sf,cr}, ... }, "regions": { "default", "home", "list": [{name,parent,flood}] },
+ *   "filter": { "mode": "off|blacklist|whitelist", "dryrun", "blacklist": {...}, "whitelist": {...} } }
+ * Der "filter"-Block ist eine Erweiterung dieser App (MeshCore simple_repeater/ZephCore Filter.cpp); Dateien ohne ihn
+ * (offizielle MeshCore-/PEmesh-Exporte) werden unverändert gelesen und installiert.
  */
 object MeshCoreBackup {
     enum class VarType { STRING, BOOL, INT, NUMBER, NUMERIC_STRING, RADIO }
@@ -82,7 +85,124 @@ object MeshCoreBackup {
         return out to home
     }
 
-    fun buildJson(vars: LinkedHashMap<String, Any>, regions: List<RegionEntry>?, home: String?, default: String?): String {
+    // ---------------- Paketfilter (Blacklist/Whitelist) ----------------
+
+    /** Sender-/Text-Regel: secs = 0 -> "block", sonst "throttle"; prob = Verwurfwahrscheinlichkeit 1..100. */
+    data class RuleEntry(val pattern: String, val secs: Int = 0, val prob: Int = 100)
+    /** Whitelist-Kanal: die Firmware speichert nur den 1-Byte-Hash; der Name ist eine Komfort-Angabe. */
+    data class WlChannelEntry(val hash: String, val name: String? = null)
+
+    data class FilterBackup(
+        /** "off", "blacklist" oder "whitelist". */
+        val mode: String,
+        val dryrun: Boolean? = null,
+        val blChannels: List<String> = emptyList(),
+        val blPaths: List<String> = emptyList(),
+        val senders: List<RuleEntry> = emptyList(),
+        val texts: List<RuleEntry> = emptyList(),
+        val watch: List<String> = emptyList(),
+        /** null = Firmware ohne Whitelist (Standard-MeshCore) bzw. kein Whitelist-Abschnitt. */
+        val wlChannels: List<WlChannelEntry>? = null,
+        val wlPaths: List<String>? = null
+    ) {
+        val blacklistCount get() = blChannels.size + blPaths.size + senders.size + texts.size + watch.size
+        val whitelistCount get() = (wlChannels?.size ?: 0) + (wlPaths?.size ?: 0)
+        val hasWhitelist get() = wlChannels != null || wlPaths != null
+    }
+
+    private val FILTER_MODES = setOf("off", "blacklist", "whitelist")
+    private val PATH_HEX = Regex("""^[0-9a-fA-F]{2,8}$""")
+    private val HASH_HEX = Regex("""^[0-9a-fA-F]{2}$""")
+    private fun isToken(s: String) = s.isNotBlank() && s.none { it.isWhitespace() } && !isPlaceholder(s)
+
+    private fun rulesToJson(rules: List<RuleEntry>) = JSONArray().also { a -> rules.forEach { a.put(JSONObject().put("pattern", it.pattern).put("secs", it.secs).put("prob", it.prob)) } }
+
+    fun filterToJson(f: FilterBackup): JSONObject {
+        val o = JSONObject().put("mode", f.mode)
+        f.dryrun?.let { o.put("dryrun", it) }
+        o.put("blacklist", JSONObject()
+            .put("channels", JSONArray(f.blChannels)).put("paths", JSONArray(f.blPaths))
+            .put("senders", rulesToJson(f.senders)).put("texts", rulesToJson(f.texts)).put("watch", JSONArray(f.watch)))
+        if (f.hasWhitelist) {
+            val ch = JSONArray().also { a -> f.wlChannels.orEmpty().forEach { c -> a.put(JSONObject().put("hash", c.hash.lowercase()).apply { c.name?.let { put("name", it) } }) } }
+            o.put("whitelist", JSONObject().put("channels", ch).put("paths", JSONArray(f.wlPaths.orEmpty())))
+        }
+        return o
+    }
+
+    private fun strings(a: JSONArray?, valid: (String) -> Boolean): List<String> =
+        if (a == null) emptyList() else (0 until a.length()).mapNotNull { a.opt(it) as? String }.map { it.trim() }.filter(valid).distinct()
+
+    private fun rules(a: JSONArray?): List<RuleEntry> = if (a == null) emptyList() else (0 until a.length()).mapNotNull { i ->
+        val o = a.optJSONObject(i) ?: return@mapNotNull null
+        val p = o.optString("pattern").trim()
+        val secs = o.optInt("secs", 0); val prob = o.optInt("prob", 100)
+        if (!isToken(p) || secs !in 0..65535 || prob !in 1..100) null else RuleEntry(p, secs, prob)
+    }.distinctBy { it.pattern }
+
+    /** "filter"-Block lesen; null = nicht vorhanden/unbrauchbar (Abwärtskompatibilität). */
+    fun parseFilter(o: JSONObject?): FilterBackup? {
+        if (o == null) return null
+        val mode = o.optString("mode", "").trim().lowercase().takeIf { it in FILTER_MODES } ?: return null
+        val bl = o.optJSONObject("blacklist"); val wl = o.optJSONObject("whitelist")
+        val wlCh = wl?.optJSONArray("channels")?.let { a ->
+            (0 until a.length()).mapNotNull { i ->
+                val e = a.opt(i)
+                when (e) {
+                    is JSONObject -> e.optString("hash").trim().takeIf { HASH_HEX.matches(it) }?.let { WlChannelEntry(it.uppercase(), e.optString("name").trim().ifEmpty { null }) }
+                    is String -> e.trim().let { t -> if (HASH_HEX.matches(t)) WlChannelEntry(t.uppercase()) else if (isToken(t)) WlChannelEntry(ChannelHash.hashHex(t), t) else null }
+                    else -> null
+                }
+            }.distinctBy { it.hash }
+        }
+        return FilterBackup(
+            mode = mode,
+            dryrun = if (o.has("dryrun") && !o.isNull("dryrun")) o.optBoolean("dryrun") else null,
+            blChannels = strings(bl?.optJSONArray("channels"), ::isToken),
+            blPaths = strings(bl?.optJSONArray("paths")) { PATH_HEX.matches(it) }.map { it.uppercase() },
+            senders = rules(bl?.optJSONArray("senders")),
+            texts = rules(bl?.optJSONArray("texts")),
+            watch = strings(bl?.optJSONArray("watch")) { isToken(it) && it != "Public" },
+            wlChannels = if (wl != null) wlCh.orEmpty() else null,
+            wlPaths = if (wl != null) strings(wl.optJSONArray("paths")) { PATH_HEX.matches(it) }.map { it.uppercase() } else null
+        )
+    }
+
+    /**
+     * CLI-Befehle, die den Repeater-Stand [current] (frisch ausgelesen) in den Backup-Stand [target] überführen:
+     * überzählige Einträge entfernen, fehlende hinzufügen, danach dryrun, Modus und Ein/Aus.
+     * [supportsWhitelist] = false (Standard-MeshCore): Whitelist-Befehle und "filter mode" entfallen.
+     */
+    fun filterCommands(target: FilterBackup, current: FilterBackup?, supportsWhitelist: Boolean): List<String> {
+        val cur = current ?: FilterBackup("off")
+        val c = mutableListOf<String>()
+        fun <T> sync(have: List<T>, want: List<T>, key: (T) -> String, rm: (T) -> String, add: (T) -> String) {
+            val wantKeys = want.map(key).toSet(); val haveKeys = have.map(key).toSet()
+            have.filter { key(it) !in wantKeys }.forEach { c += rm(it) }
+            want.filter { key(it) !in haveKeys }.forEach { c += add(it) }
+        }
+        sync(cur.blChannels, target.blChannels, { it }, { "filter channel remove $it" }, { "filter channel add $it" })
+        sync(cur.blPaths, target.blPaths, { it.uppercase() }, { "filter path remove $it" }, { "filter path add $it" })
+        // Regeln mit geänderten Parametern: entfernen und neu anlegen (Schlüssel inkl. secs/prob)
+        val ruleKey: (RuleEntry) -> String = { "${it.pattern}|${it.secs}|${it.prob}" }
+        fun ruleAdd(kind: String, r: RuleEntry) = "filter $kind add ${r.pattern}" + if (r.secs != 0 || r.prob != 100) " ${r.secs}" + (if (r.prob != 100) " ${r.prob}" else "") else ""
+        sync(cur.senders, target.senders, ruleKey, { "filter sender remove ${it.pattern}" }, { ruleAdd("sender", it) })
+        sync(cur.texts, target.texts, ruleKey, { "filter text remove ${it.pattern}" }, { ruleAdd("text", it) })
+        sync(cur.watch, target.watch, { it }, { "filter watch remove $it" }, { "filter watch add $it" })
+        if (supportsWhitelist && target.hasWhitelist) {
+            sync(cur.wlChannels.orEmpty(), target.wlChannels.orEmpty(), { it.hash.uppercase() }, { "filter wl channel del ${it.hash.lowercase()}" }, { "filter wl channel add ${it.hash.lowercase()}" })
+            sync(cur.wlPaths.orEmpty(), target.wlPaths.orEmpty(), { it.uppercase() }, { "filter wl path del $it" }, { "filter wl path add $it" })
+        }
+        target.dryrun?.let { c += "filter dryrun ${if (it) "on" else "off"}" }
+        when (target.mode) {
+            "off" -> c += "filter off"
+            "blacklist" -> { if (supportsWhitelist) c += "filter mode blacklist"; c += "filter on" }
+            "whitelist" -> if (supportsWhitelist) { c += "filter mode whitelist"; c += "filter on" }   // ohne Whitelist-Firmware: Ein/Aus unverändert lassen
+        }
+        return c
+    }
+
+    fun buildJson(vars: LinkedHashMap<String, Any>, regions: List<RegionEntry>?, home: String?, default: String?, filter: FilterBackup? = null): String {
         val v = JSONObject()
         for (def in VARS) vars[def.key]?.let { v.put(def.key, it) }
         vars.keys.filter { it !in DEFS }.forEach { v.put(it, vars[it]) }
@@ -95,6 +215,7 @@ object MeshCoreBackup {
                 .put("home", home ?: JSONObject.NULL)
                 .put("list", list))
         }
+        filter?.let { root.put("filter", filterToJson(it)) }
         return root.toString(2).replace("\\/", "/")
     }
 
@@ -108,7 +229,9 @@ object MeshCoreBackup {
         val regionHome: String?,
         val regionDefault: String?,
         val hasRegionDefault: Boolean,
-        val regionCommands: List<String>
+        val regionCommands: List<String>,
+        /** null = Backup ohne "filter"-Block (z. B. offizieller MeshCore-/PEmesh-Export). */
+        val filter: FilterBackup? = null
     ) {
         fun commands(includePrivateKey: Boolean, includeGuestPassword: Boolean): List<String> {
             val chosen = vars.filter { it.state == ItemState.APPLY && it.command != null }.filter {
@@ -188,6 +311,6 @@ object MeshCoreBackup {
             if (hasDefault) rc += "region default ${def ?: "<null>"}"
             rc += "region save"
         }
-        return Plan(items, regions, home, def, hasDefault, rc)
+        return Plan(items, regions, home, def, hasDefault, rc, parseFilter(root.optJSONObject("filter")))
     }
 }

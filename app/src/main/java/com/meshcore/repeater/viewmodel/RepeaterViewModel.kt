@@ -682,18 +682,40 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 _readProgress.value = ++step to total
                 runQuery("region default")?.value?.let { v -> Regex("""default scope is (?:now )?(\S+)""").find(v)?.groupValues?.get(1)?.let { default = if (it == "<null>") null else it } }
             }
+            // Paketfilter (Blacklist/Whitelist) frisch auslesen – nur wenn die Firmware Filter kann
+            var filter: MeshCoreBackup.FilterBackup? = null
+            if (_deviceCapabilities.value.supportsBlacklist && isLinkUp()) {
+                filter = readFilterSnapshot(tr("Backup"))
+                if (filter == null && isLinkUp()) notifyUser("Hinweis: Paketfilter nicht vollständig lesbar – nicht im Backup enthalten.")
+            }
             if (vars.isEmpty()) { notifyUser("Backup fehlgeschlagen – keine Werte gelesen."); return@startRead }
             if (includePrivateKey && "prv.key" !in vars) notifyUser("Hinweis: Private Key ist nur über USB-Direktverbindung auslesbar – nicht im Backup enthalten.")
-            _backupJson.value = MeshCoreBackup.buildJson(vars, regions, home, default)
+            _backupJson.value = MeshCoreBackup.buildJson(vars, regions, home, default, filter)
         }.invokeOnCompletion { clearBusy(BusyKey.BACKUP_CREATE) }
     }
 
     /** Backup installieren: Befehle streng sequentiell senden, abgelehnte/unbeantwortete Befehle melden. */
-    fun installBackup(cmds: List<String>) {
+    fun installBackup(planCmds: List<String>, filter: MeshCoreBackup.FilterBackup? = null) {
         if (!isLinkUp()) { notifyUser("Nicht verbunden."); return }
-        if (cmds.isEmpty()) { notifyUser("Keine übertragbaren Einstellungen im Backup."); return }
+        if (planCmds.isEmpty() && filter == null) { notifyUser("Keine übertragbaren Einstellungen im Backup."); return }
         if (!tryMarkBusy(BusyKey.BACKUP_INSTALL)) return
         startRead(cancelPrevious = false) {
+            // Funk/TX/Key bleiben am Ende (können die Verbindung beenden) – der Paketfilter kommt davor
+            val isTail: (String) -> Boolean = { it.startsWith("set radio ") || it.startsWith("set tx ") || it.startsWith("set prv.key ") }
+            var cmds = planCmds.filterNot(isTail)
+            if (filter != null) {
+                val caps = _deviceCapabilities.value
+                if (!caps.supportsBlacklist) notifyUser("Paketfilter übersprungen – die Firmware dieses Repeaters hat keinen Filter.")
+                else {
+                    val current = readFilterSnapshot(tr("Backup"))
+                    if (current == null) { if (isLinkUp()) notifyUser("Paketfilter übersprungen – aktueller Filter-Stand nicht vollständig lesbar.") }
+                    else {
+                        cmds = cmds + MeshCoreBackup.filterCommands(filter, current, caps.supportsWhitelist)
+                        if (filter.hasWhitelist && filter.whitelistCount > 0 && !caps.supportsWhitelist) notifyUser("Hinweis: Whitelist-Regeln übersprungen – diese Firmware kennt nur die Blacklist.")
+                    }
+                }
+            }
+            cmds = cmds + planCmds.filter(isTail)
             val failed = mutableListOf<String>()
             for ((i, c) in cmds.withIndex()) {
                 if (!isLinkUp()) { failed += cmds.drop(i).map { it.substringAfter(' ').substringBefore(' ') }; break }
@@ -938,6 +960,61 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             }
             RepeaterProtocol.CMD_FILTER_WL_PATH_LIST -> { val old = _whitelistPaths.value; _whitelistPaths.value = FilterListParser.parsePaths(v).map { p -> WhitelistPath(p, old.firstOrNull { it.prefixHex == p }?.comment ?: "") } }
         }
+    }
+
+    /** Antwort auf einen Filter-Befehl (Listen mit langem LoRa-Fenster). first = false -> Remote-Link verloren. */
+    private suspend fun queryFilterValue(cmd: String): Pair<Boolean, String?> {
+        val wireless = _remoteAdminSession.value.targetRepeater != null
+        val isList = cmd.endsWith(" list")
+        var reply: QueryReply? = null
+        for (attempt in 1..(if (wireless) 2 else 1)) {
+            reply = if (isList) runQuery(cmd, timeoutMs = filterListTimeoutMs(), trailingMs = if (wireless) FILTER_LIST_TRAILING_LORA_MS else null) else runQuery(cmd)
+            if (reply != null) break
+        }
+        if (wireless && reply == null && noteRemoteTimeout()) return false to null
+        return true to reply?.value
+    }
+
+    /**
+     * Kompletten Filter-Stand frisch lesen (Status, dry-run, Modus, alle Listen). null = nicht vollständig lesbar
+     * (dann wird weder exportiert noch abgeglichen – sonst würden Regeln verloren gehen). Muss unter dem Mutex laufen.
+     * Befehle laut MeshCore simple_repeater/Filter.cpp bzw. ZephCore app/Filter.cpp; Whitelist & "filter mode" nur ZephCore.
+     */
+    private suspend fun readFilterSnapshot(label: String): MeshCoreBackup.FilterBackup? {
+        val caps = _deviceCapabilities.value
+        if (!caps.supportsBlacklist) return null
+        val wl = caps.supportsWhitelist
+        val cmds = buildList {
+            add("filter"); add("filter dryrun"); if (wl) add(RepeaterProtocol.CMD_FILTER_MODE_QUERY)
+            addAll(listOf(RepeaterProtocol.CMD_FILTER_CHANNEL_LIST, RepeaterProtocol.CMD_FILTER_PATH_LIST, "filter sender list", "filter text list", "filter watch list"))
+            if (wl) { add(RepeaterProtocol.CMD_FILTER_WL_CHANNEL_LIST); add(RepeaterProtocol.CMD_FILTER_WL_PATH_LIST) }
+        }
+        val res = HashMap<String, String>()
+        for ((i, c) in cmds.withIndex()) {
+            if (!isLinkUp()) return null
+            _activeReadStatusText.value = tr("{0}: Paketfilter wird gelesen ({1}/{2})…", label, i + 1, cmds.size)
+            val (ok, v) = queryFilterValue(c)
+            if (!ok || v == null) return null
+            res[c] = v
+            if (c.endsWith(" list")) applyFilterList(c, v)
+        }
+        val enabled = Regex("""^filter on\b""", RegexOption.IGNORE_CASE).containsMatchIn(res.getValue("filter"))
+        val wlMode = wl && res[RepeaterProtocol.CMD_FILTER_MODE_QUERY]?.contains("whitelist", true) == true
+        val senders = FilterListParser.parseRules(res.getValue("filter sender list"))
+        val texts = FilterListParser.parseRules(res.getValue("filter text list"))
+        val watch = FilterListParser.parseWatch(res.getValue("filter watch list"))
+        _senderRules.value = senders.map { FilterRule(it.pattern, it.secs, it.prob) }
+        _textRules.value = texts.map { FilterRule(it.pattern, it.secs, it.prob) }
+        _watchChannels.value = watch.map { WatchChannel(it) }
+        return MeshCoreBackup.FilterBackup(
+            mode = if (!enabled) "off" else if (wlMode) "whitelist" else "blacklist",
+            dryrun = Regex("""dry-?run on""", RegexOption.IGNORE_CASE).containsMatchIn(res.getValue("filter dryrun")),
+            blChannels = _blockedChannels.value.map { it.name },
+            blPaths = _blockedPaths.value.map { it.prefixHex },
+            senders = senders, texts = texts, watch = watch,
+            wlChannels = if (wl) _whitelistChannels.value.map { MeshCoreBackup.WlChannelEntry(it.hashHex, it.name.takeIf { n -> n.startsWith("#") || n == "Public" }) } else null,
+            wlPaths = if (wl) _whitelistPaths.value.map { it.prefixHex } else null
+        )
     }
 
     // Beim Öffnen von Blacklist/Whitelist einmalig nachladen, falls der Filter aktiv, die Kanalliste aber leer ist

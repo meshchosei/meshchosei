@@ -33,4 +33,13 @@ class FilterListsTest {
         assertTrue(FilterListParser.isValidListReply("filter path list", "a1b2,c3d4"))
         assertFalse(FilterListParser.isValidListReply("filter path list", "Filter: off"))
     }
+
+    @Test fun parsesRuleAndWatchLists() {
+        val r = FilterListParser.parseRules("bot block,spammer throttle 30s 50%,x block 20%")
+        assertEquals(listOf("bot" to 0, "spammer" to 30, "x" to 0), r.map { it.pattern to it.secs })
+        assertEquals(listOf(100, 50, 20), r.map { it.prob })
+        assertEquals(listOf("#mesh-de"), FilterListParser.parseWatch("Public (11),#mesh-de (f6)"))
+        assertTrue(FilterListParser.isValidListReply("filter sender list", "None"))
+        assertFalse(FilterListParser.isValidListReply("filter watch list", "Filter: on"))
+    }
 }

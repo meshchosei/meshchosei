@@ -29,6 +29,8 @@ object ChannelHash {
  *  - "filter channel list"     -> "#test (d9),Public (11)"   bzw. "None"
  *  - "filter wl channel list"  -> "d9,11"                    bzw. "None"
  *  - "filter path list" / "filter wl path list" -> "a1b2,c3d4" (ggf. ": <Zähler>", ".." = gekürzt) bzw. "None"
+ *  - "filter sender|text list" -> "bot block,spam throttle 30s 50%" bzw. "None" (FilterStat::formatRuleList)
+ *  - "filter watch list"       -> "Public (11),#x (ab)" ("Public" ist immer enthalten und fest)
  */
 object FilterListParser {
     private val BL_CHANNEL = Regex("""^(\S+)\s*\(([0-9a-fA-F]{2})\)""")
@@ -51,6 +53,16 @@ object FilterListParser {
     fun parsePaths(v: String): List<String> =
         tokens(v).map { it.substringBefore(':').trim() }.filter { PATH.matches(it) }.map { it.uppercase() }.distinct()
 
+    private val RULE = Regex("""^(\S+) (?:block|throttle (\d+)s)(?: (\d+)%)?$""")
+
+    /** Sender-/Text-Regeln: (Muster, Sekunden, Wahrscheinlichkeit). */
+    fun parseRules(v: String): List<MeshCoreBackup.RuleEntry> = tokens(v).mapNotNull { t ->
+        RULE.find(t)?.groupValues?.let { g -> MeshCoreBackup.RuleEntry(g[1], g[2].toIntOrNull() ?: 0, g[3].toIntOrNull() ?: 100) }
+    }.distinctBy { it.pattern }
+
+    /** Watch-Liste ohne den festen Eintrag "Public". */
+    fun parseWatch(v: String): List<String> = parseBlacklistChannels(v).filter { it != "Public" }
+
     /** Gültige (nicht fremde) Antwort auf den jeweiligen Listenbefehl. */
     fun isValidListReply(cmd: String, v: String): Boolean {
         if (isNone(v)) return true
@@ -59,6 +71,8 @@ object FilterListParser {
             "filter channel list" -> parseBlacklistChannels(v).isNotEmpty()
             "filter wl channel list" -> Regex("""^[0-9a-fA-F]{2}(,[0-9a-fA-F]{2})*(\.\.)?$""").matches(v.trim())
             "filter path list", "filter wl path list" -> tokens(v).all { PATH.matches(it.substringBefore(':').trim()) } && parsePaths(v).isNotEmpty()
+            "filter sender list", "filter text list" -> parseRules(v).isNotEmpty()
+            "filter watch list" -> v.trim().removePrefix(">").trim().startsWith("Public")
             else -> true
         }
     }

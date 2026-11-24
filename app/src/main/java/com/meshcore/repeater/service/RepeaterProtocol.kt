@@ -45,6 +45,7 @@ object RepeaterProtocol {
     const val CMD_FILTER_DRYRUN_OFF = "filter dryrun off"
     const val CMD_FILTER_MODE_BLACKLIST = "filter mode blacklist"
     const val CMD_FILTER_MODE_WHITELIST = "filter mode whitelist"
+    const val CMD_FILTER_MODE_QUERY = "filter mode"
     const val CMD_FILTER_RESET = "filter RESET" // Großbuchstaben erforderlich für Reset
 
     fun buildWlChannelAdd(channelOrName: String): String = "filter wl channel add $channelOrName"

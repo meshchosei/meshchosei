@@ -2543,5 +2543,120 @@
   "Changes are sent immediately and stored permanently with \"region save\".",
   "Wijzigingen worden direct verzonden en met \"region save\" permanent opgeslagen.",
   "Les modifications sont envoyées immédiatement et enregistrées durablement avec « region save »."
+ ],
+ "Hinweis: Paketfilter nicht vollständig lesbar – nicht im Backup enthalten.": [
+  "Note: packet filter could not be read completely – not included in the backup.",
+  "Let op: pakketfilter niet volledig leesbaar – niet in de back-up opgenomen.",
+  "Remarque : filtre de paquets illisible en entier – non inclus dans la sauvegarde."
+ ],
+ "Paketfilter übersprungen – die Firmware dieses Repeaters hat keinen Filter.": [
+  "Packet filter skipped – this repeater's firmware has no filter.",
+  "Pakketfilter overgeslagen – de firmware van deze repeater heeft geen filter.",
+  "Filtre de paquets ignoré – le firmware de ce répéteur n'a pas de filtre."
+ ],
+ "Paketfilter übersprungen – aktueller Filter-Stand nicht vollständig lesbar.": [
+  "Packet filter skipped – current filter state could not be read completely.",
+  "Pakketfilter overgeslagen – huidige filterstatus niet volledig leesbaar.",
+  "Filtre de paquets ignoré – état actuel du filtre illisible en entier."
+ ],
+ "Hinweis: Whitelist-Regeln übersprungen – diese Firmware kennt nur die Blacklist.": [
+  "Note: whitelist rules skipped – this firmware only supports the blacklist.",
+  "Let op: whitelist-regels overgeslagen – deze firmware kent alleen de blacklist.",
+  "Remarque : règles de liste blanche ignorées – ce firmware ne gère que la liste noire."
+ ],
+ "{0}: Paketfilter wird gelesen ({1}/{2})…": [
+  "{0}: reading packet filter ({1}/{2})…",
+  "{0}: pakketfilter wordt gelezen ({1}/{2})…",
+  "{0} : lecture du filtre de paquets ({1}/{2})…"
+ ],
+ "Backup": [
+  "Backup",
+  "Back-up",
+  "Sauvegarde"
+ ],
+ "Filter aus": [
+  "Filter off",
+  "Filter uit",
+  "Filtre désactivé"
+ ],
+ "Paketfilter: {0}  ·  Blacklist: {1} Regeln  ·  Whitelist: {2}": [
+  "Packet filter: {0}  ·  Blacklist: {1} rules  ·  Whitelist: {2}",
+  "Pakketfilter: {0}  ·  Blacklist: {1} regels  ·  Whitelist: {2}",
+  "Filtre de paquets : {0}  ·  Liste noire : {1} règles  ·  Liste blanche : {2}"
+ ],
+ "{0} Regeln": [
+  "{0} rules",
+  "{0} regels",
+  "{0} règles"
+ ],
+ "BL Kanäle": [
+  "BL channels",
+  "BL-kanalen",
+  "Canaux LN"
+ ],
+ "BL Pfade": [
+  "BL paths",
+  "BL-paden",
+  "Chemins LN"
+ ],
+ "Sender": [
+  "Sender",
+  "Afzender",
+  "Expéditeur"
+ ],
+ "Text": [
+  "Text",
+  "Tekst",
+  "Texte"
+ ],
+ "Watch": [
+  "Watch",
+  "Watch",
+  "Surveillance"
+ ],
+ "WL Kanäle": [
+  "WL channels",
+  "WL-kanalen",
+  "Canaux LB"
+ ],
+ "WL Pfade": [
+  "WL paths",
+  "WL-paden",
+  "Chemins LB"
+ ],
+ "dry-run an": [
+  "dry-run on",
+  "dry-run aan",
+  "dry-run activé"
+ ],
+ "Paketfilter (Blacklist/Whitelist) wiederherstellen": [
+  "Restore packet filter (blacklist/whitelist)",
+  "Pakketfilter (blacklist/whitelist) herstellen",
+  "Restaurer le filtre de paquets (liste noire/blanche)"
+ ],
+ "Die Firmware dieses Repeaters hat keinen Paketfilter.": [
+  "This repeater's firmware has no packet filter.",
+  "De firmware van deze repeater heeft geen pakketfilter.",
+  "Le firmware de ce répéteur n'a pas de filtre de paquets."
+ ],
+ "Diese Firmware kennt nur die Blacklist – Whitelist-Teil wird übersprungen.": [
+  "This firmware only supports the blacklist – the whitelist part will be skipped.",
+  "Deze firmware kent alleen de blacklist – het whitelist-deel wordt overgeslagen.",
+  "Ce firmware ne gère que la liste noire – la partie liste blanche sera ignorée."
+ ],
+ "Aktueller Filter wird ausgelesen und exakt auf den Backup-Stand gebracht (überzählige Regeln werden entfernt).": [
+  "The current filter is read and brought exactly to the backup state (extra rules are removed).",
+  "Het huidige filter wordt uitgelezen en exact op de back-upstand gebracht (overtollige regels worden verwijderd).",
+  "Le filtre actuel est lu puis aligné exactement sur la sauvegarde (les règles en trop sont supprimées)."
+ ],
+ " + Paketfilter": [
+  " + packet filter",
+  " + pakketfilter",
+  " + filtre de paquets"
+ ],
+ "\n\nDanach wird der Paketfilter ausgelesen und auf den Backup-Stand gebracht (vor Funkparametern und Key).": [
+  "\n\nThen the packet filter is read and brought to the backup state (before radio parameters and key).",
+  "\n\nDaarna wordt het pakketfilter uitgelezen en op de back-upstand gebracht (vóór radioparameters en sleutel).",
+  "\n\nEnsuite, le filtre de paquets est lu et aligné sur la sauvegarde (avant les paramètres radio et la clé)."
  ]
 }

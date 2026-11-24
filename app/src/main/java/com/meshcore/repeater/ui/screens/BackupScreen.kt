@@ -55,6 +55,8 @@ fun BackupScreen(viewModel: RepeaterViewModel) {
     var applyPrv by remember { mutableStateOf(false) }
     var applyGuest by remember { mutableStateOf(false) }
     var showInstallConfirm by remember { mutableStateOf(false) }
+    // Paketfilter: standardmäßig an, wenn im Backup enthalten UND die Ziel-Firmware Filter kann
+    var applyFilter by remember(plan, caps.supportsBlacklist) { mutableStateOf(plan?.filter != null && caps.supportsBlacklist) }
     var lastSaved by remember { mutableStateOf<String?>(null) }
 
     val fileName = remember(setup.nodeName) {
@@ -170,6 +172,32 @@ fun BackupScreen(viewModel: RepeaterViewModel) {
                         }
                     }
 
+                    // Paketfilter-Block (Erweiterung dieser App; offizielle MeshCore-/PEmesh-Dateien haben keinen)
+                    val pf = p.filter
+                    if (pf != null) {
+                        val modeLabel = when (pf.mode) { "blacklist" -> tr("Blacklist aktiv"); "whitelist" -> tr("Whitelist aktiv"); else -> tr("Filter aus") }
+                        Text(tr("Paketfilter: {0}  ·  Blacklist: {1} Regeln  ·  Whitelist: {2}", modeLabel, pf.blacklistCount,
+                            if (pf.hasWhitelist) tr("{0} Regeln", pf.whitelistCount) else "—"), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background, BauhausCornerShape).padding(8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            @Composable fun line(label: String, items: List<String>) { if (items.isNotEmpty()) Text("$label: ${items.joinToString(", ")}", fontFamily = FontFamily.Monospace, fontSize = 11.sp, maxLines = 3, overflow = TextOverflow.Ellipsis) }
+                            line(tr("BL Kanäle"), pf.blChannels); line(tr("BL Pfade"), pf.blPaths)
+                            line(tr("Sender"), pf.senders.map { it.pattern }); line(tr("Text"), pf.texts.map { it.pattern }); line(tr("Watch"), pf.watch)
+                            line(tr("WL Kanäle"), pf.wlChannels.orEmpty().map { it.name ?: "0x${it.hash}" }); line(tr("WL Pfade"), pf.wlPaths.orEmpty())
+                            if (pf.dryrun == true) Text(tr("dry-run an"), fontFamily = FontFamily.Monospace, fontSize = 11.sp, color = bColors.ochre)
+                        }
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(checked = applyFilter && caps.supportsBlacklist, enabled = enabled && caps.supportsBlacklist, onCheckedChange = { applyFilter = it })
+                            Column(Modifier.weight(1f)) {
+                                Text(tr("Paketfilter (Blacklist/Whitelist) wiederherstellen"), fontSize = 13.sp)
+                                Text(when {
+                                    !caps.supportsBlacklist -> tr("Die Firmware dieses Repeaters hat keinen Paketfilter.")
+                                    (pf.mode == "whitelist" || pf.whitelistCount > 0) && !caps.supportsWhitelist -> tr("Diese Firmware kennt nur die Blacklist – Whitelist-Teil wird übersprungen.")
+                                    else -> tr("Aktueller Filter wird ausgelesen und exakt auf den Backup-Stand gebracht (überzählige Regeln werden entfernt).")
+                                }, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+
                     val hasPrv = p.vars.any { it.sensitivity == MeshCoreBackup.Sensitivity.PRIVATE_KEY && it.state == MeshCoreBackup.ItemState.APPLY }
                     val hasGuest = p.vars.any { it.sensitivity == MeshCoreBackup.Sensitivity.GUEST_PASSWORD && it.state == MeshCoreBackup.ItemState.APPLY }
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -186,11 +214,12 @@ fun BackupScreen(viewModel: RepeaterViewModel) {
                     }
 
                     val cmds = p.commands(applyPrv && hasPrv, applyGuest && hasGuest)
+                    val filterToApply = p.filter?.takeIf { applyFilter && caps.supportsBlacklist }
                     BusyButton(
                         busy = BusyKey.BACKUP_INSTALL in busyActions, containerColor = bColors.signalRed, busyText = tr("Installiere…"),
-                        modifier = Modifier.fillMaxWidth(), enabled = enabled && cmds.isNotEmpty(),
+                        modifier = Modifier.fillMaxWidth(), enabled = enabled && (cmds.isNotEmpty() || filterToApply != null),
                         onClick = { showInstallConfirm = true }
-                    ) { Text(tr("Backup installieren ({0} Befehle)", cmds.size), color = Color.White, fontWeight = FontWeight.Bold) }
+                    ) { Text(tr("Backup installieren ({0} Befehle)", cmds.size) + if (filterToApply != null) tr(" + Paketfilter") else "", color = Color.White, fontWeight = FontWeight.Bold) }
 
                     if (showInstallConfirm) {
                         AlertDialog(
@@ -198,9 +227,10 @@ fun BackupScreen(viewModel: RepeaterViewModel) {
                             title = { Text(tr("Backup installieren?"), fontWeight = FontWeight.Bold, color = bColors.signalRed) },
                             text = {
                                 Text(tr("{0} Befehle werden nacheinander an den Repeater gesendet (Einstellungen, Regionen + \"region save\"; Funkparameter und Key zuletzt).", cmds.size) +
+                                    (if (filterToApply != null) tr("\n\nDanach wird der Paketfilter ausgelesen und auf den Backup-Stand gebracht (vor Funkparametern und Key).") else "") +
                                     if (applyPrv && hasPrv) tr("\n\nDer Private Key wird überschrieben – die Node-Identität ändert sich.") else "")
                             },
-                            confirmButton = { Button(shape = BauhausCornerShape, colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed), onClick = { showInstallConfirm = false; viewModel.installBackup(cmds) }) { Text(tr("Installieren"), color = Color.White, fontWeight = FontWeight.Bold) } },
+                            confirmButton = { Button(shape = BauhausCornerShape, colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed), onClick = { showInstallConfirm = false; viewModel.installBackup(cmds, filterToApply) }) { Text(tr("Installieren"), color = Color.White, fontWeight = FontWeight.Bold) } },
                             dismissButton = { OutlinedButton(shape = BauhausCornerShape, onClick = { showInstallConfirm = false }) { Text(tr("Abbrechen")) } }
                         )
                     }
