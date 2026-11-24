@@ -2658,5 +2658,40 @@
   "\n\nThen the packet filter is read and brought to the backup state (before radio parameters and key).",
   "\n\nDaarna wordt het pakketfilter uitgelezen en op de back-upstand gebracht (vóór radioparameters en sleutel).",
   "\n\nEnsuite, le filtre de paquets est lu et aligné sur la sauvegarde (avant les paramètres radio et la clé)."
+ ],
+ "KONFIGURIERTE REGIONEN": [
+  "CONFIGURED REGIONS",
+  "GECONFIGUREERDE REGIO'S",
+  "RÉGIONS CONFIGURÉES"
+ ],
+ "DEF": [
+  "DEF",
+  "STD",
+  "DÉF"
+ ],
+ "FLOOD": [
+  "FLOOD",
+  "FLOOD",
+  "FLOOD"
+ ],
+ "Neue Region": [
+  "New region",
+  "Nieuwe regio",
+  "Nouvelle région"
+ ],
+ "Noch keine eigenen Regionen.": [
+  "No custom regions yet.",
+  "Nog geen eigen regio's.",
+  "Aucune région personnalisée."
+ ],
+ "Backup abgebrochen – Regionen konnten nicht gelesen werden.": [
+  "Backup aborted – regions could not be read.",
+  "Back-up afgebroken – regio's konden niet worden gelezen.",
+  "Sauvegarde annulée – impossible de lire les régions."
+ ],
+ "Backup abgebrochen – Paketfilter konnte nicht vollständig gelesen werden.": [
+  "Backup aborted – packet filter could not be read completely.",
+  "Back-up afgebroken – pakketfilter kon niet volledig worden gelezen.",
+  "Sauvegarde annulée – filtre de paquets illisible en entier."
  ]
 }

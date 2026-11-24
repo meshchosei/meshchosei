@@ -100,4 +100,37 @@ class MeshCoreBackupTest {
         assertEquals("filter on", bl.last())
         assertEquals("filter off", MeshCoreBackup.filterCommands(MeshCoreBackup.FilterBackup("off"), null, false).single())
     }
+
+    @Test fun exportFromStateHasNonEmptyVarsRegionsAndFilter() {
+        // So baut createBackup() das JSON: aus dem frisch gelesenen Regionen-State + Filter-Snapshot
+        val state = com.meshcore.repeater.model.RegionState(
+            supported = true, wildcardFlood = true, home = "de-ni", default = "de-ni-bs",
+            regions = listOf(
+                com.meshcore.repeater.model.RegionInfo("de", "*", true, 1),
+                com.meshcore.repeater.model.RegionInfo("de-ni", "de", true, 2),
+                com.meshcore.repeater.model.RegionInfo("de-ni-bs", "de-ni", false, 3)
+            )
+        )
+        val vars = linkedMapOf<String, Any>("name" to "Rpt", "tx" to 22)
+        val json = MeshCoreBackup.buildJson(vars, MeshCoreBackup.regionEntries(state), state.home, state.default, sample)
+        val root = org.json.JSONObject(json)
+
+        assertTrue(root.getJSONObject("vars").length() > 0)
+        val regions = root.getJSONObject("regions")
+        assertEquals(4, regions.getJSONArray("list").length())          // "*" + 3 eigene
+        assertEquals("de-ni", regions.getString("home"))
+        assertEquals("de-ni-bs", regions.getString("default"))
+        val filter = root.getJSONObject("filter")
+        assertEquals("whitelist", filter.getString("mode"))
+        assertTrue(filter.getJSONObject("blacklist").getJSONArray("channels").length() > 0)
+        assertTrue(filter.getJSONObject("whitelist").getJSONArray("channels").length() > 0)
+
+        // und zurück: der Import erzeugt die passenden Region-Befehle
+        val plan = MeshCoreBackup.parse(json)
+        assertTrue("region put de-ni de" in plan.regionCommands)
+        assertTrue("region denyf de-ni-bs" in plan.regionCommands)
+        assertTrue("region home de-ni" in plan.regionCommands)
+        assertEquals("region save", plan.regionCommands.last())
+        assertEquals(sample, plan.filter)
+    }
 }

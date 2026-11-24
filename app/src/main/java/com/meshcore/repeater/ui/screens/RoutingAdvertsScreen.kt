@@ -14,6 +14,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.text.style.TextOverflow
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -149,26 +151,22 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
 }
 
 /**
- * REGIONEN & SCOPE-ROUTING (MeshCore/ZephCore "region …").
- * Jede Aktion wird sofort gesendet (put/allowf/denyf/remove/home + "region save"; "region default" speichert
- * selbst) und danach der Regionen-Stand neu eingelesen.
+ * KONFIGURIERTE REGIONEN (MeshCore/ZephCore "region …") – eine einzige Karte:
+ * je Region eine Zeile mit eckigen Bauhaus-Schaltern [HOME] [DEF] [FLOOD] + Löschen, darunter eine Zeile zum Hinzufügen.
+ * Jede Aktion wird sofort gesendet (put/allowf/denyf/remove/home + "region save"; "region default" speichert selbst)
+ * und danach der Regionen-Stand neu eingelesen.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun RegionsSection(viewModel: RepeaterViewModel, state: RegionState, busy: Boolean) {
     val bColors = LocalBauhausColors.current
-    var homeInput by remember { mutableStateOf("") }
-    var defaultInput by remember { mutableStateOf("") }
     var newName by remember { mutableStateOf("") }
     var newParent by remember { mutableStateOf("*") }
-    var newFlood by remember { mutableStateOf(true) }
     var confirmRemove by remember { mutableStateOf<String?>(null) }
-    val names = state.regions.map { it.name }
 
     Card(modifier = Modifier.fillMaxWidth(), shape = BauhausCornerShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(tr("REGIONEN & SCOPE-ROUTING"), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = bColors.cobalt, modifier = Modifier.weight(1f))
+                Text(tr("KONFIGURIERTE REGIONEN"), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = bColors.cobalt, modifier = Modifier.weight(1f))
                 BusyOutlinedButton(busy = busy, onClick = { viewModel.refreshRegions() }, color = bColors.cobalt, busyText = null) {
                     Icon(Icons.Default.Refresh, contentDescription = tr("Aktualisieren"), tint = bColors.cobalt, modifier = Modifier.size(16.dp))
                 }
@@ -178,67 +176,44 @@ private fun RegionsSection(viewModel: RepeaterViewModel, state: RegionState, bus
                 false -> { Text(tr("Diese Firmware unterstützt keine Regionen (Befehl \"region\" unbekannt)."), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant); return@Column }
                 true -> Unit
             }
-            Text(tr("Änderungen werden sofort gesendet und mit \"region save\" dauerhaft gespeichert."), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-            // --- Home-Region ---
-            RegionPicker(
-                title = tr("Home-Region"), current = state.home ?: "*", options = listOf("*") + names,
-                input = homeInput, onInput = { homeInput = it }, busy = busy,
-                hint = tr("Muss bereits existieren (sonst \"Err - unknown region\")."),
-                onPick = { viewModel.setHomeRegion(it) }
-            )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-            // --- Default-Region ---
-            RegionPicker(
-                title = tr("Default-Region"), current = state.default ?: "<null>", options = listOf("<null>") + names,
-                input = defaultInput, onInput = { defaultInput = it }, busy = busy,
-                hint = tr("Unbekannte Namen legt die Firmware automatisch an (Flood erlaubt)."),
-                onPick = { viewModel.setDefaultRegion(if (it == "<null>") null else it) }
-            )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-
-            // --- Liste ---
-            Text(tr("Konfigurierte Regionen ({0})", state.regions.size), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
-            RegionRow(name = "*", parent = null, depth = 0, flood = state.wildcardFlood, isHome = state.home == null, isDefault = false, busy = busy,
-                onFlood = { viewModel.setRegionFlood("*", it) }, onRemove = null)
+            // Wildcard "*": nur Flood (Home/Default/Löschen gibt es für die Wurzel nicht)
+            RegionRow(name = "*", parent = null, isHome = false, isDefault = false, flood = state.wildcardFlood, busy = busy, wildcard = true,
+                onHome = {}, onDefault = {}, onFlood = { viewModel.setRegionFlood("*", !state.wildcardFlood) }, onRemove = {})
             state.regions.forEach { r ->
-                RegionRow(name = r.name, parent = r.parent, depth = r.depth, flood = r.floodAllowed, isHome = state.home == r.name, isDefault = state.default == r.name, busy = busy,
-                    onFlood = { viewModel.setRegionFlood(r.name, it) }, onRemove = { confirmRemove = r.name })
+                val isHome = state.home == r.name; val isDef = state.default == r.name
+                RegionRow(
+                    name = r.name, parent = r.parent, isHome = isHome, isDefault = isDef, flood = r.floodAllowed, busy = busy,
+                    onHome = { viewModel.setHomeRegion(if (isHome) "*" else r.name) },          // erneut tippen = Home zurück auf "*"
+                    onDefault = { viewModel.setDefaultRegion(if (isDef) null else r.name) },     // erneut tippen = "<null>"
+                    onFlood = { viewModel.setRegionFlood(r.name, !r.floodAllowed) },
+                    onRemove = { confirmRemove = r.name }
+                )
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+            if (state.regions.isEmpty()) Text(tr("Noch keine eigenen Regionen."), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-            // --- Neue Region ---
-            Text(tr("Neue Region hinzufügen"), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(vertical = 4.dp))
+            // Eine kompakte Zeile zum Hinzufügen ("region put" erlaubt Flood standardmäßig)
             val nameOk = newName.isBlank() || RegionParser.isValidName(newName)
             val parentOk = newParent.isBlank() || newParent.trim() == "*" || RegionParser.isValidName(newParent)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 OutlinedTextField(
                     value = newName, onValueChange = { newName = it.filterNot(Char::isWhitespace).take(RegionParser.MAX_NAME_LEN) },
-                    label = { Text(tr("Name"), fontSize = 11.sp) }, placeholder = { Text("de-ni-bs", fontSize = 12.sp) },
-                    isError = !nameOk, singleLine = true, shape = BauhausCornerShape, modifier = Modifier.weight(1.4f)
+                    placeholder = { Text(tr("Neue Region"), fontSize = 12.sp) }, isError = !nameOk, singleLine = true,
+                    textStyle = LocalTextStyle.current.copy(fontSize = 13.sp, fontFamily = FontFamily.Monospace),
+                    shape = BauhausCornerShape, modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
                     value = newParent, onValueChange = { newParent = it.filterNot(Char::isWhitespace).take(RegionParser.MAX_NAME_LEN) },
-                    label = { Text(tr("Parent"), fontSize = 11.sp) }, placeholder = { Text("*", fontSize = 12.sp) },
-                    isError = !parentOk, singleLine = true, shape = BauhausCornerShape, modifier = Modifier.weight(1f)
+                    placeholder = { Text(tr("Parent"), fontSize = 12.sp) }, isError = !parentOk, singleLine = true,
+                    textStyle = LocalTextStyle.current.copy(fontSize = 13.sp, fontFamily = FontFamily.Monospace),
+                    shape = BauhausCornerShape, modifier = Modifier.width(84.dp)
                 )
-            }
-            if (names.isNotEmpty()) FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                (listOf("*") + names).forEach { n ->
-                    FilterChip(selected = newParent == n, onClick = { newParent = n }, label = { Text(n, fontSize = 11.sp, fontFamily = FontFamily.Monospace) }, shape = BauhausCornerShape)
-                }
-            }
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(tr("Flood erlaubt"), fontSize = 12.sp, modifier = Modifier.weight(1f))
-                Switch(checked = newFlood, onCheckedChange = { newFlood = it }, colors = SwitchDefaults.colors(checkedTrackColor = bColors.signalRed))
-            }
-            BusyButton(
-                busy = busy, enabled = newName.isNotBlank() && nameOk && parentOk, containerColor = bColors.cobalt, modifier = Modifier.fillMaxWidth(),
-                onClick = { viewModel.addRegion(newName, newParent, newFlood); newName = "" }
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
-                Spacer(Modifier.width(6.dp))
-                Text(tr("Hinzufügen"), color = Color.White, fontWeight = FontWeight.Bold)
+                BusyButton(
+                    busy = busy, enabled = newName.isNotBlank() && nameOk && parentOk, containerColor = bColors.cobalt, busyText = null,
+                    contentPadding = PaddingValues(0.dp), modifier = Modifier.size(48.dp),
+                    onClick = { viewModel.addRegion(newName, newParent.ifBlank { "*" }, flood = true); newName = "" }
+                ) { Icon(Icons.Default.Add, contentDescription = tr("Hinzufügen"), tint = Color.White) }
             }
         }
     }
@@ -254,63 +229,48 @@ private fun RegionsSection(viewModel: RepeaterViewModel, state: RegionState, bus
     }
 }
 
-/** Auswahl über vorhandene Regionen (Chips) oder freie Eingabe + "Setzen". */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun RegionPicker(title: String, current: String, options: List<String>, input: String, onInput: (String) -> Unit, busy: Boolean, hint: String, onPick: (String) -> Unit) {
-    val bColors = LocalBauhausColors.current
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(title, fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-        Text(current, fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = bColors.cobalt)
-    }
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        options.forEach { n ->
-            FilterChip(selected = n == current, enabled = !busy, onClick = { if (n != current) onPick(n) }, label = { Text(n, fontSize = 11.sp, fontFamily = FontFamily.Monospace) }, shape = BauhausCornerShape)
-        }
-    }
-    val ok = input.isBlank() || RegionParser.isValidName(input)
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(
-            value = input, onValueChange = { onInput(it.filterNot(Char::isWhitespace).take(RegionParser.MAX_NAME_LEN)) },
-            placeholder = { Text(tr("Freie Eingabe"), fontSize = 12.sp) }, isError = !ok, singleLine = true, shape = BauhausCornerShape, modifier = Modifier.weight(1f)
-        )
-        BusyButton(busy = busy, enabled = input.isNotBlank() && ok, containerColor = bColors.cobalt, busyText = null, onClick = { onPick(input.trim()); onInput("") }) {
-            Text(tr("Setzen"), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-        }
-    }
-    Text(hint, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-}
-
-@Composable
-private fun RegionRow(name: String, parent: String?, depth: Int, flood: Boolean, isHome: Boolean, isDefault: Boolean, busy: Boolean, onFlood: (Boolean) -> Unit, onRemove: (() -> Unit)?) {
+private fun RegionRow(
+    name: String, parent: String?, isHome: Boolean, isDefault: Boolean, flood: Boolean, busy: Boolean, wildcard: Boolean = false,
+    onHome: () -> Unit, onDefault: () -> Unit, onFlood: () -> Unit, onRemove: () -> Unit
+) {
     val bColors = LocalBauhausColors.current
     Row(
-        modifier = Modifier.fillMaxWidth().padding(start = (depth.coerceAtMost(4) * 12).dp)
-            .clip(BauhausCornerShape).background(MaterialTheme.colorScheme.surfaceVariant)
+        modifier = Modifier.fillMaxWidth().clip(BauhausCornerShape)
             .border(1.dp, MaterialTheme.colorScheme.outline, BauhausCornerShape)
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(start = 10.dp, end = 2.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Column(Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(name, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
-                if (isHome && name != "*") RegionTag(tr("HOME"), bColors.signalRed)
-                if (isDefault) RegionTag(tr("DEFAULT"), bColors.cobalt)
-            }
-            Text(
-                if (parent == null) tr("Wildcard (Wurzel)") else tr("Parent: {0}", parent) + "  ·  " + (if (flood) tr("Flood AN") else tr("Flood AUS")),
-                fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(name, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (!parent.isNullOrBlank() && parent != "*") Text("↳ $parent", fontFamily = FontFamily.Monospace, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        Switch(checked = flood, enabled = !busy, onCheckedChange = onFlood, colors = SwitchDefaults.colors(checkedTrackColor = bColors.signalRed))
-        if (onRemove != null) {
-            IconButton(enabled = !busy, onClick = onRemove) { Icon(Icons.Default.Delete, contentDescription = tr("Löschen"), tint = if (busy) MaterialTheme.colorScheme.outline else bColors.signalRed) }
-        } else Spacer(Modifier.width(48.dp))
+        if (!wildcard) {
+            BauhausToggle(tr("HOME"), isHome, bColors.signalRed, enabled = !busy, onClick = onHome)
+            BauhausToggle(tr("DEF"), isDefault, bColors.cobalt, enabled = !busy, onClick = onDefault)
+        }
+        BauhausToggle(tr("FLOOD"), flood, bColors.ochre, activeText = Color.Black, enabled = !busy, onClick = onFlood)
+        if (!wildcard) {
+            IconButton(enabled = !busy, onClick = onRemove, modifier = Modifier.size(36.dp)) {
+                Icon(Icons.Default.Delete, contentDescription = tr("Löschen"), tint = if (busy) MaterialTheme.colorScheme.outline else bColors.signalRed, modifier = Modifier.size(20.dp))
+            }
+        } else Spacer(Modifier.width(36.dp))
     }
 }
 
+/** Eckiger Bauhaus-Schalter (2 dp, BauhausCornerShape) statt rundem Material-Switch: aktiv = vollflächig in Signalfarbe. */
 @Composable
-private fun RegionTag(text: String, color: Color) {
-    Text(text, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White,
-        modifier = Modifier.clip(BauhausCornerShape).background(color).padding(horizontal = 4.dp, vertical = 1.dp))
+private fun BauhausToggle(label: String, active: Boolean, color: Color, activeText: Color = Color.White, enabled: Boolean = true, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier.height(28.dp).widthIn(min = 44.dp).clip(BauhausCornerShape)
+            .background(if (active) color else Color.Transparent)
+            .border(1.dp, if (active) color else MaterialTheme.colorScheme.outline, BauhausCornerShape)
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(label, fontSize = 10.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace,
+            color = when { !enabled -> MaterialTheme.colorScheme.outline; active -> activeText; else -> MaterialTheme.colorScheme.onSurfaceVariant })
+    }
 }

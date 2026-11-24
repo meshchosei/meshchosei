@@ -1,12 +1,13 @@
 # ROADMAP – meshchōsei
 
-Stand: 2026-11-24 · aktuelle Version: 1.02
+Stand: 2026-11-24 · aktuelle Version: 1.03
 
 | Version | Status | Inhalt |
 |---|---|---|
 | **1.00** | ✅ veröffentlicht (Tag `v1.00`) | Erste stabile Version |
 | **1.01** | ✅ veröffentlicht (Tag `v1.01`) | Regionen-Verwaltung (region …), Button-Arbeitszustand & Doppelklick-Sperre, zuverlässige Filter-Kanallisten über LoRa, LED-„boot“-Hinweis |
 | **1.02** | ✅ veröffentlicht (Tag `v1.02`) | JSON-Backup mit `"filter"`-Block (Modus, Blacklist, Whitelist), Wiederherstellung per Abgleich |
+| **1.03** | ✅ veröffentlicht (Tag `v1.03`) | Kompakte Regionen-Karte mit eckigen [HOME]/[DEF]/[FLOOD]-Schaltern, Backup-Export liest Regionen & Filter zuerst vollständig ein |
 | **1.1** | 📋 geplant | CLI-Autocomplete (F1), BLE-OTA-Firmware-Update (F2), Live-Repeater-Suche (F3), Präfix-Filter Repeater-Auswahl (F4) |
 
 Beide Features folgen den Regeln aus [`STYLE_GUIDE.md`](STYLE_GUIDE.md):

@@ -202,6 +202,10 @@ object MeshCoreBackup {
         return c
     }
 
+    /** Regionen-State (Start-Scan/Backup-Einlesen) -> JSON-Liste inkl. Wildcard "*" als Wurzel. */
+    fun regionEntries(state: com.meshcore.repeater.model.RegionState): List<RegionEntry> =
+        listOf(RegionEntry("*", null, state.wildcardFlood)) + state.regions.map { RegionEntry(it.name, it.parent, it.floodAllowed) }
+
     fun buildJson(vars: LinkedHashMap<String, Any>, regions: List<RegionEntry>?, home: String?, default: String?, filter: FilterBackup? = null): String {
         val v = JSONObject()
         for (def in VARS) vars[def.key]?.let { v.put(def.key, it) }

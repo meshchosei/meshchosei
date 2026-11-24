@@ -649,48 +649,53 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
      * Backup erstellen: liest alle MeshCore-Variablen (+ optional prv.key) und den Regions-Baum streng
      * sequentiell aus und legt das JSON in [backupJson] ab.
      */
+    /**
+     * Backup erstellen. Ablauf streng sequentiell unter dem zentralen Mutex:
+     *  1) Regionen ("region", "region home", "region default") -> [regionState]
+     *  2) Paketfilter (Status, dry-run, Modus, alle Blacklist-/Whitelist-Listen) -> Filter-State-Flows
+     *  3) alle MeshCore-Variablen
+     * Erst danach wird das JSON aus genau diesem frisch gelesenen Stand gebaut. Bleibt eine Region- oder
+     * Filterabfrage trotz Wiederholung unbeantwortet, wird abgebrochen statt ein unvollständiges Backup zu speichern.
+     */
     fun createBackup(includePrivateKey: Boolean) {
         if (!isLinkUp()) { notifyUser("Nicht verbunden."); return }
         if (!tryMarkBusy(BusyKey.BACKUP_CREATE)) return
         startRead(cancelPrevious = false) {
-            val vars = LinkedHashMap<String, Any>()
             val defs = MeshCoreBackup.VARS.filter { includePrivateKey || it.sensitivity != MeshCoreBackup.Sensitivity.PRIVATE_KEY }
-            val total = defs.size + 3
             val wireless = _remoteAdminSession.value.targetRepeater != null
-            var step = 0
-            for (def in defs) {
+
+            // 1) Regionen
+            _activeReadStatusText.value = "Backup: Regionen werden gelesen…"
+            _readProgress.value = null
+            _regionState.value = RegionState()
+            if (!readRegions()) { notifyUser("Backup abgebrochen – Repeater antwortet nicht."); return@startRead }
+            val rs = _regionState.value
+            if (rs.supported == null) { notifyUser("Backup abgebrochen – Regionen konnten nicht gelesen werden."); return@startRead }
+
+            // 2) Paketfilter (nur wenn die Firmware Filter kann)
+            var filter: MeshCoreBackup.FilterBackup? = null
+            if (_deviceCapabilities.value.supportsBlacklist) {
+                filter = readFilterSnapshot(tr("Backup"))
+                if (filter == null) { if (isLinkUp()) notifyUser("Backup abgebrochen – Paketfilter konnte nicht vollständig gelesen werden."); return@startRead }
+            }
+
+            // 3) Variablen
+            val vars = LinkedHashMap<String, Any>()
+            for ((i, def) in defs.withIndex()) {
                 if (!isLinkUp()) return@startRead
                 _activeReadStatusText.value = tr("Backup: \"{0}\" wird gelesen…", def.key)
-                _readProgress.value = ++step to total
+                _readProgress.value = (i + 1) to defs.size
                 var reply: QueryReply? = null
                 for (attempt in 1..(if (wireless) 2 else 1)) { reply = runQuery("get ${def.key}"); if (reply != null) break }
                 if (wireless && reply == null && noteRemoteTimeout()) { notifyUser("Backup abgebrochen – Repeater antwortet nicht."); return@startRead }
                 reply?.value?.let { MeshCoreBackup.replyToJson(def, it) }?.let { vars[def.key] = it }
             }
-            // Regions-Baum, Home & Default
-            _activeReadStatusText.value = "Backup: Regionen werden gelesen…"
-            _readProgress.value = ++step to total
-            val lines = mutableListOf<String>()
-            val treeReply = runQuery("region", capture = lines)
-            var regions: List<MeshCoreBackup.RegionEntry>? = null
-            var home: String? = null; var default: String? = null
-            if (treeReply?.value != null) {
-                val (list, h) = MeshCoreBackup.parseRegionTree(lines)
-                regions = list; home = h
-                _readProgress.value = ++step to total
-                runQuery("region home")?.value?.let { v -> Regex("""home is (?:now )?(\S+)""").find(v)?.groupValues?.get(1)?.let { home = it } }
-                _readProgress.value = ++step to total
-                runQuery("region default")?.value?.let { v -> Regex("""default scope is (?:now )?(\S+)""").find(v)?.groupValues?.get(1)?.let { default = if (it == "<null>") null else it } }
-            }
-            // Paketfilter (Blacklist/Whitelist) frisch auslesen – nur wenn die Firmware Filter kann
-            var filter: MeshCoreBackup.FilterBackup? = null
-            if (_deviceCapabilities.value.supportsBlacklist && isLinkUp()) {
-                filter = readFilterSnapshot(tr("Backup"))
-                if (filter == null && isLinkUp()) notifyUser("Hinweis: Paketfilter nicht vollständig lesbar – nicht im Backup enthalten.")
-            }
             if (vars.isEmpty()) { notifyUser("Backup fehlgeschlagen – keine Werte gelesen."); return@startRead }
             if (includePrivateKey && "prv.key" !in vars) notifyUser("Hinweis: Private Key ist nur über USB-Direktverbindung auslesbar – nicht im Backup enthalten.")
-            _backupJson.value = MeshCoreBackup.buildJson(vars, regions, home, default, filter)
+
+            // JSON erst jetzt – ausschließlich aus dem frisch gelesenen State
+            val regions = if (rs.supported == true) MeshCoreBackup.regionEntries(rs) else null
+            _backupJson.value = MeshCoreBackup.buildJson(vars, regions, rs.home, rs.default, filter)
         }.invokeOnCompletion { clearBusy(BusyKey.BACKUP_CREATE) }
     }
 
@@ -993,7 +998,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         for ((i, c) in cmds.withIndex()) {
             if (!isLinkUp()) return null
             _activeReadStatusText.value = tr("{0}: Paketfilter wird gelesen ({1}/{2})…", label, i + 1, cmds.size)
-            val (ok, v) = queryFilterValue(c)
+            var (ok, v) = queryFilterValue(c)
+            if (ok && v == null) { val again = queryFilterValue(c); ok = again.first; v = again.second }   // eine Wiederholung je Befehl
             if (!ok || v == null) return null
             res[c] = v
             if (c.endsWith(" list")) applyFilterList(c, v)
@@ -1046,7 +1052,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         var tree: QueryReply? = null
         for (attempt in 1..(if (wireless) 2 else 1)) {
             lines.clear()
-            tree = runQuery("region", capture = lines, timeoutMs = queryTimeoutMs() + if (wireless) 1500L else 300L)
+            tree = runQuery("region", capture = lines, timeoutMs = queryTimeoutMs() + if (wireless) 1500L else 300L,
+                trailingMs = if (wireless) REGION_TRAILING_LORA_MS else REGION_TRAILING_USB_MS)   // alle Baumzeilen abwarten
             if (tree != null) break
         }
         if (tree == null) return !(wireless && noteRemoteTimeout())   // keine Antwort: Zustand bleibt "unbekannt"
@@ -1601,6 +1608,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         )
         /** Start-Scan-Schritte für "region", "region home", "region default". */
         const val REGION_STEPS = 3
+        const val REGION_TRAILING_USB_MS = 800L      // USB: Baumzeilen kommen einzeln nach der "->"-Zeile
+        const val REGION_TRAILING_LORA_MS = 2_000L
         const val FILTER_LIST_EXTRA_LORA_MS = 3_500L   // Listen über LoRa: 4,5 s + 3,5 s = 8 s Antwortfenster
         const val FILTER_LIST_TRAILING_LORA_MS = 2_000L // Nachlauf für evtl. Folgezeilen über LoRa
         const val PREF_KNOWN_CHANNELS = "known_channel_names"
