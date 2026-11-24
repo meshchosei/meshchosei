@@ -46,7 +46,9 @@ object RepeaterProtocol {
     const val CMD_FILTER_MODE_BLACKLIST = "filter mode blacklist"
     const val CMD_FILTER_MODE_WHITELIST = "filter mode whitelist"
     const val CMD_FILTER_MODE_QUERY = "filter mode"
-    const val CMD_FILTER_RESET = "filter RESET" // Großbuchstaben erforderlich für Reset
+    // ABSICHTLICH in Großbuchstaben: "filter RESET" ist ein Schutz der Firmware gegen versehentliches
+    // Löschen aller Filterlisten. Nicht in "filter reset" ändern – muss exakt so gesendet werden.
+    const val CMD_FILTER_RESET = "filter RESET"
 
     fun buildWlChannelAdd(channelOrName: String): String = "filter wl channel add $channelOrName"
     fun buildWlChannelDel(channelOrName: String): String = "filter wl channel del $channelOrName"
