@@ -33,6 +33,9 @@ import androidx.compose.ui.draw.clip
 import com.meshcore.repeater.ui.components.OsmTileMap
 import com.meshcore.repeater.ui.components.LocalTourMode
 import com.meshcore.repeater.ui.components.RegisterTourSave
+import com.meshcore.repeater.ui.components.BusyButton
+import com.meshcore.repeater.ui.components.BusyOutlinedButton
+import com.meshcore.repeater.viewmodel.BusyKey
 
 private fun fmtCoord(v: Double): String = String.format(Locale.US, "%.6f", v)
 
@@ -43,6 +46,7 @@ fun IdentityLocationScreen(viewModel: RepeaterViewModel) {
     val setup by viewModel.basicSetup.collectAsState()
     // "Gespeichert"-Basis liegt im ViewModel und wird erst nach Bestätigung durch den Repeater aktualisiert
     val baseline by viewModel.nodeBaseline.collectAsState()
+    val busy by viewModel.busyActions.collectAsState()
     var newAdminPassword by remember { mutableStateOf("") }
     var newGuestPassword by remember { mutableStateOf("") }
     var clearGuestPassword by remember { mutableStateOf(false) }
@@ -119,7 +123,8 @@ fun IdentityLocationScreen(viewModel: RepeaterViewModel) {
                     OutlinedButton(shape = BauhausCornerShape, onClick = { shift(0.0, dLon) }) { Text("+200m O", fontSize = 10.sp) }
                     OutlinedButton(shape = BauhausCornerShape, onClick = { shift(0.0, -dLon) }) { Text("+200m W", fontSize = 10.sp) }
                     OutlinedButton(shape = BauhausCornerShape, onClick = { val a = Math.random() * 2 * Math.PI; shift(dLat * cos(a), dLon * sin(a)) }) { Text(tr("🎲 200m Zufall"), fontSize = 10.sp) }
-                    OutlinedButton(shape = BauhausCornerShape, onClick = { viewModel.sendCommand("gps setloc", manualCli = false) }) {
+                    BusyOutlinedButton(busy = BusyKey.GPS_SETLOC in busy, onClick = { viewModel.sendCommand("gps setloc", busyKey = BusyKey.GPS_SETLOC) },
+                        color = MaterialTheme.colorScheme.primary, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline), busyText = null, fontSize = 10.sp) {
                         Icon(Icons.Default.MyLocation, contentDescription = null, modifier = Modifier.size(14.dp))
                         Spacer(Modifier.width(4.dp))
                         Text("GPS", fontSize = 10.sp)
@@ -160,14 +165,14 @@ fun IdentityLocationScreen(viewModel: RepeaterViewModel) {
                 if (clearGuestPassword) { changes.add(SetupChange("set guest.password ")); clearGuestPassword = false }
                 else if (newGuestPassword.isNotBlank()) { changes.add(SetupChange("set guest.password ${newGuestPassword.trim()}")); newGuestPassword = "" }
                 if (changes.isEmpty() && inTour) return@save
-                viewModel.applyBasicSetupChanges(changes)
+                viewModel.applyBasicSetupChanges(changes, BusyKey.IDENTITY)
         }
         RegisterTourSave { doSave() }
         // Im Setup-Tour-Modus übernimmt "Speichern & Weiter →" in der Tour-Leiste
         if (!inTour) {
-            Button(
-                modifier = Modifier.fillMaxWidth(), shape = BauhausCornerShape, colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed),
-                onClick = { doSave() }
+            BusyButton(
+                busy = BusyKey.IDENTITY in busy, onClick = { doSave() },
+                containerColor = bColors.signalRed, modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, tint = Color.White)
                 Spacer(Modifier.width(8.dp))
@@ -192,7 +197,7 @@ text = {
         singleLine = true, shape = BauhausCornerShape, modifier = Modifier.fillMaxWidth()
     )
 },
-confirmButton = { Button(shape = BauhausCornerShape, colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed), enabled = InputValidator.isValidPrivateKeyHex(customPrivKeyHex), onClick = { val k = customPrivKeyHex.trim(); customPrivKeyHex = ""; showNewKeyDialog = false; viewModel.sendCommand("set prv.key $k", manualCli = false) }) { Text(tr("Setzen"), color = Color.White, fontWeight = FontWeight.Bold) } },
+confirmButton = { Button(shape = BauhausCornerShape, colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed), enabled = InputValidator.isValidPrivateKeyHex(customPrivKeyHex), onClick = { val k = customPrivKeyHex.trim(); customPrivKeyHex = ""; showNewKeyDialog = false; viewModel.sendCommand("set prv.key $k", busyKey = BusyKey.PRV_KEY) }) { Text(tr("Setzen"), color = Color.White, fontWeight = FontWeight.Bold) } },
 dismissButton = { OutlinedButton(shape = BauhausCornerShape, onClick = { showNewKeyDialog = false }) { Text(tr("Abbrechen")) } }
 )
 }

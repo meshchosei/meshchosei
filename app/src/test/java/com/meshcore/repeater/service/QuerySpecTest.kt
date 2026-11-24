@@ -86,4 +86,13 @@ class QuerySpecTest {
         assertFalse(v("MeinRepeater"))
         assertFalse(QuerySpec.validatorFor("get name")("a1".repeat(32)))  // Key nie als Name übernehmen
     }
+
+    @Test fun regionValidators() {
+        assertTrue(ok("region", "* F"))
+        assertFalse(ok("region", "OK"))
+        assertTrue(ok("region home", "home is bsmesh"))
+        assertTrue(ok("region default", "default scope is <null>"))
+        assertTrue(ok("filter wl channel list", "d9,11"))
+        assertFalse(ok("filter wl channel list", "Filter: mode whitelist"))
+    }
 }

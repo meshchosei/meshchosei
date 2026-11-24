@@ -123,17 +123,28 @@ Column(fillMaxSize · verticalScroll · imePadding · padding(16.dp) · spacedBy
 ### 2.2 Speichern-Button
 
 ```kotlin
-Button(
-    onClick = { viewModel.saveXyzDraft() },
+val busy by viewModel.busyActions.collectAsState()
+BusyButton(                                   // ui/components/BusyButton.kt
+    busy = BusyKey.RADIO in busy,             // Arbeitszustand aus dem ViewModel
+    onClick = { viewModel.saveRadioDraft() }, // VM sendet mit busyKey = BusyKey.RADIO
     modifier = Modifier.fillMaxWidth().height(52.dp),
-    colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed),
-    shape = RoundedCornerShape(12.dp)
+    containerColor = bColors.signalRed
 ) {
     Icon(Icons.AutoMirrored.Filled.Send, null, tint = Color.White)
     Spacer(Modifier.width(8.dp))
     Text(tr("Speichern"), color = Color.White, fontWeight = FontWeight.Bold)
 }
 ```
+
+**Sofortiges Button-Feedback & Doppelklick-Sperre (verbindlich für jeden Speichern-/Senden-Button):**
+
+- Beim Antippen wechselt der Button **sofort** in den Arbeitszustand (`isSaving`/`busy = true`): Er zeigt den rotierenden Braille-Spinner `⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏` (80 ms/Frame, Monospace) samt „Speichere…“ (bei reinen Sende-Aktionen „Sende…“, bei sehr schmalen Buttons nur den Spinner).
+- Während der Übertragung ist der Button gesperrt. Er bleibt aber in seiner Signalfarbe (85 % Deckkraft, nicht grau), damit erkennbar ist, dass gearbeitet wird.
+- Der Zustand endet erst, wenn der Repeater geantwortet hat (Bestätigung, Fehlerantwort oder Timeout). Das gilt auch bei Abbruch durch Trennung (`invokeOnCompletion`).
+- Die Sperre liegt **im ViewModel** (`busyActions: StateFlow<Set<String>>`, Schlüssel aus `BusyKey`). `enqueueCommands(…, busyKey = …)` verwirft einen zweiten Aufruf mit demselben Schlüssel, auch wenn die UI noch nicht neu gezeichnet hat.
+- Listen-Aktionen (Hinzufügen/Löschen in Filtern, Regionen) ändern die Anzeige erst **nach** der Bestätigung durch den Repeater. Die Löschen-Icons der betroffenen Liste sind währenddessen gesperrt.
+- Eingabefelder werden nur geleert, wenn der Befehl wirklich gesendet wurde (Rückgabe `true`).
+- Betroffene Screens: `RadioAntennaScreen`, `IdentityLocationScreen` (inkl. GPS, Private Key), `RoutingAdvertsScreen` (inkl. Advert, Regionen), `BackupScreen` (Erstellen, Installieren) und `FilterScreen` (alle Hinzufügen-Buttons).
 
 - Jeder Screen hat genau **einen** roten Primärbutton, volle Breite, 52 dp hoch, mit weißer Fettschrift. Sekundäraktionen sind `OutlinedButton` mit `BauhausCornerShape`.
 - **Tour-Modus:** Ein Screen registriert seine Aktion über `RegisterTourSave { … }` und blendet den eigenen Button aus (`if (!inTour)`). In der Tour-Leiste erscheint dann „Speichern & Weiter →“. Es gibt nie zwei rote Buttons gleichzeitig.

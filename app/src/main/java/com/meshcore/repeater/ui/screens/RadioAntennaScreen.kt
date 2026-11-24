@@ -22,6 +22,9 @@ import androidx.compose.ui.unit.sp
 import com.meshcore.repeater.model.CountryRegion
 import com.meshcore.repeater.ui.components.LocalTourMode
 import com.meshcore.repeater.ui.components.RegisterTourSave
+import com.meshcore.repeater.ui.components.BusyButton
+import com.meshcore.repeater.ui.components.BusyOutlinedButton
+import com.meshcore.repeater.viewmodel.BusyKey
 import com.meshcore.repeater.ui.theme.AlertRed
 import com.meshcore.repeater.ui.theme.BauhausCornerShape
 import com.meshcore.repeater.ui.theme.LocalBauhausColors
@@ -49,6 +52,7 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
     val setup by viewModel.basicSetup.collectAsState()
     val bColors = LocalBauhausColors.current
     val inTour = LocalTourMode.current
+    val busy by viewModel.busyActions.collectAsState()
 
     val freqOk = setup.freqMhz.toDoubleOrNull()?.let { it in 137.0..1020.0 } == true
     val bwOk = setup.bwKhz.toDoubleOrNull()?.let { it in 7.8..500.0 } == true
@@ -164,11 +168,11 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
         // Im Setup-Tour-Modus übernimmt "Speichern & Weiter →" in der Tour-Leiste
         if (!inTour) {
             Spacer(Modifier.height(8.dp))
-            Button(
+            BusyButton(
+                busy = BusyKey.RADIO in busy,
                 onClick = { viewModel.saveRadioDraft() },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed),
-                shape = RoundedCornerShape(12.dp)
+                containerColor = bColors.signalRed
             ) {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, tint = Color.White)
                 Spacer(modifier = Modifier.width(8.dp))

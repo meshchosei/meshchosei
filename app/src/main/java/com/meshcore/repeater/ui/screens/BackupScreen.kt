@@ -1,6 +1,9 @@
 package com.meshcore.repeater.ui.screens
 
 import com.meshcore.repeater.i18n.tr
+import com.meshcore.repeater.ui.components.BusyButton
+import com.meshcore.repeater.ui.components.BusyOutlinedButton
+import com.meshcore.repeater.viewmodel.BusyKey
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -39,6 +42,7 @@ fun BackupScreen(viewModel: RepeaterViewModel) {
     val backupJson by viewModel.backupJson.collectAsState()
     val readStatus by viewModel.activeReadStatusText.collectAsState()
     val busy = readStatus != null
+    val busyActions by viewModel.busyActions.collectAsState()
     val caps by viewModel.deviceCapabilities.collectAsState()
     val remoteAdmin by viewModel.remoteAdminSession.collectAsState()
     // Gleiche Bedingung wie navigationAllowed: verbunden, erkannt und (bei Companion) eingeloggt
@@ -105,8 +109,9 @@ fun BackupScreen(viewModel: RepeaterViewModel) {
                         Text(tr("Nur über USB-Direktverbindung auslesbar. Datei danach sicher aufbewahren!"), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(), shape = BauhausCornerShape, enabled = enabled,
+                BusyOutlinedButton(
+                    busy = BusyKey.BACKUP_CREATE in busyActions, color = bColors.cobalt, busyText = tr("Lese Backup…"),
+                    modifier = Modifier.fillMaxWidth(), enabled = enabled, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                     onClick = { lastSaved = null; viewModel.createBackup(includePrvOnCreate) }
                 ) {
                     Icon(Icons.Default.SaveAlt, null, modifier = Modifier.size(16.dp))
@@ -181,9 +186,9 @@ fun BackupScreen(viewModel: RepeaterViewModel) {
                     }
 
                     val cmds = p.commands(applyPrv && hasPrv, applyGuest && hasGuest)
-                    Button(
-                        modifier = Modifier.fillMaxWidth(), shape = BauhausCornerShape, enabled = enabled && cmds.isNotEmpty(),
-                        colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed),
+                    BusyButton(
+                        busy = BusyKey.BACKUP_INSTALL in busyActions, containerColor = bColors.signalRed, busyText = tr("Installiere…"),
+                        modifier = Modifier.fillMaxWidth(), enabled = enabled && cmds.isNotEmpty(),
                         onClick = { showInstallConfirm = true }
                     ) { Text(tr("Backup installieren ({0} Befehle)", cmds.size), color = Color.White, fontWeight = FontWeight.Bold) }
 

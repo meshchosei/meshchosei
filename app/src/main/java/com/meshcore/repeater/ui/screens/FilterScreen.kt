@@ -1,6 +1,10 @@
 package com.meshcore.repeater.ui.screens
 
 import com.meshcore.repeater.i18n.tr
+import com.meshcore.repeater.ui.components.BusyButton
+import com.meshcore.repeater.viewmodel.BusyKey
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -86,6 +90,10 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
     val canWhitelist = cap.supportsWhitelist
     val isWlView = view == FilterMode.WHITELIST
     val filterSwitchPending by viewModel.filterSwitchPending.collectAsState()
+    val busy by viewModel.busyActions.collectAsState()
+    val initialReadDone by viewModel.hasCompletedInitialRead.collectAsState()
+    // Einmalig beim Öffnen: Filter aktiv, aber Kanalliste leer (z. B. über LoRa abgeschnitten) -> automatisch nachladen
+    LaunchedEffect(view, initialReadDone) { if (initialReadDone) viewModel.ensureFilterChannelsLoaded(view) }
     val scrollState = rememberScrollState()
 
     // Whitelist State
@@ -301,6 +309,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                     ) {
                         presetWlChannels.forEach { ch ->
                             SuggestionChip(
+                                enabled = BusyKey.WL_CHANNEL !in busy,
                                 onClick = { viewModel.addWhitelistChannel(ch) },
                                 label = { Text(ch, fontSize = 12.sp) },
                                 colors = SuggestionChipDefaults.suggestionChipColors(
@@ -329,12 +338,10 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(onClick = {
-                                viewModel.addWhitelistChannel(newWlChannelInput)
-                                newWlChannelInput = ""
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = bColors.cobalt),
-                            shape = BauhausCornerShape
+                        BusyButton(busy = BusyKey.WL_CHANNEL in busy, containerColor = bColors.cobalt, contentColor = Color.White, contentPadding = PaddingValues(horizontal = 12.dp),
+                            onClick = {
+                                if (viewModel.addWhitelistChannel(newWlChannelInput)) newWlChannelInput = ""
+                            }
                         ) {
                             Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.White)
                         }
@@ -368,7 +375,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                                     Text(tr("Hash: {0}", ch.hashHex), fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
-                            IconButton(onClick = { viewModel.removeWhitelistChannel(ch) }) {
+                            IconButton(enabled = BusyKey.WL_CHANNEL !in busy, onClick = { viewModel.removeWhitelistChannel(ch) }) {
                                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
                             }
                         }
@@ -408,13 +415,10 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(onClick = {
-                                viewModel.addWhitelistPath(newWlPathInput, newWlPathComment)
-                                newWlPathInput = ""
-                                newWlPathComment = ""
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = bColors.cobalt),
-                            shape = BauhausCornerShape
+                        BusyButton(busy = BusyKey.WL_PATH in busy, containerColor = bColors.cobalt, contentColor = Color.White, contentPadding = PaddingValues(horizontal = 12.dp),
+                            onClick = {
+                                if (viewModel.addWhitelistPath(newWlPathInput, newWlPathComment)) { newWlPathInput = ""; newWlPathComment = "" }
+                            }
                         ) {
                             Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.White)
                         }
@@ -453,7 +457,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                                     Text(p.comment, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
-                            IconButton(onClick = { viewModel.removeWhitelistPath(p) }) {
+                            IconButton(enabled = BusyKey.WL_PATH !in busy, onClick = { viewModel.removeWhitelistPath(p) }) {
                                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
                             }
                         }
@@ -496,6 +500,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                     ) {
                         presetBlChannels.forEach { ch ->
                             SuggestionChip(
+                                enabled = BusyKey.BL_CHANNEL !in busy,
                                 onClick = { viewModel.addBlockedChannel(ch) },
                                 label = { Text(ch, fontSize = 12.sp) },
                                 colors = SuggestionChipDefaults.suggestionChipColors(
@@ -523,12 +528,10 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(onClick = {
-                                viewModel.addBlockedChannel(newBlChannelInput)
-                                newBlChannelInput = ""
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed),
-                            shape = BauhausCornerShape
+                        BusyButton(busy = BusyKey.BL_CHANNEL in busy, containerColor = bColors.signalRed, contentColor = Color.White, contentPadding = PaddingValues(horizontal = 12.dp),
+                            onClick = {
+                                if (viewModel.addBlockedChannel(newBlChannelInput)) newBlChannelInput = ""
+                            }
                         ) {
                             Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.White)
                         }
@@ -557,7 +560,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(ch.name, fontWeight = FontWeight.Bold, color = bColors.signalRed)
-                            IconButton(onClick = { viewModel.removeBlockedChannel(ch.name) }) {
+                            IconButton(enabled = BusyKey.BL_CHANNEL !in busy, onClick = { viewModel.removeBlockedChannel(ch.name) }) {
                                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
                             }
                         }
@@ -597,13 +600,10 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(onClick = {
-                                viewModel.addBlockedPath(newBlPathInput, newBlPathComment)
-                                newBlPathInput = ""
-                                newBlPathComment = ""
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed),
-                            shape = BauhausCornerShape
+                        BusyButton(busy = BusyKey.BL_PATH in busy, containerColor = bColors.signalRed, contentColor = Color.White, contentPadding = PaddingValues(horizontal = 12.dp),
+                            onClick = {
+                                if (viewModel.addBlockedPath(newBlPathInput, newBlPathComment)) { newBlPathInput = ""; newBlPathComment = "" }
+                            }
                         ) {
                             Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.White)
                         }
@@ -642,7 +642,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                                     Text(p.comment, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
-                            IconButton(onClick = { viewModel.removeBlockedPath(p.prefixHex) }) {
+                            IconButton(enabled = BusyKey.BL_PATH !in busy, onClick = { viewModel.removeBlockedPath(p.prefixHex) }) {
                                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
                             }
                         }
@@ -731,18 +731,13 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             singleLine = true,
                             shape = BauhausCornerShape
                         )
-                        Button(onClick = {
+                        BusyButton(busy = BusyKey.RULE in busy, containerColor = bColors.ochre, contentColor = Color.Black, contentPadding = PaddingValues(horizontal = 12.dp),
+                            onClick = {
                                 val s = newRuleTimeout.toIntOrNull() ?: 0
                                 val p = (newRuleProb.toIntOrNull() ?: 100).coerceIn(1, 100)
-                                if (ruleTypeTab == 0) {
-                                    viewModel.addSenderRule(newRulePattern, s, p)
-                                } else {
-                                    viewModel.addTextRule(newRulePattern, s, p)
-                                }
-                                newRulePattern = ""
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = bColors.ochre),
-                            shape = BauhausCornerShape
+                                val sent = if (ruleTypeTab == 0) viewModel.addSenderRule(newRulePattern, s, p) else viewModel.addTextRule(newRulePattern, s, p)
+                                if (sent) newRulePattern = ""
+                            }
                         ) {
                             Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.Black)
                         }
@@ -771,7 +766,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            IconButton(onClick = {
+                            IconButton(enabled = BusyKey.RULE !in busy, onClick = {
                                 if (ruleTypeTab == 0) viewModel.removeSenderRule(r.pattern)
                                 else viewModel.removeTextRule(r.pattern)
                             }) {
@@ -821,12 +816,10 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(onClick = {
-                                viewModel.addWatchChannel(newWatchInput)
-                                newWatchInput = ""
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = bColors.cobalt),
-                            shape = BauhausCornerShape
+                        BusyButton(busy = BusyKey.WATCH in busy, containerColor = bColors.cobalt, contentColor = Color.White, contentPadding = PaddingValues(horizontal = 12.dp),
+                            onClick = {
+                                if (viewModel.addWatchChannel(newWatchInput)) newWatchInput = ""
+                            }
                         ) {
                             Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.White)
                         }
@@ -859,7 +852,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(w.name, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                             }
-                            IconButton(onClick = { viewModel.removeWatchChannel(w.name) }) {
+                            IconButton(enabled = BusyKey.WATCH !in busy, onClick = { viewModel.removeWatchChannel(w.name) }) {
                                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
                             }
                         }

@@ -70,6 +70,10 @@ object QuerySpec {
         // Filter-Erkennung: jede "filter…"-Antwort annehmen (auch "Filter: command error"), Auswertung in isBlacklistHelp/isWhitelistHelp
         "filter help", "filter wl help" -> { v -> v.startsWith("filter", true) }
         "filter mode" -> { v -> v.contains("mode", true) }
+        // Listen: nur das jeweilige Listenformat bzw. "None" annehmen – keine verspäteten Status-/OK-Zeilen
+        "filter channel list", "filter wl channel list", "filter path list", "filter wl path list" -> { v -> FilterListParser.isValidListReply(cmd, v) }
+        // Regionen (CommonCLI::handleRegionCmd): Baum beginnt immer mit der Wildcard "*"
+        "region" -> { v -> v.trimStart().startsWith("*") }
         "region home" -> { v -> v.contains("home is", true) }
         "region default" -> { v -> v.contains("default scope", true) }
         else -> { _ -> true } // set-/sonstige Befehle: erste Antwortzeile (z. B. "OK")
@@ -104,6 +108,7 @@ object QuerySpec {
         "filter", "filter help" -> "Prüfe Geräte- & Filter-Funktionen…"
         "power" -> "Versorgung wird abgefragt…"
         "clock" -> "Telemetrie wird abgefragt…"
+        "region", "region home", "region default" -> "Regionen werden abgefragt…"
         else -> if (cmd.trim().lowercase().startsWith("filter")) "Filter-Einstellungen werden abgefragt…" else tr("\"{0}\" wird ausgeführt…", cmd.trim())
     }
 }

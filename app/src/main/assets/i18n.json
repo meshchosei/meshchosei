@@ -2333,5 +2333,215 @@
   "[ignored: binary data from direct USB repeater] {0} bytes",
   "[genegeerd: binaire data van directe USB-repeater] {0} bytes",
   "[ignoré : données binaires du répéteur USB direct] {0} octets"
+ ],
+ "\"{0}\" vom Repeater nicht bestätigt.": [
+  "\"{0}\" not confirmed by the repeater.",
+  "\"{0}\" niet bevestigd door de repeater.",
+  "« {0} » non confirmé par le répéteur."
+ ],
+ "Aktualisieren": [
+  "Refresh",
+  "Vernieuwen",
+  "Actualiser"
+ ],
+ "DEFAULT": [
+  "DEFAULT",
+  "STANDAARD",
+  "DÉFAUT"
+ ],
+ "HOME": [
+  "HOME",
+  "THUIS",
+  "ACCUEIL"
+ ],
+ "Diese Firmware unterstützt keine Regionen (Befehl \"region\" unbekannt).": [
+  "This firmware does not support regions (command \"region\" unknown).",
+  "Deze firmware ondersteunt geen regio's (commando \"region\" onbekend).",
+  "Ce firmware ne prend pas en charge les régions (commande « region » inconnue)."
+ ],
+ "Flood AN": [
+  "Flood ON",
+  "Flood AAN",
+  "Flood ACTIVÉ"
+ ],
+ "Flood AUS": [
+  "Flood OFF",
+  "Flood UIT",
+  "Flood DÉSACTIVÉ"
+ ],
+ "Flood erlaubt": [
+  "Flood allowed",
+  "Flood toegestaan",
+  "Flood autorisé"
+ ],
+ "Freie Eingabe": [
+  "Custom entry",
+  "Vrije invoer",
+  "Saisie libre"
+ ],
+ "Hinweis: \"boot\" ist eine Custom-Firmware-Erweiterung und wird von Standard-Firmware ggf. nicht unterstützt.": [
+  "Note: \"boot\" is a custom firmware extension and may not be supported by standard firmware.",
+  "Let op: \"boot\" is een custom-firmware-uitbreiding en wordt door standaardfirmware mogelijk niet ondersteund.",
+  "Remarque : « boot » est une extension de firmware personnalisé et peut ne pas être prise en charge par le firmware standard."
+ ],
+ "Hinzufügen": [
+  "Add",
+  "Toevoegen",
+  "Ajouter"
+ ],
+ "Installiere…": [
+  "Installing…",
+  "Installeren…",
+  "Installation…"
+ ],
+ "Konfigurierte Regionen ({0})": [
+  "Configured regions ({0})",
+  "Geconfigureerde regio's ({0})",
+  "Régions configurées ({0})"
+ ],
+ "Lese Backup…": [
+  "Reading backup…",
+  "Back-up lezen…",
+  "Lecture de la sauvegarde…"
+ ],
+ "Löschen": [
+  "Delete",
+  "Verwijderen",
+  "Supprimer"
+ ],
+ "Muss bereits existieren (sonst \"Err - unknown region\").": [
+  "Must already exist (otherwise \"Err - unknown region\").",
+  "Moet al bestaan (anders \"Err - unknown region\").",
+  "Doit déjà exister (sinon « Err - unknown region »)."
+ ],
+ "Name": [
+  "Name",
+  "Naam",
+  "Nom"
+ ],
+ "Neue Region hinzufügen": [
+  "Add new region",
+  "Nieuwe regio toevoegen",
+  "Ajouter une région"
+ ],
+ "Parent": [
+  "Parent",
+  "Bovenliggend",
+  "Parent"
+ ],
+ "Parent: {0}": [
+  "Parent: {0}",
+  "Bovenliggend: {0}",
+  "Parent : {0}"
+ ],
+ "REGIONEN & SCOPE-ROUTING": [
+  "REGIONS & SCOPE ROUTING",
+  "REGIO'S & SCOPE-ROUTING",
+  "RÉGIONS & ROUTAGE PAR SCOPE"
+ ],
+ "Region \"{0}\" löschen?": [
+  "Delete region \"{0}\"?",
+  "Regio \"{0}\" verwijderen?",
+  "Supprimer la région « {0} » ?"
+ ],
+ "Region hinzugefügt und gespeichert.": [
+  "Region added and saved.",
+  "Regio toegevoegd en opgeslagen.",
+  "Région ajoutée et enregistrée."
+ ],
+ "Region gelöscht.": [
+  "Region deleted.",
+  "Regio verwijderd.",
+  "Région supprimée."
+ ],
+ "Home-Region gesetzt und gespeichert.": [
+  "Home region set and saved.",
+  "Thuisregio ingesteld en opgeslagen.",
+  "Région d'accueil définie et enregistrée."
+ ],
+ "Default-Region gesetzt und gespeichert.": [
+  "Default region set and saved.",
+  "Standaardregio ingesteld en opgeslagen.",
+  "Région par défaut définie et enregistrée."
+ ],
+ "Flood für Region erlaubt.": [
+  "Flood allowed for region.",
+  "Flood toegestaan voor regio.",
+  "Flood autorisé pour la région."
+ ],
+ "Flood für Region gesperrt.": [
+  "Flood denied for region.",
+  "Flood geblokkeerd voor regio.",
+  "Flood bloqué pour la région."
+ ],
+ "Home-Region": [
+  "Home region",
+  "Thuisregio",
+  "Région d'accueil"
+ ],
+ "Default-Region": [
+  "Default region",
+  "Standaardregio",
+  "Région par défaut"
+ ],
+ "Regionen mit Unterregionen lehnt die Firmware ab (\"Err - not empty\").": [
+  "The firmware rejects regions that still have sub-regions (\"Err - not empty\").",
+  "De firmware weigert regio's met subregio's (\"Err - not empty\").",
+  "Le firmware refuse les régions qui ont des sous-régions (« Err - not empty »)."
+ ],
+ "Regionen noch nicht gelesen – \"Aktualisieren\" tippen.": [
+  "Regions not read yet – tap \"Refresh\".",
+  "Regio's nog niet gelezen – tik op \"Vernieuwen\".",
+  "Régions pas encore lues – appuyez sur « Actualiser »."
+ ],
+ "Regionen werden abgefragt…": [
+  "Reading regions…",
+  "Regio's worden opgevraagd…",
+  "Lecture des régions…"
+ ],
+ "Regionen: nicht übernommen – {0}": [
+  "Regions: not applied – {0}",
+  "Regio's: niet toegepast – {0}",
+  "Régions : non appliqué – {0}"
+ ],
+ "Sende…": [
+  "Sending…",
+  "Verzenden…",
+  "Envoi…"
+ ],
+ "Speichere…": [
+  "Saving…",
+  "Opslaan…",
+  "Enregistrement…"
+ ],
+ "Unbekannte Namen legt die Firmware automatisch an (Flood erlaubt).": [
+  "Unknown names are created automatically by the firmware (flood allowed).",
+  "Onbekende namen maakt de firmware automatisch aan (flood toegestaan).",
+  "Les noms inconnus sont créés automatiquement par le firmware (flood autorisé)."
+ ],
+ "Ungültiger Regionsname (keine Leerzeichen, max. 30 Zeichen).": [
+  "Invalid region name (no spaces, max. 30 characters).",
+  "Ongeldige regionaam (geen spaties, max. 30 tekens).",
+  "Nom de région invalide (sans espaces, 30 caractères max.)."
+ ],
+ "Verbindung getrennt": [
+  "Connection lost",
+  "Verbinding verbroken",
+  "Connexion perdue"
+ ],
+ "Wildcard (Wurzel)": [
+  "Wildcard (root)",
+  "Wildcard (wortel)",
+  "Joker (racine)"
+ ],
+ "keine Antwort auf \"{0}\"": [
+  "no reply to \"{0}\"",
+  "geen antwoord op \"{0}\"",
+  "pas de réponse à « {0} »"
+ ],
+ "Änderungen werden sofort gesendet und mit \"region save\" dauerhaft gespeichert.": [
+  "Changes are sent immediately and stored permanently with \"region save\".",
+  "Wijzigingen worden direct verzonden en met \"region save\" permanent opgeslagen.",
+  "Les modifications sont envoyées immédiatement et enregistrées durablement avec « region save »."
  ]
 }

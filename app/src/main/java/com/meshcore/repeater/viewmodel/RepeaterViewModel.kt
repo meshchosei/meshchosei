@@ -7,6 +7,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.meshcore.repeater.model.*
 import com.meshcore.repeater.service.BleConnectionManager
+import com.meshcore.repeater.service.ChannelHash
+import com.meshcore.repeater.service.FilterListParser
 import com.meshcore.repeater.service.InputValidator
 import com.meshcore.repeater.service.MeshCoreBackup
 import com.meshcore.repeater.service.QuerySpec
@@ -61,6 +63,29 @@ data class BasicSetupState(
  */
 class SetupChange(val command: String, val commit: (BasicSetupState) -> BasicSetupState = { it })
 
+/**
+ * Schlüssel für den Arbeitszustand der Speichern-/Senden-Buttons ([RepeaterViewModel.busyActions]).
+ * Solange ein Schlüssel aktiv ist, zeigt der Button den Braille-Spinner und nimmt keine Klicks an.
+ */
+object BusyKey {
+    const val RADIO = "radio"
+    const val IDENTITY = "identity"
+    const val ROUTING = "routing"
+    const val ADVERT = "advert"
+    const val GPS_SETLOC = "gps_setloc"
+    const val PRV_KEY = "prv_key"
+    const val REGION = "region"
+    const val BACKUP_CREATE = "backup_create"
+    const val BACKUP_INSTALL = "backup_install"
+    const val WL_CHANNEL = "wl_channel"
+    const val WL_PATH = "wl_path"
+    const val BL_CHANNEL = "bl_channel"
+    const val BL_PATH = "bl_path"
+    const val RULE = "rule"
+    const val WATCH = "watch"
+    const val FILTER_LOAD = "filter_load"
+}
+
 class RepeaterViewModel(application: Application) : AndroidViewModel(application) {
     private val prefs = application.getSharedPreferences("repeater_cfg_prefs", Context.MODE_PRIVATE)
 
@@ -100,7 +125,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     // genau ein Befehl, und erst nach dessen (validierter) Antwort oder Timeout wird der nächste gesendet.
     private val sequentialQueryMutex = Mutex()
     private var readJob: Job? = null                       // aktueller Auslese-Job (Basis-Setup, Capability, Filter, Telemetrie)
-    private class QueryReply(val value: String?)           // value == null -> Fehler/"unknown"-Antwort
+    private class QueryReply(val value: String?, val error: String? = null)   // value == null -> Fehler/"unknown"-Antwort (Text in error)
     @Volatile private var activeQueryCommand: String? = null
     private var activeQueryValidator: ((String) -> Boolean)? = null
     private var activeQueryWaiter: CompletableDeferred<QueryReply>? = null
@@ -126,6 +151,22 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     /** Zuletzt vom Node gelesener bzw. erfolgreich gesendeter Stand – Basis für "nur Änderungen senden". */
     private val _nodeBaseline = MutableStateFlow(BasicSetupState())
     val nodeBaseline: StateFlow<BasicSetupState> = _nodeBaseline
+
+    // === Arbeitszustand der Speichern-/Senden-Buttons (Doppelklick-Sperre) ===
+    private val _busyActions = MutableStateFlow<Set<String>>(emptySet())
+    /** Aktive [BusyKey]s: Button zeigt Spinner + "Speichere…", bis der Repeater geantwortet hat (oder Timeout). */
+    val busyActions: StateFlow<Set<String>> = _busyActions
+    /** false, wenn [key] bereits arbeitet (zweiter Klick wird verworfen). */
+    private fun tryMarkBusy(key: String): Boolean {
+        if (key in _busyActions.value) return false
+        _busyActions.value = _busyActions.value + key
+        return true
+    }
+    private fun clearBusy(key: String) { _busyActions.update { it - key } }
+
+    // === Regionen (region …) ===
+    private val _regionState = MutableStateFlow(RegionState())
+    val regionState: StateFlow<RegionState> = _regionState
 
     private val _uiEvents = MutableSharedFlow<String>(extraBufferCapacity = 16)
     val uiEvents: SharedFlow<String> = _uiEvents
@@ -490,7 +531,10 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     fun sendManualCommand(cmd: String) { enqueueCommands(listOf(cmd), isAuto = false) }
     /** Einzelner Set-/Aktionsbefehl aus der UI – ebenfalls streng sequentiell. */
     /** Von UI-Buttons ausgelöste Befehle gelten als System-Befehle (SYSTEM-Tab); nur manualCli = true landet im CLI-Tab. */
-    fun sendCommand(cmd: String, manualCli: Boolean = false) { enqueueCommands(listOf(cmd), isAuto = !manualCli) }
+    fun sendCommand(cmd: String, manualCli: Boolean = false, busyKey: String? = null) {
+        if (busyKey == null) { enqueueCommands(listOf(cmd), isAuto = !manualCli); return }
+        sendBusy(busyKey, cmd) { ok -> if (!ok) notifyUser(tr("\"{0}\" vom Repeater nicht bestätigt.", cmd.substringBefore(' ', cmd))) }
+    }
 
     private fun isLinkUp() = _connectionState.value is ConnectionState.Connected
 
@@ -505,7 +549,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
      * Sendet GENAU EINEN Befehl und wartet exklusiv auf dessen Antwort (Format-Validator) oder Timeout.
      * Muss unter [sequentialQueryMutex] aufgerufen werden. Rückgabe: null = Timeout, sonst QueryReply.
      */
-    private suspend fun runQuery(cmd: String, isAuto: Boolean = true, timeoutMs: Long = queryTimeoutMs(), capture: MutableList<String>? = null): QueryReply? {
+    private suspend fun runQuery(cmd: String, isAuto: Boolean = true, timeoutMs: Long = queryTimeoutMs(), capture: MutableList<String>? = null, trailingMs: Long? = null): QueryReply? {
         if (cmd.isBlank() || !isLinkUp()) return null
         val c = cmd.trim()
         val key = c.lowercase()
@@ -519,7 +563,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         try {
             sendCommandInternal(c, isAuto)
             val reply = withTimeoutOrNull(timeoutMs) { waiter.await() }
-            if (reply != null && QuerySpec.isMultiLine(key)) delay(if (_remoteAdminSession.value.targetRepeater != null) 1200L else 350L) // Folgezeilen einsammeln
+            if (reply != null && QuerySpec.isMultiLine(key)) delay(trailingMs ?: if (_remoteAdminSession.value.targetRepeater != null) 1200L else 350L) // Folgezeilen einsammeln
             reply?.value?.let { applyQueryResult(key, it) }
             return reply
         } finally {
@@ -532,10 +576,12 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
      * [onDone] erhält die Anzahl BESTÄTIGTER Befehle (Antwort erhalten und keine Fehlerantwort),
      * [onResults] je Befehl true/false in der Reihenfolge von [cmds] (nicht gesendete = false).
      */
-    private fun enqueueCommands(cmds: List<String>, isAuto: Boolean = true, onResults: ((List<Boolean>) -> Unit)? = null, onDone: ((Int) -> Unit)? = null) {
+    private fun enqueueCommands(cmds: List<String>, isAuto: Boolean = true, busyKey: String? = null, onResults: ((List<Boolean>) -> Unit)? = null, onDone: ((Int) -> Unit)? = null): Boolean {
         val list = cmds.map { it.trim() }
-        if (list.none { it.isNotEmpty() }) return
-        viewModelScope.launch {
+        if (list.none { it.isNotEmpty() }) return false
+        // Doppelklick-Sperre: läuft dieselbe Aktion noch, wird der zweite Klick verworfen
+        if (busyKey != null && !tryMarkBusy(busyKey)) return false
+        val job = viewModelScope.launch {
             val results = BooleanArray(list.size)
             sequentialQueryMutex.withLock {
                 for ((i, c) in list.withIndex()) {
@@ -547,6 +593,15 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             onResults?.invoke(results.toList())
             onDone?.invoke(results.count { it })
         }
+        // auch bei Abbruch (Trennung) zuverlässig freigeben
+        if (busyKey != null) job.invokeOnCompletion { clearBusy(busyKey) }
+        return true
+    }
+
+    /** Einzelnen Befehl mit Arbeitszustand [key] senden; onDone(true) = vom Repeater bestätigt. false = nicht gesendet (busy/getrennt). */
+    private fun sendBusy(key: String, cmd: String, onDone: ((Boolean) -> Unit)? = null): Boolean {
+        if (!isLinkUp()) { notifyUser("Nicht verbunden."); return false }
+        return enqueueCommands(listOf(cmd), busyKey = key) { n -> onDone?.invoke(n > 0) }
     }
 
     /**
@@ -596,6 +651,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
      */
     fun createBackup(includePrivateKey: Boolean) {
         if (!isLinkUp()) { notifyUser("Nicht verbunden."); return }
+        if (!tryMarkBusy(BusyKey.BACKUP_CREATE)) return
         startRead(cancelPrevious = false) {
             val vars = LinkedHashMap<String, Any>()
             val defs = MeshCoreBackup.VARS.filter { includePrivateKey || it.sensitivity != MeshCoreBackup.Sensitivity.PRIVATE_KEY }
@@ -629,13 +685,14 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             if (vars.isEmpty()) { notifyUser("Backup fehlgeschlagen – keine Werte gelesen."); return@startRead }
             if (includePrivateKey && "prv.key" !in vars) notifyUser("Hinweis: Private Key ist nur über USB-Direktverbindung auslesbar – nicht im Backup enthalten.")
             _backupJson.value = MeshCoreBackup.buildJson(vars, regions, home, default)
-        }
+        }.invokeOnCompletion { clearBusy(BusyKey.BACKUP_CREATE) }
     }
 
     /** Backup installieren: Befehle streng sequentiell senden, abgelehnte/unbeantwortete Befehle melden. */
     fun installBackup(cmds: List<String>) {
         if (!isLinkUp()) { notifyUser("Nicht verbunden."); return }
         if (cmds.isEmpty()) { notifyUser("Keine übertragbaren Einstellungen im Backup."); return }
+        if (!tryMarkBusy(BusyKey.BACKUP_INSTALL)) return
         startRead(cancelPrevious = false) {
             val failed = mutableListOf<String>()
             for ((i, c) in cmds.withIndex()) {
@@ -649,7 +706,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             _hasCompletedInitialRead.value = false
             notifyUser(if (failed.isEmpty()) tr("Backup installiert ({0} Befehle). Funk-/Key-Änderungen ggf. erst nach Neustart aktiv – danach \"Neu einlesen\".", cmds.size)
                        else tr("Backup installiert, {0} von {1} abgelehnt/ohne Antwort: {2}", failed.size, cmds.size, failed.take(6).joinToString(", ") + if (failed.size > 6) " …" else ""))
-        }
+        }.invokeOnCompletion { clearBusy(BusyKey.BACKUP_INSTALL) }
     }
 
     fun cancelActiveRead() { readJob?.cancel(); notifyUser("Auslesen abgebrochen.") }
@@ -721,6 +778,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     private fun resetInitialReadState() {
         readJob?.cancel()
         initialScanRunning = false
+        filterAutoLoadDone.clear()
         _hasCompletedInitialRead.value = false
         _activeReadStatusText.value = null
         _readProgress.value = null
@@ -740,6 +798,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             // Remote: Key des Ziel-Repeaters; USB-direkt: leeren und per "get public.key" neu einlesen (kein Key vom vorigen Gerät)
             val targetKey = _remoteAdminSession.value.targetRepeater?.pubKeyHex ?: ""
             _basicSetup.value = _basicSetup.value.copy(isReading = true, publicKeyHex = targetKey)
+            _regionState.value = RegionState()
+            filterAutoLoadDone.clear()
             try {
                 _activeReadStatusText.value = "Verbindung zum Repeater wird vorbereitet…"
                 _readProgress.value = null
@@ -753,7 +813,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 // Ein durchgehender Ablauf in klaren Phasen; Menü/Setup werden erst nach dem LETZTEN Schritt freigegeben
                 // 1) Hardware & Firmware ZUERST (board/ver = schnelles Lebenszeichen, u. a. für den USB-Timeout)
                 val detectSteps = 2 // "filter help" + "filter wl help"
-                val maxScanSteps = HARDWARE_QUERIES.size + detectSteps + BL_STATUS_QUERIES.size + BL_LIST_QUERIES.size + WL_STATUS_QUERIES.size + WL_LIST_QUERIES.size + BASIC_SETUP_QUERIES.size
+                val maxScanSteps = HARDWARE_QUERIES.size + detectSteps + BL_STATUS_QUERIES.size + BL_LIST_QUERIES.size + WL_STATUS_QUERIES.size + WL_LIST_QUERIES.size + BASIC_SETUP_QUERIES.size + REGION_STEPS
                 var ok = runReadSequence(HARDWARE_QUERIES, phaseText = "Lese Hardware & Firmware…", progressTotal = maxScanSteps)
                 var done = HARDWARE_QUERIES.size
                 // 2) Blacklist / Whitelist getrennt und strikt anhand der Firmware-Antworten erkennen
@@ -773,7 +833,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 } else done++
                 _deviceCapabilities.value = _deviceCapabilities.value.copy(supportsBlacklist = supportsBl, supportsWhitelist = supportsWl, detectionComplete = true)
                 val filterQueries = filterQueriesFor(supportsBl, supportsWl)
-                val total = HARDWARE_QUERIES.size + detectSteps + filterQueries.size + BASIC_SETUP_QUERIES.size
+                val total = HARDWARE_QUERIES.size + detectSteps + filterQueries.size + BASIC_SETUP_QUERIES.size + REGION_STEPS
                 // 3) Paket-Filter: Listen NUR für die jeweils unterstützte Funktion abfragen
                 if (ok && filterQueries.isNotEmpty()) {
                     ok = runFilterListQueries(filterQueries, progressOffset = done, progressTotal = total)
@@ -781,6 +841,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 }
                 // 4) Funk- & Routing-Parameter
                 if (ok) ok = runReadSequence(BASIC_SETUP_QUERIES, phaseText = "Lese Funk- & Routing-Parameter…", progressOffset = done, progressTotal = total)
+                done += BASIC_SETUP_QUERIES.size
+                // 5) Regionen & Scope-Routing (region / region home / region default)
+                if (ok) ok = readRegions(progressOffset = done, progressTotal = total)
                 if (ok) {
                     _nodeBaseline.value = _basicSetup.value.copy(isReading = false)
                     _activeReadStatusText.value = "✓ Alle Start-Abfragen abgeschlossen"
@@ -818,15 +881,174 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         return true to reply
     }
 
+    /**
+     * Filter-Status und -Listen streng nacheinander lesen. Listen ("… list") bekommen über LoRa ein deutlich
+     * größeres Empfangsfenster (Multi-Hop) und eine Wiederholung; nur das passende Listenformat wird als
+     * Antwort akzeptiert, die Liste wird danach komplett ersetzt (gelöschte Einträge verschwinden).
+     */
     private suspend fun runFilterListQueries(qs: List<String>, progressOffset: Int = 0, progressTotal: Int = qs.size): Boolean {
+        val wireless = _remoteAdminSession.value.targetRepeater != null
         for ((i, q) in qs.withIndex()) {
             if (!isLinkUp()) return false
             lastFilterQuery = q
             _activeReadStatusText.value = "Lese Paket-Filter (Whitelist/Blacklist)…"
             _readProgress.value = (progressOffset + i + 1) to progressTotal
-            runQuery(q)
+            val isList = q.endsWith(" list")
+            var reply: QueryReply? = null
+            for (attempt in 1..(if (wireless) 2 else 1)) {
+                reply = if (isList) runQuery(q, timeoutMs = filterListTimeoutMs(), trailingMs = if (wireless) FILTER_LIST_TRAILING_LORA_MS else null)
+                        else runQuery(q)
+                if (reply != null) break
+            }
+            if (wireless && reply == null && noteRemoteTimeout()) return false
+            reply?.value?.let { if (isList) applyFilterList(q, it) }
         }
         return true
+    }
+
+    /** Antwortfenster für Filterlisten: über LoRa deutlich länger als für Einzelwerte. */
+    private fun filterListTimeoutMs(): Long =
+        if (_remoteAdminSession.value.targetRepeater != null) queryTimeoutMs() + FILTER_LIST_EXTRA_LORA_MS else queryTimeoutMs() + 600L
+
+    /** Bekannte Kanalnamen (Presets + früher hinzugefügte) – für die Zuordnung der Whitelist-Hashes. */
+    private fun knownChannelNames(): List<String> =
+        (PRESET_CHANNEL_NAMES + (prefs.getStringSet(PREF_KNOWN_CHANNELS, emptySet()) ?: emptySet()) +
+            _blockedChannels.value.map { it.name } + _whitelistChannels.value.filter { it.name.startsWith("#") }.map { it.name }).distinct()
+
+    private fun rememberChannelName(name: String) {
+        val n = name.trim(); if (n.isEmpty() || FilterListParser.parseWhitelistChannelHashes(n).isNotEmpty()) return
+        val set = (prefs.getStringSet(PREF_KNOWN_CHANNELS, emptySet()) ?: emptySet()).toMutableSet()
+        if (set.add(n)) prefs.edit().putStringSet(PREF_KNOWN_CHANNELS, set).apply()
+    }
+
+    /** Validierte Listenantwort übernehmen (ersetzt die bisherige Liste). */
+    private fun applyFilterList(cmd: String, v: String) {
+        when (cmd) {
+            RepeaterProtocol.CMD_FILTER_CHANNEL_LIST -> _blockedChannels.value = FilterListParser.parseBlacklistChannels(v).map { BlockedChannel(it) }
+            RepeaterProtocol.CMD_FILTER_PATH_LIST -> { val old = _blockedPaths.value; _blockedPaths.value = FilterListParser.parsePaths(v).map { p -> BlockedPath(p, old.firstOrNull { it.prefixHex == p }?.comment ?: "") } }
+            RepeaterProtocol.CMD_FILTER_WL_CHANNEL_LIST -> {
+                // Firmware speichert nur den 1-Byte-Hash -> Namen über bekannte Kanäle zuordnen
+                val names = knownChannelNames()
+                val old = _whitelistChannels.value
+                _whitelistChannels.value = FilterListParser.parseWhitelistChannelHashes(v).map { h ->
+                    val prev = old.firstOrNull { it.hashHex.equals(h, true) }
+                    val name = prev?.name?.takeIf { it.startsWith("#") || it == "Public" } ?: names.firstOrNull { ChannelHash.hashHex(it) == h } ?: "0x$h"
+                    WhitelistChannel(name, hashHex = h, isPreset = name in PRESET_CHANNEL_NAMES)
+                }
+            }
+            RepeaterProtocol.CMD_FILTER_WL_PATH_LIST -> { val old = _whitelistPaths.value; _whitelistPaths.value = FilterListParser.parsePaths(v).map { p -> WhitelistPath(p, old.firstOrNull { it.prefixHex == p }?.comment ?: "") } }
+        }
+    }
+
+    // Beim Öffnen von Blacklist/Whitelist einmalig nachladen, falls der Filter aktiv, die Kanalliste aber leer ist
+    private val filterAutoLoadDone = java.util.Collections.synchronizedSet(mutableSetOf<FilterMode>())
+    fun ensureFilterChannelsLoaded(view: FilterMode) {
+        if (!isLinkUp() || !_hasCompletedInitialRead.value || readJob?.isActive == true) return
+        if (view in filterAutoLoadDone) return
+        val caps = _deviceCapabilities.value
+        val isWl = view == FilterMode.WHITELIST
+        val supported = if (isWl) caps.supportsWhitelist else caps.supportsBlacklist
+        val empty = if (isWl) _whitelistChannels.value.isEmpty() else _blockedChannels.value.isEmpty()
+        if (!supported || _filterStats.value.activeMode != view || !empty) return
+        filterAutoLoadDone += view
+        if (!tryMarkBusy(BusyKey.FILTER_LOAD)) return
+        startRead(cancelPrevious = false) {
+            runFilterListQueries(listOf(if (isWl) RepeaterProtocol.CMD_FILTER_WL_CHANNEL_LIST else RepeaterProtocol.CMD_FILTER_CHANNEL_LIST))
+            _activeReadStatusText.value = null
+        }.invokeOnCompletion { clearBusy(BusyKey.FILTER_LOAD) }
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Regionen & Scope-Routing (MeshCore/ZephCore CommonCLI::handleRegionCmd)
+    // ---------------------------------------------------------------------------------------
+    /** "region", "region home", "region default" lesen. false = Remote-Link verloren. Muss unter dem Mutex laufen. */
+    private suspend fun readRegions(progressOffset: Int? = null, progressTotal: Int = 0): Boolean {
+        val wireless = _remoteAdminSession.value.targetRepeater != null
+        if (progressOffset != null) { _activeReadStatusText.value = QuerySpec.statusTextFor("region"); _readProgress.value = (progressOffset + 1) to progressTotal }
+        val lines = mutableListOf<String>()
+        var tree: QueryReply? = null
+        for (attempt in 1..(if (wireless) 2 else 1)) {
+            lines.clear()
+            tree = runQuery("region", capture = lines, timeoutMs = queryTimeoutMs() + if (wireless) 1500L else 300L)
+            if (tree != null) break
+        }
+        if (tree == null) return !(wireless && noteRemoteTimeout())   // keine Antwort: Zustand bleibt "unbekannt"
+        if (tree.value == null) { _regionState.value = RegionState(supported = false); return true }   // Firmware ohne Regionen
+        val (list, wildcardFlood, homeMark) = RegionParser.parseTree(lines)
+        if (progressOffset != null) _readProgress.value = (progressOffset + 2) to progressTotal
+        val h = queryWithRetries("region home"); if (!h.first) return false
+        if (progressOffset != null) _readProgress.value = (progressOffset + 3) to progressTotal
+        val d = queryWithRetries("region default"); if (!d.first) return false
+        val home = if (RegionParser.isHomeReply(h.second?.value)) RegionParser.parseHome(h.second?.value) else homeMark
+        _regionState.value = RegionState(
+            supported = true, regions = list, wildcardFlood = wildcardFlood,
+            home = home, default = RegionParser.parseDefault(d.second?.value)
+        )
+        return true
+    }
+
+    /** "Aktualisieren" in der Regionen-Sektion. */
+    fun refreshRegions() {
+        if (!isLinkUp()) { notifyUser("Nicht verbunden."); return }
+        if (!tryMarkBusy(BusyKey.REGION)) return
+        startRead(cancelPrevious = false) { readRegions() }.invokeOnCompletion { clearBusy(BusyKey.REGION) }
+    }
+
+    /**
+     * Regionen-Befehle streng nacheinander senden; beim ersten Fehler abbrechen (Fehlertext der Firmware
+     * wird angezeigt). Danach wird der Regionen-Stand neu eingelesen, damit die Anzeige dem Repeater entspricht.
+     */
+    private fun runRegionCommands(cmds: List<String>, successMsg: String) {
+        if (!isLinkUp()) { notifyUser("Nicht verbunden."); return }
+        if (!tryMarkBusy(BusyKey.REGION)) return
+        startRead(cancelPrevious = false) {
+            var err: String? = null
+            for (c in cmds) {
+                if (!isLinkUp()) { err = tr("Verbindung getrennt"); break }
+                val r = runQuery(c, timeoutMs = queryTimeoutMs() + 600L)
+                if (r == null) { err = tr("keine Antwort auf \"{0}\"", c); break }
+                if (r.value == null) { err = "${r.error ?: "Err"} ($c)"; break }
+            }
+            if (isLinkUp()) readRegions()
+            _uiEvents.tryEmit(if (err == null) tr(successMsg) else tr("Regionen: nicht übernommen – {0}", err))
+        }.invokeOnCompletion { clearBusy(BusyKey.REGION) }
+    }
+
+    private fun regionArg(name: String) = name.trim().removePrefix("#")
+
+    fun setHomeRegion(name: String) {
+        val n = regionArg(name)
+        if (n != "*" && !RegionParser.isValidName(n)) { notifyUser("Ungültiger Regionsname (keine Leerzeichen, max. 30 Zeichen)."); return }
+        runRegionCommands(listOf("region home $n", "region save"), "Home-Region gesetzt und gespeichert.")
+    }
+
+    /** [name] = null -> "region default <null>" (kein Default-Scope). */
+    fun setDefaultRegion(name: String?) {
+        val n = name?.let(::regionArg)
+        if (n != null && !RegionParser.isValidName(n)) { notifyUser("Ungültiger Regionsname (keine Leerzeichen, max. 30 Zeichen)."); return }
+        runRegionCommands(listOf("region default ${n ?: "<null>"}"), "Default-Region gesetzt und gespeichert.")
+    }
+
+    fun setRegionFlood(name: String, allow: Boolean) {
+        val n = regionArg(name)
+        runRegionCommands(listOf("region ${if (allow) "allowf" else "denyf"} $n", "region save"), if (allow) "Flood für Region erlaubt." else "Flood für Region gesperrt.")
+    }
+
+    fun removeRegion(name: String) {
+        val n = regionArg(name)
+        if (n == "*") return
+        runRegionCommands(listOf("region remove $n", "region save"), "Region gelöscht.")
+    }
+
+    fun addRegion(name: String, parent: String, flood: Boolean) {
+        val n = regionArg(name); val p = regionArg(parent).ifBlank { "*" }
+        if (!RegionParser.isValidName(n) || (p != "*" && !RegionParser.isValidName(p))) { notifyUser("Ungültiger Regionsname (keine Leerzeichen, max. 30 Zeichen)."); return }
+        val cmds = buildList {
+            add(if (p == "*") "region put $n" else "region put $n $p")
+            if (!flood) add("region denyf $n")   // "region put" erlaubt Flood standardmäßig
+            add("region save")
+        }
+        runRegionCommands(cmds, "Region hinzugefügt und gespeichert.")
     }
     private fun handleIncomingFrame(data: ByteArray) {
         if (data.isEmpty()) return
@@ -901,7 +1123,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         if (acceptAsReply) activeQueryWaiter?.let { w ->
             when {
                 w.isCompleted -> {}
-                QuerySpec.isErrorReply(body) -> { usbReplySeen = true; w.complete(QueryReply(null)) }
+                QuerySpec.isErrorReply(body) -> { usbReplySeen = true; w.complete(QueryReply(null, body)) }
                 activeQueryValidator?.invoke(body) == true -> { usbReplySeen = true; w.complete(QueryReply(body)) }
                 else -> logTerminal(tr("[ignoriert: passt nicht zu \"{0}\"] {1}", activeQueryCommand, body), false, systemOnly = true)
             }
@@ -915,35 +1137,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         // 1. Telemetrie ("power") wird ausschließlich in applyQueryResult() übernommen.
         // 3.–5. Feldwerte (TX, Name, Owner, Board, ...) werden NUR noch über applyQueryResult() gesetzt.
 
-        // 6. Filter-Listen (Einzelzeilen UND kommagetrennte Listen wie "#test (D9),#bot (CA),#crypto-ad (04)")
-        val loBody = body.lowercase()
-        // Ausschließlich während eines aktiven "filter … list"-Befehls Listeneinträge übernehmen
-        val listCmd = activeQueryCommand?.takeIf { it.startsWith("filter") && it.endsWith(" list") } ?: ""
-        if (listCmd.isNotEmpty() && !loBody.startsWith("filter") && !loBody.contains("none") && !loBody.contains("empty") && !loBody.startsWith("batt:") && !loBody.contains("zephcore")) {
-            val tokens = body.split(",").map { it.removePrefix("-").removePrefix("*").trim() }.filter { it.isNotEmpty() }
-            for (tok in tokens) {
-                if (tok.startsWith("#") || listCmd.contains("channel")) {
-                    val chName = tok.substringBefore(" (").split(" ").firstOrNull()?.trim() ?: ""
-                    if (chName.startsWith("#") && chName.length > 1 && !chName.contains(":")) {
-                        if (listCmd.contains("wl")) {
-                            if (_whitelistChannels.value.none { it.name == chName }) _whitelistChannels.value += WhitelistChannel(chName)
-                        } else if (listCmd.contains("channel")) {
-                            if (_blockedChannels.value.none { it.name == chName }) _blockedChannels.value += BlockedChannel(chName)
-                        }
-                    }
-                } else if (listCmd.contains("path")) {
-                    val hex = tok.substringBefore(" (").split(" ").firstOrNull()?.uppercase() ?: ""
-                    if (hex.matches(Regex("^[0-9A-F]{2,12}$"))) {
-                        if (listCmd.contains("wl")) {
-                            if (_whitelistPaths.value.none { it.prefixHex == hex }) _whitelistPaths.value += WhitelistPath(hex)
-                        } else {
-                            if (_blockedPaths.value.none { it.prefixHex == hex }) _blockedPaths.value += BlockedPath(hex)
-                        }
-                    }
-                }
-            }
-        }
-        val lo = body.lowercase()
+        // 6. Filter-Listen werden ausschließlich in runFilterListQueries() aus der validierten Antwort übernommen.
         // Filter-Fähigkeiten werden ausschließlich im Start-Scan über "filter help" / "filter wl help" erkannt
     }
 
@@ -1033,7 +1227,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         if (changes.isEmpty()) return // still: keine Änderungen (z. B. "Weiter" in der Tour)
         if (!_radioConfig.value.isCompliant) notifyUser("Hinweis: ERP-Grenzwert mit aktueller Antenne überschritten (siehe Hardware & Antenne).")
         // Basis erst nach Bestätigung aktualisieren (nur bestätigte Befehle)
-        enqueueCommands(changes.map { it.command }, onResults = { ok -> commitConfirmed(changes, ok) }) { confirmed ->
+        enqueueCommands(changes.map { it.command }, busyKey = BusyKey.RADIO, onResults = { ok -> commitConfirmed(changes, ok) }) { confirmed ->
             notifyUser(when {
                 confirmed < changes.size -> tr("{0} von {1} Einstellung(en) bestätigt – bitte prüfen.", confirmed, changes.size)
                 radioChanged -> tr("{0} Funkeinstellung(en) übertragen – neue Funkparameter ggf. erst nach Neustart aktiv.", changes.size)
@@ -1191,9 +1385,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
      * Repeater und nur für die bestätigten Befehle aktualisiert – fehlgeschlagene Werte bleiben "geändert"
      * und werden beim nächsten Speichern erneut gesendet.
      */
-    fun applyBasicSetupChanges(changes: List<SetupChange>) {
+    fun applyBasicSetupChanges(changes: List<SetupChange>, busyKey: String? = null) {
         if (changes.isEmpty()) return // still: z. B. "Weiter" in der Tour ohne Änderungen
-        enqueueCommands(changes.map { it.command }, onResults = { ok -> commitConfirmed(changes, ok) }) { confirmed ->
+        enqueueCommands(changes.map { it.command }, busyKey = busyKey, onResults = { ok -> commitConfirmed(changes, ok) }) { confirmed ->
             notifyUser(if (confirmed == changes.size) tr("{0} Einstellung(en) übertragen!", changes.size) else tr("{0} von {1} Einstellung(en) bestätigt – bitte prüfen.", confirmed, changes.size))
         }
     }
@@ -1211,20 +1405,75 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         }
     }
     fun executeFilterReset() { sendCommand(RepeaterProtocol.CMD_FILTER_RESET); _blockedChannels.value = emptyList(); _blockedPaths.value = emptyList(); _whitelistChannels.value = emptyList(); _whitelistPaths.value = emptyList(); _senderRules.value = emptyList(); _textRules.value = emptyList(); _watchChannels.value = emptyList() }
-    fun addWhitelistChannel(name: String, isPreset: Boolean = false) { _whitelistChannels.value += WhitelistChannel(name, isPreset = isPreset); sendCommand(RepeaterProtocol.buildWlChannelAdd(name)) }
-    fun removeWhitelistChannel(ch: WhitelistChannel) { _whitelistChannels.value = _whitelistChannels.value.filterNot { it.name == ch.name }; sendCommand(RepeaterProtocol.buildWlChannelDel(ch.name)) }
-    fun addWhitelistPath(prefix: String, comment: String = "") { _whitelistPaths.value += WhitelistPath(prefix, comment); sendCommand(RepeaterProtocol.buildWlPathAdd(prefix)) }
-    fun removeWhitelistPath(p: WhitelistPath) { _whitelistPaths.value = _whitelistPaths.value.filterNot { it.prefixHex == p.prefixHex }; sendCommand(RepeaterProtocol.buildWlPathDel(p.prefixHex)) }
-    fun addBlockedChannel(name: String) { _blockedChannels.value += BlockedChannel(name); sendCommand(RepeaterProtocol.buildChannelAdd(name)) }
-    fun removeBlockedChannel(name: String) { _blockedChannels.value = _blockedChannels.value.filterNot { it.name == name }; sendCommand(RepeaterProtocol.buildChannelRemove(name)) }
-    fun addBlockedPath(prefix: String, comment: String = "") { _blockedPaths.value += BlockedPath(prefix, comment); sendCommand(RepeaterProtocol.buildPathAdd(prefix)) }
-    fun removeBlockedPath(prefix: String) { _blockedPaths.value = _blockedPaths.value.filterNot { it.prefixHex == prefix }; sendCommand(RepeaterProtocol.buildPathRemove(prefix)) }
-    fun addSenderRule(pattern: String, secs: Int = 0, prob: Int = 100) { _senderRules.value += FilterRule(pattern, secs, prob); sendCommand(RepeaterProtocol.buildSenderRuleAdd(pattern, secs, prob)) }
-    fun removeSenderRule(pattern: String) { _senderRules.value = _senderRules.value.filterNot { it.pattern == pattern }; sendCommand(RepeaterProtocol.buildSenderRuleRemove(pattern)) }
-    fun addTextRule(pattern: String, secs: Int = 0, prob: Int = 100) { _textRules.value += FilterRule(pattern, secs, prob); sendCommand(RepeaterProtocol.buildTextRuleAdd(pattern, secs, prob)) }
-    fun removeTextRule(pattern: String) { _textRules.value = _textRules.value.filterNot { it.pattern == pattern }; sendCommand(RepeaterProtocol.buildTextRuleRemove(pattern)) }
-    fun addWatchChannel(name: String) { _watchChannels.value += WatchChannel(name); sendCommand(RepeaterProtocol.buildWatchAdd(name)) }
-    fun removeWatchChannel(name: String) { _watchChannels.value = _watchChannels.value.filterNot { it.name == name }; sendCommand(RepeaterProtocol.buildWatchRemove(name)) }
+    // Hinzufügen/Löschen: Button arbeitet (Spinner), bis der Repeater bestätigt; erst dann wird die Liste geändert.
+    // Rückgabe false = nicht gesendet (z. B. Doppelklick während der Übertragung).
+    private fun notConfirmed(what: String) = notifyUser(tr("\"{0}\" vom Repeater nicht bestätigt.", what))
+
+    fun addWhitelistChannel(name: String, isPreset: Boolean = false): Boolean {
+        val n = name.trim(); if (n.isEmpty()) return false
+        return sendBusy(BusyKey.WL_CHANNEL, RepeaterProtocol.buildWlChannelAdd(n)) { ok ->
+            if (!ok) return@sendBusy notConfirmed(n)
+            rememberChannelName(n)
+            val h = FilterListParser.parseWhitelistChannelHashes(n).firstOrNull() ?: ChannelHash.hashHex(n)
+            if (_whitelistChannels.value.none { it.hashHex.equals(h, true) }) _whitelistChannels.value += WhitelistChannel(n, hashHex = h, isPreset = isPreset)
+        }
+    }
+    fun removeWhitelistChannel(ch: WhitelistChannel): Boolean {
+        // per Hash löschen – funktioniert auch für Einträge, deren Name unbekannt ist ("0xD9")
+        val arg = ch.hashHex.takeIf { it.length == 2 }?.lowercase() ?: ch.name
+        return sendBusy(BusyKey.WL_CHANNEL, RepeaterProtocol.buildWlChannelDel(arg)) { ok ->
+            if (ok) _whitelistChannels.value = _whitelistChannels.value.filterNot { it.name == ch.name && it.hashHex == ch.hashHex } else notConfirmed(ch.name)
+        }
+    }
+    fun addWhitelistPath(prefix: String, comment: String = ""): Boolean {
+        val p = prefix.trim().uppercase(); if (p.isEmpty()) return false
+        return sendBusy(BusyKey.WL_PATH, RepeaterProtocol.buildWlPathAdd(p)) { ok ->
+            if (!ok) return@sendBusy notConfirmed(p)
+            if (_whitelistPaths.value.none { it.prefixHex == p }) _whitelistPaths.value += WhitelistPath(p, comment)
+        }
+    }
+    fun removeWhitelistPath(p: WhitelistPath): Boolean = sendBusy(BusyKey.WL_PATH, RepeaterProtocol.buildWlPathDel(p.prefixHex)) { ok ->
+        if (ok) _whitelistPaths.value = _whitelistPaths.value.filterNot { it.prefixHex == p.prefixHex } else notConfirmed(p.prefixHex)
+    }
+    fun addBlockedChannel(name: String): Boolean {
+        val n = name.trim(); if (n.isEmpty()) return false
+        return sendBusy(BusyKey.BL_CHANNEL, RepeaterProtocol.buildChannelAdd(n)) { ok ->
+            if (!ok) return@sendBusy notConfirmed(n)
+            rememberChannelName(n)
+            if (_blockedChannels.value.none { it.name == n }) _blockedChannels.value += BlockedChannel(n)
+        }
+    }
+    fun removeBlockedChannel(name: String): Boolean = sendBusy(BusyKey.BL_CHANNEL, RepeaterProtocol.buildChannelRemove(name)) { ok ->
+        if (ok) _blockedChannels.value = _blockedChannels.value.filterNot { it.name == name } else notConfirmed(name)
+    }
+    fun addBlockedPath(prefix: String, comment: String = ""): Boolean {
+        val p = prefix.trim().uppercase(); if (p.isEmpty()) return false
+        return sendBusy(BusyKey.BL_PATH, RepeaterProtocol.buildPathAdd(p)) { ok ->
+            if (!ok) return@sendBusy notConfirmed(p)
+            if (_blockedPaths.value.none { it.prefixHex == p }) _blockedPaths.value += BlockedPath(p, comment)
+        }
+    }
+    fun removeBlockedPath(prefix: String): Boolean = sendBusy(BusyKey.BL_PATH, RepeaterProtocol.buildPathRemove(prefix)) { ok ->
+        if (ok) _blockedPaths.value = _blockedPaths.value.filterNot { it.prefixHex == prefix } else notConfirmed(prefix)
+    }
+    fun addSenderRule(pattern: String, secs: Int = 0, prob: Int = 100): Boolean = sendBusy(BusyKey.RULE, RepeaterProtocol.buildSenderRuleAdd(pattern, secs, prob)) { ok ->
+        if (ok) _senderRules.value += FilterRule(pattern, secs, prob) else notConfirmed(pattern)
+    }
+    fun removeSenderRule(pattern: String): Boolean = sendBusy(BusyKey.RULE, RepeaterProtocol.buildSenderRuleRemove(pattern)) { ok ->
+        if (ok) _senderRules.value = _senderRules.value.filterNot { it.pattern == pattern } else notConfirmed(pattern)
+    }
+    fun addTextRule(pattern: String, secs: Int = 0, prob: Int = 100): Boolean = sendBusy(BusyKey.RULE, RepeaterProtocol.buildTextRuleAdd(pattern, secs, prob)) { ok ->
+        if (ok) _textRules.value += FilterRule(pattern, secs, prob) else notConfirmed(pattern)
+    }
+    fun removeTextRule(pattern: String): Boolean = sendBusy(BusyKey.RULE, RepeaterProtocol.buildTextRuleRemove(pattern)) { ok ->
+        if (ok) _textRules.value = _textRules.value.filterNot { it.pattern == pattern } else notConfirmed(pattern)
+    }
+    fun addWatchChannel(name: String): Boolean = sendBusy(BusyKey.WATCH, RepeaterProtocol.buildWatchAdd(name)) { ok ->
+        if (ok) _watchChannels.value += WatchChannel(name) else notConfirmed(name)
+    }
+    fun removeWatchChannel(name: String): Boolean = sendBusy(BusyKey.WATCH, RepeaterProtocol.buildWatchRemove(name)) { ok ->
+        if (ok) _watchChannels.value = _watchChannels.value.filterNot { it.name == name } else notConfirmed(name)
+    }
     fun buildBackupScript(): String {
         val rc = _radioConfig.value; val fs = _filterStats.value
         val cr = rc.codingRate.substringAfter('/').toIntOrNull() ?: 5
@@ -1273,6 +1522,12 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             "get advert.interval", "get flood.advert.interval",
             "get txdelay", "get direct.txdelay", "get rxdelay", "get multi.acks", "get leds"
         )
+        /** Start-Scan-Schritte für "region", "region home", "region default". */
+        const val REGION_STEPS = 3
+        const val FILTER_LIST_EXTRA_LORA_MS = 3_500L   // Listen über LoRa: 4,5 s + 3,5 s = 8 s Antwortfenster
+        const val FILTER_LIST_TRAILING_LORA_MS = 2_000L // Nachlauf für evtl. Folgezeilen über LoRa
+        const val PREF_KNOWN_CHANNELS = "known_channel_names"
+        val PRESET_CHANNEL_NAMES = listOf("Public", "#mesh-de", "#notfunk", "#test", "#spam-bot", "#crypto-ad", "#test-flood")
         const val LINK_WATCH_TICK_MS = 5_000L
         const val USB_PROBE_TIMEOUT_MS = 1_200L      // Antwortfenster für das "ver" der USB-Erkennung
         const val COMPANION_IDLE_PING_MS = 20_000L   // nach 20 s Funkstille: Keep-Alive an den Companion
