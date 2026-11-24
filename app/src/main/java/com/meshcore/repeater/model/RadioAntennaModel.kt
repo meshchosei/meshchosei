@@ -132,8 +132,17 @@ data class RadioAntennaConfig(
     val antennaPreset: AntennaPreset = AntennaPreset.STOCK_2DBI,
     val customAntennaGainDbi: Double = 2.0,
     val cableLossDb: Double = 0.5, // Typische Dämpfung von Pigtail/Kabel
-    val complianceUnlocked: Boolean = false // Sicherheitsfreigabe für Überschreitungen
+    val complianceUnlocked: Boolean = false, // Sicherheitsfreigabe für Überschreitungen
+    /** Hardware-Profil aus der BoardDatabase (automatisch per "board" erkannt oder manuell gewählt) */
+    val board: BoardProfile = BoardDatabase.GENERIC,
+    val boardAutoDetected: Boolean = false,
+    /** true, sobald der Nutzer die Kabeldämpfung selbst eingegeben hat (dann nicht mehr durch Board-Standard überschreiben) */
+    val cableLossUserSet: Boolean = false
 ) {
+    /** Hardware-Maximum des Boards (Transceiver bzw. mit externem PA). */
+    val hardwareMaxTxDbm: Double
+        get() = board.maxTxDbm
+
     val effectiveGainDbi: Double
         get() = if (antennaPreset.isCustom) customAntennaGainDbi else antennaPreset.gainDbi
 
@@ -151,10 +160,18 @@ data class RadioAntennaConfig(
     val calculatedErpMw: Double
         get() = 10.0.pow(calculatedErpDbm / 10.0)
 
-    // Maximal erlaubte TX-Sendeleistung des Transceivers:
+    // Gesetzlich maximal erlaubte TX-Sendeleistung am Transceiver:
     // P_TX_max = Limit_ERP + 2.15 - Gain + CableLoss
     val maxAllowedTxPowerDbm: Double
         get() = region.maxLegalErpDbm + 2.15 - effectiveGainDbi + cableLossDb
+
+    /** Obergrenze für die TX-Eingabe: mindestens 30 dBm, bei Boards mit PA (z. B. Station G2, 35 dBm) entsprechend höher. */
+    val maxTxInputDbm: Int
+        get() = kotlin.math.floor(maxOf(30.0, board.maxTxDbm)).toInt()
+
+    /** Empfehlung = min(gesetzliches Maximum, Hardware-Maximum des Boards). */
+    val recommendedMaxTxDbm: Double
+        get() = minOf(maxAllowedTxPowerDbm, hardwareMaxTxDbm)
 
     // Ist das aktuelle Setup legal ohne Override?
     val isCompliant: Boolean

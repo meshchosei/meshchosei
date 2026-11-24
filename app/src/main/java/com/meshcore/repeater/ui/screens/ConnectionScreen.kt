@@ -1,4 +1,7 @@
 package com.meshcore.repeater.ui.screens
+import com.meshcore.repeater.R
+import androidx.compose.ui.res.stringResource
+import com.meshcore.repeater.i18n.tr
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,6 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -85,6 +89,7 @@ import com.meshcore.repeater.model.ConnectionState
 import com.meshcore.repeater.model.ConnectionType
 import com.meshcore.repeater.model.MeshContact
 import com.meshcore.repeater.ui.theme.AlertRed
+import com.meshcore.repeater.ui.theme.BauhausCornerShape
 import com.meshcore.repeater.ui.theme.LocalBauhausColors
 import com.meshcore.repeater.viewmodel.RepeaterViewModel
 
@@ -110,6 +115,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
     val connectionState by viewModel.connectionState.collectAsState()
     val selectedType by viewModel.selectedConnectionType.collectAsState()
     val usbDevices by viewModel.usbDevices.collectAsState()
+    val usbDebugInfo by viewModel.usbDebugInfo.collectAsState()
     val bleDevices by viewModel.bleDevices.collectAsState()
     val isScanningBle by viewModel.isScanningBle.collectAsState()
     val caps by viewModel.deviceCapabilities.collectAsState()
@@ -118,8 +124,17 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
     val remoteAdmin by viewModel.remoteAdminSession.collectAsState()
     val bColors = LocalBauhausColors.current
     val blePerms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT) else arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+    val permContext = androidx.compose.ui.platform.LocalContext.current
+    fun hasBlePerms() = blePerms.all { permContext.checkSelfPermission(it) == android.content.pm.PackageManager.PERMISSION_GRANTED }
+    // Nach dem Erteilen der Berechtigungen startet der Scan sofort – ohne zweiten Klick
     val blePermLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
-        if (granted.values.all { it }) viewModel.startBleScan()
+        if (granted.isNotEmpty() && granted.values.all { it }) viewModel.startBleScan() else viewModel.notifyBlePermissionDenied()
+    }
+    /** Scan starten – fehlende Bluetooth-Berechtigungen vorher anfordern. */
+    fun scanWithPermissions() { if (hasBlePerms()) viewModel.startBleScan() else blePermLauncher.launch(blePerms) }
+    // BLE-Tab bereits aktiv (z. B. nach App-Neustart): Berechtigungen sofort prüfen bzw. anfordern
+    LaunchedEffect(selectedType) {
+        if (selectedType == ConnectionType.BLE_COMPANION && connectionState !is ConnectionState.Connected && !hasBlePerms()) blePermLauncher.launch(blePerms)
     }
 
     var manualCommand by remember { mutableStateOf("") }
@@ -128,30 +143,42 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
     var filterOnlyKnownPaths by remember { mutableStateOf(false) }
     var contactSearchQuery by remember { mutableStateOf("") }
 
+    // Oberer Bereich (Header, Tabs, Geräteliste/Login) füllt genau den sichtbaren Bildschirm mit fester Höhe;
+    // die Status-Karte "Alle Parameter eingelesen" liegt als letztes Element DARUNTER im scrollbaren Bereich
+    // und kann so nie das Login-Feld überlagern oder dessen Platz stehlen.
+    BoxWithConstraints(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    // Größte gemessene Höhe je Ausrichtung merken: Beim Einblenden der Tastatur (adjustResize) schrumpft
+    // maxHeight – der obere Bereich behält trotzdem seine volle Höhe, die Seite scrollt stattdessen hoch
+    // (das fokussierte Passwortfeld wird automatisch in den sichtbaren Bereich gescrollt).
+    val orientation = androidx.compose.ui.platform.LocalConfiguration.current.orientation
+    val stableHeight = remember(orientation) { StableHeight() }
+    if (maxHeight > stableHeight.value) stableHeight.value = maxHeight
+    val viewportHeight = stableHeight.value
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
             .imePadding()
             .padding(16.dp)
     ) {
+      Column(modifier = Modifier.fillMaxWidth().height(maxOf(viewportHeight - 32.dp, 420.dp))) {
         // Active Connection Header Card
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp)
+            shape = BauhausCornerShape
         ) {
+            val connected = connectionState is ConnectionState.Connected
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(14.dp),
+                    .padding(horizontal = 14.dp, vertical = if (connected) 8.dp else 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val icon = if (selectedType == ConnectionType.USB_SERIAL) Icons.Default.Usb else Icons.Default.Bluetooth
                 Box(
                     modifier = Modifier
-                        .size(46.dp)
+                        .size(if (connected) 36.dp else 46.dp)
                         .clip(CircleShape)
                         .background(
                             if (connectionState is ConnectionState.Connected) Color(0xFF4CAF50).copy(alpha = 0.2f)
@@ -163,42 +190,47 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         imageVector = icon,
                         contentDescription = null,
                         tint = if (connectionState is ConnectionState.Connected) Color(0xFF4CAF50) else Color.Gray,
-                        modifier = Modifier.size(26.dp)
+                        modifier = Modifier.size(if (connected) 20.dp else 26.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = when (val state = connectionState) {
                             is ConnectionState.Connected -> state.deviceName
-                            is ConnectionState.Connecting -> "Verbinde..."
-                            is ConnectionState.Error -> "Fehler: ${state.message}"
-                            is ConnectionState.Disconnected -> "Keine aktive Verbindung"
+                            is ConnectionState.Connecting -> tr("Verbinde...")
+                            is ConnectionState.Error -> tr("Fehler: {0}", state.message)
+                            is ConnectionState.Disconnected -> tr("Keine aktive Verbindung")
                         },
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    if (connectionState is ConnectionState.Connected && !caps.detectionComplete) {
-                        AsciiSpinner("Erkenne Gerät & Rolle...", bColors.cobalt)
-                    } else if (connectionState is ConnectionState.Connecting) {
-                        AsciiSpinner(connectionState.let { (it as ConnectionState.Connecting).message }, bColors.ochre)
-                    } else if (isScanningBle && connectionState is ConnectionState.Disconnected) {
-                        AsciiSpinner("Scanne nach BLE-Nodes...", bColors.cobalt)
+                    // Fortschritt (Verbinden, Erkennung, Auslesen) zeigt ausschließlich das zentrale Overlay
+                    val linkState = connectionState
+                    if (linkState is ConnectionState.Connected && remoteAdmin.targetRepeater == null) {
+                        // Verbunden ohne Ziel-Repeater: nur ein kurzes, einzeiliges Badge statt langer Beschreibung
+                        Text(
+                            text = when {
+                                linkState.connectionType == ConnectionType.BLE_COMPANION -> tr("BLE · Mesh OTA")
+                                caps.isDirectRepeater || (!caps.isCompanion && caps.firmwareVersion.isNotBlank()) -> tr("USB · Repeater")
+                                caps.isCompanion -> tr("USB · Companion")
+                                else -> tr("USB · Seriell")
+                            },
+                            fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false,
+                            color = Color(0xFF4CAF50),
+                            modifier = Modifier.padding(top = 2.dp).clip(BauhausCornerShape).background(Color(0xFF4CAF50).copy(alpha = 0.14f)).padding(horizontal = 6.dp, vertical = 1.dp)
+                        )
                     } else Text(
                         text = when (val state = connectionState) {
                             is ConnectionState.Connected -> {
-                                if (remoteAdmin.targetRepeater != null) {
-                                    "${remoteAdmin.targetRepeater?.name} • ${if (remoteAdmin.isLoggedIn) "Eingeloggt" else remoteAdmin.sessionStatus}"
-                                } else {
-                                    "${state.connectionType.displayName} • ${state.details}"
-                                }
+                                "${remoteAdmin.targetRepeater?.name} • ${if (remoteAdmin.isLoggedIn) tr("Eingeloggt") else tr(remoteAdmin.sessionStatus)}"
                             }
-                            is ConnectionState.Connecting -> state.message
-                            else -> "Wähle USB-OTG oder BLE-Companion (Mesh OTA)"
+                            is ConnectionState.Connecting -> tr(state.message)
+                            else -> tr("Wähle USB-OTG oder BLE-Companion (Mesh OTA)")
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
@@ -209,11 +241,10 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
 
                 if (connectionState is ConnectionState.Connected) {
                     Spacer(modifier = Modifier.width(8.dp))
-                    OutlinedButton(
-                        onClick = { viewModel.disconnect() },
+                    OutlinedButton(shape = BauhausCornerShape, onClick = { viewModel.disconnect() },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = AlertRed)
                     ) {
-                        Text("Trennen")
+                        Text(tr("Trennen"))
                     }
                 }
             }
@@ -241,15 +272,15 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                 enabled = usbEnabled,
                 onClick = { if (usbEnabled) viewModel.selectConnectionType(ConnectionType.USB_SERIAL) },
                 modifier = Modifier.alpha(if (usbEnabled) 1f else 0.35f),
-                text = { Text("USB-Serial (OTG)", fontWeight = FontWeight.SemiBold) },
+                text = { Text(tr("USB-Serial (OTG)"), fontWeight = FontWeight.SemiBold) },
                 icon = { Icon(Icons.Default.Usb, contentDescription = null) }
             )
             Tab(
                 selected = selectedType == ConnectionType.BLE_COMPANION,
                 enabled = bleEnabled,
-                onClick = { if (bleEnabled) viewModel.selectConnectionType(ConnectionType.BLE_COMPANION) },
+                onClick = { if (bleEnabled) { viewModel.selectConnectionType(ConnectionType.BLE_COMPANION, startScan = false); scanWithPermissions() } },
                 modifier = Modifier.alpha(if (bleEnabled) 1f else 0.35f),
-                text = { Text("BLE Companion (Mesh OTA)", fontWeight = FontWeight.SemiBold) },
+                text = { Text(tr("BLE Companion (Mesh OTA)"), fontWeight = FontWeight.SemiBold) },
                 icon = { Icon(Icons.Default.Bluetooth, contentDescription = null) }
             )
         }
@@ -261,7 +292,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(BauhausCornerShape)
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(12.dp)
         ) {
@@ -273,13 +304,45 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(
-                            text = "Erkannte OTG-Geräte (${usbDevices.size})",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        IconButton(onClick = { viewModel.refreshUsbDevices() }) {
-                            Icon(Icons.Default.Refresh, contentDescription = "Aktualisieren", tint = bColors.signalRed)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = tr("Erkannte OTG-Geräte ({0})", usbDevices.size),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            if (usbDebugInfo.isNotEmpty()) {
+                                Text(
+                                    text = tr(usbDebugInfo),
+                                    fontSize = 10.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = bColors.ochre,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            // Manuelles Umschalten auf Companion nur, solange KEIN direkter Repeater erkannt wurde
+                            if (connectionState is ConnectionState.Connected && selectedType == ConnectionType.USB_SERIAL && !caps.isDirectRepeater && !caps.isCompanion) {
+                                Text(
+                                    text = "Companion →",
+                                    color = bColors.signalRed,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .clickable { viewModel.enableCompanionMode() }
+                                        .padding(vertical = 4.dp, horizontal = 4.dp)
+                                )
+                            }
+                            Text(
+                                text = "Sync",
+                                color = bColors.cobalt,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .clickable { viewModel.refreshUsbDevices() }
+                                    .padding(vertical = 4.dp, horizontal = 4.dp)
+                            )
                         }
                     }
 
@@ -291,7 +354,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Bitte OTG-Kabel anschließen",
+                                text = tr("Bitte OTG-Kabel anschließen"),
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth(),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -325,12 +388,11 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
-                                        Button(
-                                            onClick = { viewModel.connectUsb(dev.deviceId, 115200) },
+                                        Button(shape = BauhausCornerShape, onClick = { viewModel.connectUsb(dev.deviceId, 115200) },
                                             colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed),
                                             enabled = connectionState !is ConnectionState.Connected
                                         ) {
-                                            Text("Verbinden", color = Color.Black)
+                                            Text(tr("Verbinden"), color = Color.Black)
                                         }
                                     }
                                 }
@@ -349,27 +411,31 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Gefundene BLE-Nodes (${bleDevices.size})",
+                                text = tr("Gefundene BLE-Nodes ({0})", bleDevices.size),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
 
                             if (isScanningBle) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-
-                                    OutlinedButton(onClick = { viewModel.stopBleScan() }) {
-                                        Text("Stop", fontSize = 12.sp)
-                                    }
-                                }
+                                Text(
+                                    text = "Stop",
+                                    color = bColors.signalRed,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .clickable { viewModel.stopBleScan() }
+                                        .padding(vertical = 4.dp, horizontal = 4.dp)
+                                )
                             } else {
-                                Button(
-                                    onClick = { blePermLauncher.launch(blePerms) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = bColors.cobalt)
-                                ) {
-                                    Icon(Icons.AutoMirrored.Filled.BluetoothSearching, contentDescription = null, tint = Color.Black)
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Scannen", color = Color.Black)
-                                }
+                                Text(
+                                    text = "Scan",
+                                    color = bColors.cobalt,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .clickable { scanWithPermissions() }
+                                        .padding(vertical = 4.dp, horizontal = 4.dp)
+                                )
                             }
                         }
 
@@ -381,7 +447,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = if (isScanningBle) "Suche nach Bluetooth-Nodes..." else "Verbinde dich per Bluetooth mit deinem Companion-Node (um empfangene Repeater über das Mesh zu steuern) oder direkt mit einem BLE-fähigen Repeater.\n\nTippe oben auf 'Scannen'.",
+                                    text = if (isScanningBle) tr("Suche nach Bluetooth-Nodes...") else tr("Verbinde dich per Bluetooth mit deinem Companion-Node (um empfangene Repeater über das Mesh zu steuern) oder direkt mit einem BLE-fähigen Repeater.\n\nTippe oben auf 'Scan'."),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -414,16 +480,15 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
                                                 Text(
-                                                    text = "${ble.address} • RSSI: ${ble.rssi} dBm",
+                                                    text = tr("{0} • RSSI: {1} dBm", ble.address, ble.rssi),
                                                     fontSize = 12.sp,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
-                                            Button(
-                                                onClick = { viewModel.connectBle(ble.address) },
+                                            Button(shape = BauhausCornerShape, onClick = { viewModel.connectBle(ble.address) },
                                                 colors = ButtonDefaults.buttonColors(containerColor = bColors.cobalt)
                                             ) {
-                                                Text("Koppeln", color = Color.Black)
+                                                Text(tr("Koppeln"), color = Color.Black)
                                             }
                                         }
                                     }
@@ -438,28 +503,37 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         // Section Header: Companion Contact List
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("Repeater-Auswahl (${meshContacts.size})", style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold)
-                                Text("Companion Mesh-Kontakte", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(tr("Repeater-Auswahl ({0})", meshContacts.size), style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold)
+                                Text(tr("Companion Mesh-Kontakte"), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            IconButton(onClick = { viewModel.refreshMeshContacts() }, enabled = !isRefreshingContacts) {
-                                if (isRefreshingContacts) CircularProgressIndicator(modifier = Modifier.size(22.dp), color = bColors.cobalt, strokeWidth = 2.5.dp)
-                                else Icon(Icons.Default.Refresh, contentDescription = "Neu laden", tint = bColors.cobalt, modifier = Modifier.size(22.dp))
+                            if (isRefreshingContacts) {
+                                AsciiSpinner("", bColors.cobalt)
+                            } else {
+                                Text(
+                                    text = "Sync",
+                                    color = bColors.cobalt,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .clickable { viewModel.refreshMeshContacts() }
+                                        .padding(vertical = 4.dp, horizontal = 4.dp)
+                                )
                             }
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FilterChip(selected = filterOnlyRepeaters, onClick = { filterOnlyRepeaters = !filterOnlyRepeaters }, label = { Text("Nur Repeater", fontSize = 11.sp) })
-                            FilterChip(selected = filterOnlyKnownPaths, onClick = { filterOnlyKnownPaths = !filterOnlyKnownPaths }, label = { Text("Nur aktive Pfade", fontSize = 11.sp) })
+                            FilterChip(shape = BauhausCornerShape, selected = filterOnlyRepeaters, onClick = { filterOnlyRepeaters = !filterOnlyRepeaters }, label = { Text(tr("Nur Repeater"), fontSize = 11.sp) })
+                            FilterChip(shape = BauhausCornerShape, selected = filterOnlyKnownPaths, onClick = { filterOnlyKnownPaths = !filterOnlyKnownPaths }, label = { Text(tr("Nur aktive Pfade"), fontSize = 11.sp) })
                         }
                         OutlinedTextField(
                             value = contactSearchQuery,
                             onValueChange = { contactSearchQuery = it },
                             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            placeholder = { Text("Repeater suchen (Name oder Key)...", fontSize = 12.sp) },
+                            placeholder = { Text(tr("Repeater suchen (Name oder Key)..."), fontSize = 12.sp) },
                             singleLine = true,
                             trailingIcon = {
                                 if (contactSearchQuery.isNotEmpty()) {
                                     IconButton(onClick = { contactSearchQuery = "" }) {
-                                        Icon(Icons.Default.Clear, contentDescription = "Suche löschen", modifier = Modifier.size(18.dp))
+                                        Icon(Icons.Default.Clear, contentDescription = tr("Suche löschen"), modifier = Modifier.size(18.dp))
                                     }
                                 }
                             }
@@ -474,18 +548,24 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Repeater-Login", style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold)
-                                OutlinedButton(onClick = { viewModel.selectTargetRepeater(null) }) {
-                                    Text("← Zurück zur Liste", fontSize = 12.sp)
-                                }
+                                Text(tr("Repeater-Login"), style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold)
+                                Text(
+                                    text = tr("← Zurück"),
+                                    color = bColors.cobalt,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .clickable { viewModel.selectTargetRepeater(null) }
+                                        .padding(vertical = 4.dp, horizontal = 4.dp)
+                                )
                             }
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .border(1.dp, if (remoteAdmin.isLoggedIn) Color(0xFF4CAF50) else bColors.cobalt, RoundedCornerShape(10.dp)),
+                                    .border(1.dp, if (remoteAdmin.isLoggedIn) Color(0xFF4CAF50) else bColors.cobalt, BauhausCornerShape),
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                             ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
+                                Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically,
@@ -506,7 +586,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
                                                 Text(
-                                                    text = "Key: ${target.keyPrefix}... • ${when (target.outPathLen) { 0 -> "Direkt (0 Hops)"; in 1..64 -> "${target.outPathLen} Hops"; else -> "Flood (kein direkter Pfad)" }}",
+                                                    text = "Key: ${target.keyPrefix}... • ${when (target.outPathLen) { 0 -> tr("Direkt (0 Hops)"); in 1..63 -> tr("{0} Hops", target.outPathLen); else -> tr("Flood (kein direkter Pfad)") }}",
                                                     fontSize = 11.sp,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -520,35 +600,13 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                                         ) {
                                             Text(
-                                                text = if (remoteAdmin.isLoggedIn) "Admin aktiv" else "Nicht eingeloggt",
+                                                text = if (remoteAdmin.isLoggedIn) tr("Admin aktiv") else tr("Nicht eingeloggt"),
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = if (remoteAdmin.isLoggedIn) bColors.signalRed else bColors.ochre
                                             )
                                         }
                                     }
-
-                                    if (remoteAdmin.isLoggingIn) {
-                                        val infiniteTransition = androidx.compose.animation.core.rememberInfiniteTransition(label = "sync_pulse")
-                                        val pulseAlpha by infiniteTransition.animateFloat(
-                                            initialValue = 1f,
-                                            targetValue = 0.2f,
-                                            animationSpec = androidx.compose.animation.core.infiniteRepeatable(
-                                                animation = androidx.compose.animation.core.tween(450),
-                                                repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
-                                            ),
-                                            label = "pulse_alpha"
-                                        )
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth().padding(top = 6.dp).alpha(pulseAlpha),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Box(modifier = Modifier.size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(bColors.cobalt))
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            AsciiSpinner("Lade Daten vom Repeater...", bColors.cobalt)
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(8.dp))
 
                                     // Password Input & Login Action
                                     Row(
@@ -559,7 +617,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                             value = remoteAdmin.savedPassword,
                                             onValueChange = { viewModel.setRemoteAdminPassword(it) },
                                             modifier = Modifier.weight(1f),
-                                            label = { Text("Admin-Passwort (max 15 Zeichen)", fontSize = 11.sp) },
+                                            label = { Text(stringResource(R.string.conn_admin_password_label), fontSize = 11.sp, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis) },
                                             singleLine = true,
                                             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Password, autoCorrect = false),
                                             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -577,8 +635,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
 
                                         Spacer(modifier = Modifier.width(8.dp))
 
-                                        Button(
-                                            onClick = { viewModel.startRemoteLogin() },
+                                        Button(shape = BauhausCornerShape, onClick = { viewModel.startRemoteLogin() },
                                             colors = ButtonDefaults.buttonColors(containerColor = bColors.cobalt),
                                             enabled = !remoteAdmin.isLoggingIn
                                         ) {
@@ -600,7 +657,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         // Contact List
                         val filteredContacts = meshContacts.filter { ct ->
                             val typeOk = !filterOnlyRepeaters || ct.isRepeater || ct.isRoomServer
-                            val pathOk = !filterOnlyKnownPaths || (ct.outPathLen in 0..64)
+                            val pathOk = !filterOnlyKnownPaths || (ct.outPathLen in 0..63)
                             val q = contactSearchQuery.trim()
                             val searchOk = q.isEmpty() || ct.name.contains(q, ignoreCase = true) || ct.keyPrefix.contains(q, ignoreCase = true)
                             typeOk && pathOk && searchOk
@@ -614,9 +671,9 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = if (isRefreshingContacts) "Lade..."
-                                    else if (filterOnlyRepeaters) "Keine Repeater in der Kontaktliste.\nKlicke oben auf 'Neu laden'."
-                                    else "Keine Kontakte empfangen.\nKlicke oben auf 'Neu laden'.",
+                                    text = if (isRefreshingContacts) tr("Lade...")
+                                    else if (filterOnlyRepeaters) tr("Keine Repeater in der Kontaktliste.")
+                                    else tr("Keine Kontakte empfangen."),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -668,7 +725,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                                     }
                                                 }
                                                 Text(
-                                                    text = "Key: ${contact.keyPrefix}... • ${when (contact.outPathLen) { 0 -> "0 Hops (Direkt)"; in 1..64 -> "${contact.outPathLen} Hops"; else -> "Flood (unbekannt)" }}",
+                                                    text = "Key: ${contact.keyPrefix}... • ${when (contact.outPathLen) { 0 -> tr("Direkt (0 Hops)"); in 1..63 -> tr("{0} Hops", contact.outPathLen); else -> tr("Flood (unbekannt)") }}",
                                                     fontSize = 11.sp,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -677,15 +734,14 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                             if (isSelected) {
                                                 Icon(
                                                     imageVector = Icons.Default.CheckCircle,
-                                                    contentDescription = "Ausgewählt",
+                                                    contentDescription = tr("Ausgewählt"),
                                                     tint = bColors.signalRed,
                                                     modifier = Modifier.size(24.dp)
                                                 )
                                             } else {
-                                                OutlinedButton(
-                                                    onClick = { viewModel.selectTargetRepeater(contact) }
+                                                OutlinedButton(shape = BauhausCornerShape, onClick = { viewModel.selectTargetRepeater(contact) }
                                                 ) {
-                                                    Text("Wählen", fontSize = 11.sp)
+                                                    Text(tr("Wählen"), fontSize = 11.sp)
                                                 }
                                             }
                                         }
@@ -698,8 +754,34 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+      } // Ende oberer Bereich
+
+        // Start-Scan läuft einmalig automatisch; erneut nur auf ausdrücklichen Wunsch
+        val initialReadDone by viewModel.hasCompletedInitialRead.collectAsState()
+        val readActive by viewModel.activeReadStatusText.collectAsState()
+        // (ganz unten platziert, damit das Layout oben beim Einblenden nicht springt)
+        val loginDone = !caps.isCompanion || remoteAdmin.isLoggedIn
+        val scanFailed = !initialReadDone && caps.detectionComplete && readActive == null   // abgebrochen/fehlgeschlagen -> Neuversuch anbieten
+        if (connectionState is ConnectionState.Connected && loginDone && readActive == null && (initialReadDone || scanFailed)) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth().clip(BauhausCornerShape).background(MaterialTheme.colorScheme.surface).border(1.dp, MaterialTheme.colorScheme.outline, BauhausCornerShape).padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    if (initialReadDone) tr("✓ Alle Parameter eingelesen") else tr("Parameter unvollständig eingelesen"),
+                    fontSize = 12.sp,
+                    color = if (initialReadDone) MaterialTheme.colorScheme.onSurfaceVariant else bColors.ochre
+                )
+                OutlinedButton(shape = BauhausCornerShape, onClick = { viewModel.readBasicSetupFromNode() }) { Text(tr("Neu einlesen"), fontSize = 12.sp) }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+    }
     }
 }
 
 }
+
+/** Merkt sich die größte bisher gemessene Höhe (kein Compose-State: soll keine Neukomposition auslösen). */
+private class StableHeight { var value: androidx.compose.ui.unit.Dp = 0.dp }

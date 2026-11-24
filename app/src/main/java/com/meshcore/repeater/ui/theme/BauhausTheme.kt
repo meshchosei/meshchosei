@@ -51,8 +51,9 @@ val LocalBauhausColors = staticCompositionLocalOf {
     )
 }
 
-// Geometric Bauhaus shapes: strict 4.dp radii
-val BauhausCornerShape = RoundedCornerShape(4.dp)
+// Geometrische Bauhaus-Form: BauhausCornerShape = 2.dp (Standard für Cards, Buttons, Chips, Felder);
+// Material-Shapes darüber: extraSmall 2.dp, small/medium 4.dp, large 6.dp, extraLarge 8.dp
+val BauhausCornerShape = RoundedCornerShape(2.dp)
 
 val BauhausShapes = Shapes(
     extraSmall = RoundedCornerShape(2.dp),

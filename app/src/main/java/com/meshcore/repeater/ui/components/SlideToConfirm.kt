@@ -1,5 +1,6 @@
 package com.meshcore.repeater.ui.components
 
+import com.meshcore.repeater.i18n.tr
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -82,7 +83,7 @@ fun SlideToConfirm(
 
         // Label in the center
         Text(
-            text = if (isConfirmed) "BESTÄTIGT" else text,
+            text = if (isConfirmed) tr("BESTÄTIGT") else text,
             color = Color.White.copy(alpha = 0.85f),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,

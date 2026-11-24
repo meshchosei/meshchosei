@@ -1,6 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import com.meshcore.repeater.model.GpsMode
 import com.meshcore.repeater.model.LedMode
 import com.meshcore.repeater.ui.theme.AlertRed
+import com.meshcore.repeater.ui.theme.BauhausCornerShape
 import com.meshcore.repeater.ui.theme.LocalBauhausColors
 import com.meshcore.repeater.viewmodel.RepeaterViewModel
 
@@ -89,16 +91,22 @@ fun HardwareStatusScreen(viewModel: RepeaterViewModel) {
                 color = bColors.signalRed,
                 fontWeight = FontWeight.Bold
             )
-            IconButton(onClick = { viewModel.requestTelemetry() }) {
-                Icon(Icons.Default.Refresh, contentDescription = "Aktualisieren", tint = bColors.signalRed)
-            }
+            Text(
+                text = "Sync",
+                color = bColors.cobalt,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .clickable { viewModel.requestTelemetry() }
+                    .padding(vertical = 4.dp, horizontal = 4.dp)
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp)
+            shape = BauhausCornerShape
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 // Battery Bar & Status
@@ -189,7 +197,7 @@ fun HardwareStatusScreen(viewModel: RepeaterViewModel) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp)
+            shape = BauhausCornerShape
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
@@ -206,8 +214,7 @@ fun HardwareStatusScreen(viewModel: RepeaterViewModel) {
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        FilterChip(
-                            selected = ledMode == mode,
+                        FilterChip(shape = BauhausCornerShape, selected = ledMode == mode,
                             onClick = { viewModel.setLedMode(mode) },
                             label = { Text(mode.label) },
                             colors = FilterChipDefaults.filterChipColors(
@@ -234,7 +241,7 @@ fun HardwareStatusScreen(viewModel: RepeaterViewModel) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp)
+            shape = BauhausCornerShape
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 GpsMode.values().forEach { mode ->
@@ -244,8 +251,7 @@ fun HardwareStatusScreen(viewModel: RepeaterViewModel) {
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        FilterChip(
-                            selected = gpsMode == mode,
+                        FilterChip(shape = BauhausCornerShape, selected = gpsMode == mode,
                             onClick = { viewModel.setGpsMode(mode) },
                             label = { Text(mode.label) },
                             colors = FilterChipDefaults.filterChipColors(
@@ -272,7 +278,7 @@ fun HardwareStatusScreen(viewModel: RepeaterViewModel) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp)
+            shape = BauhausCornerShape
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 DetailRow("Firmware-Version", hardwareInfo.firmwareVersion)
@@ -290,27 +296,25 @@ fun HardwareStatusScreen(viewModel: RepeaterViewModel) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Button(
-                onClick = {
+            Button(onClick = {
                     val clip = android.content.ClipboardManager::class.java
                     showBackupDialog = true
                 },
                 modifier = Modifier.weight(1f).height(48.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed),
-                shape = RoundedCornerShape(10.dp)
+                shape = BauhausCornerShape
             ) {
                 Icon(Icons.Default.Save, contentDescription = null, tint = Color.White)
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("Backup / Klonen", color = Color.White, fontWeight = FontWeight.Bold)
             }
 
-            OutlinedButton(
-                onClick = { showRebootDialog = true },
+            OutlinedButton(onClick = { showRebootDialog = true },
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = AlertRed),
-                shape = RoundedCornerShape(10.dp)
+                shape = BauhausCornerShape
             ) {
                 Icon(Icons.Default.PowerSettingsNew, contentDescription = null)
                 Spacer(modifier = Modifier.width(6.dp))
@@ -334,7 +338,7 @@ fun HardwareStatusScreen(viewModel: RepeaterViewModel) {
             confirmButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = { backupText = viewModel.buildBackupScript() }) { Text("Auslesen") }
-                    Button(onClick = { viewModel.restoreBackupScript(backupText); showBackupDialog = false }) { Text("Einspielen") }
+                    Button(shape = BauhausCornerShape, onClick = { viewModel.restoreBackupScript(backupText); showBackupDialog = false }) { Text("Einspielen") }
                 }
             },
             dismissButton = { TextButton(onClick = { showBackupDialog = false }) { Text("Schließen") } }
@@ -346,8 +350,7 @@ fun HardwareStatusScreen(viewModel: RepeaterViewModel) {
             title = { Text("Repeater neu starten?") },
             text = { Text("Möchtest du den Repeater wirklich neu starten? Die Funk- und Bluetooth-Verbindung wird dabei kurzzeitig unterbrochen.") },
             confirmButton = {
-                Button(
-                    onClick = {
+                Button(shape = BauhausCornerShape, onClick = {
                         showRebootDialog = false
                         viewModel.rebootNode()
                     },

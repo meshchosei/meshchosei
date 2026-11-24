@@ -29,13 +29,13 @@
 
     <!-- Navigation Menu -->
     <string name="menu_connection">Connection</string>
-    <string name="menu_connection_sub">USB-Serial OTG &amp; BLE-Companion</string>
+    <string name="menu_connection_sub">USB-Serial OTG &amp; BLE companion</string>
     <string name="menu_radio">Radio, Country &amp; Antenna</string>
     <string name="menu_radio_sub">EU868 Presets, EIRP &amp; Compliance</string>
     <string name="menu_filter">Filter &amp; Whitelist</string>
-    <string name="menu_filter_sub">Packet Filter &amp; Rules</string>
-    <string name="menu_mesh_care">Mesh Care Mode</string>
-    <string name="menu_mesh_care_sub">Auto-Revert Watchdog (5/10 min)</string>
+    <string name="menu_filter_sub">Packet filter &amp; rules</string>
+    <string name="menu_mesh_care">Mesh care mode</string>
+    <string name="menu_mesh_care_sub">Auto-revert watchdog (5/10 min)</string>
     <string name="menu_hardware">Hardware &amp; Status</string>
     <string name="menu_hardware_sub">LEDs, GPS &amp; Solar/Battery</string>
 
@@ -47,7 +47,7 @@
     <string name="status_no_device">No device paired</string>
     <string name="status_active">Active</string>
     <string name="status_care_mode">Care Mode</string>
-    <string name="topbar_menu_desc">Open Menu</string>
+    <string name="topbar_menu_desc">Open menu</string>
 
     <!-- Connection Screen -->
     <string name="conn_physical_interface">PHYSICAL INTERFACE</string>
@@ -97,57 +97,57 @@
     <string name="filter_header">PACKET FILTER &amp; RULES</string>
     <string name="filter_master_switch">Packet filter active (filter on/off)</string>
     <string name="filter_master_on_desc">Filter engine running</string>
-    <string name="filter_master_off_desc">Disabled: Forwarding all packets</string>
-    <string name="filter_dryrun_switch">Dry-Run test mode (filter dryrun on)</string>
+    <string name="filter_master_off_desc">Disabled: forwarding all packets</string>
+    <string name="filter_dryrun_switch">Dry-run test mode (filter dryrun on)</string>
     <string name="filter_dryrun_on_desc">Counts matches only, drops no packets</string>
-    <string name="filter_dryrun_off_desc">Live mode: Unwanted packets dropped</string>
-    <string name="filter_mode_select">Select Filter Mode:</string>
-    <string name="filter_mode_blacklist">Blacklist Mode</string>
-    <string name="filter_mode_blacklist_desc">Standard Blacklist Mode: All packets forwarded except blocked rules.</string>
-    <string name="filter_mode_whitelist">Whitelist Mode (Strict)</string>
-    <string name="filter_mode_whitelist_desc">Strict Whitelist Mode: Only registered channels and paths will be forwarded.</string>
-    <string name="filter_banner_whitelist">Strict Whitelist Mode: Only registered channels and paths will be forwarded.</string>
-    <string name="filter_banner_blacklist">Standard Blacklist Mode: Everything is forwarded except blocked rules.</string>
+    <string name="filter_dryrun_off_desc">Live mode: unwanted packets are dropped</string>
+    <string name="filter_mode_select">Select filter mode:</string>
+    <string name="filter_mode_blacklist">Blacklist mode</string>
+    <string name="filter_mode_blacklist_desc">Standard blacklist mode: all packets forwarded except blocked rules.</string>
+    <string name="filter_mode_whitelist">Whitelist mode (strict)</string>
+    <string name="filter_mode_whitelist_desc">Strict whitelist mode: only registered channels and paths are forwarded.</string>
+    <string name="filter_banner_whitelist">Strict whitelist mode: only registered channels and paths are forwarded.</string>
+    <string name="filter_banner_blacklist">Standard blacklist mode: everything is forwarded except blocked rules.</string>
 
     <!-- Whitelist Controls -->
     <string name="filter_wl_channel_header">WHITELIST CHANNEL ALLOWLIST</string>
     <string name="filter_wl_presets_title">Quick select popular channels:</string>
     <string name="filter_wl_channel_input_hint">Channel name (e.g. #regional or Public)</string>
-    <string name="filter_wl_channels_count">Allowed Channels (%d):</string>
+    <string name="filter_wl_channels_count">Allowed channels (%d):</string>
     <string name="filter_wl_path_header">WHITELIST PATH PREFIXES (2-8 HEX)</string>
     <string name="filter_wl_path_input_hint">Path hex prefix (e.g. a1b2)</string>
     <string name="filter_wl_path_comment_hint">Node description (optional)</string>
-    <string name="filter_wl_paths_count">Allowed Paths (%d):</string>
+    <string name="filter_wl_paths_count">Allowed paths (%d):</string>
 
     <!-- Blacklist Controls (Filter.cpp) -->
     <string name="filter_bl_channel_header">BLOCKED CHANNELS (filter channel add/remove)</string>
     <string name="filter_bl_channel_input_hint">Channel name to block (e.g. #spam)</string>
-    <string name="filter_bl_channels_count">Blocked Channels (%d):</string>
+    <string name="filter_bl_channels_count">Blocked channels (%d):</string>
     <string name="filter_bl_path_header">BLOCKED PATH PREFIXES (filter path add/remove)</string>
     <string name="filter_bl_path_input_hint">Rogue path prefix (2-8 hex digits)</string>
-    <string name="filter_bl_paths_count">Blocked Paths (%d):</string>
+    <string name="filter_bl_paths_count">Blocked paths (%d):</string>
     <string name="filter_rules_header">CONTENT RULES: SENDER &amp; TEXT (filter sender/text)</string>
-    <string name="filter_sender_sub">Blocked Senders</string>
-    <string name="filter_text_sub">Blocked Text Content</string>
+    <string name="filter_sender_sub">Blocked senders</string>
+    <string name="filter_text_sub">Blocked text content</string>
     <string name="filter_pattern_hint">Pattern (e.g. bad_bot or spam_word)</string>
     <string name="filter_secs_hint">Duration (s, 0=perm)</string>
     <string name="filter_prob_hint">Drop % (1-100)</string>
     <string name="filter_watch_header">WATCH CHANNELS (filter watch add/remove)</string>
     <string name="filter_watch_desc">Channels decrypted by the repeater to apply sender/text rules and age limits.</string>
     <string name="filter_watch_input_hint">Watch channel name (e.g. #emergency)</string>
-    <string name="filter_watch_count">Watched Channels (%d):</string>
+    <string name="filter_watch_count">Watched channels (%d):</string>
     <string name="filter_params_header">AGE &amp; HOP LIMIT (filter age / hops)</string>
-    <string name="filter_age_label">Max Message Age (Minutes, 0=off):</string>
-    <string name="filter_hops_label">Max Allowed Hops (0-64):</string>
+    <string name="filter_age_label">Max message age (minutes, 0=off):</string>
+    <string name="filter_hops_label">Max allowed hops (0-64):</string>
 
     <!-- Filter Stats & Reset -->
     <string name="filter_stats_header">FILTER STATISTICS &amp; DROPS</string>
     <string name="filter_stats_allowed">Allowed</string>
     <string name="filter_stats_dropped">Dropped</string>
-    <string name="filter_stats_droprate">Drop Rate</string>
-    <string name="filter_stats_airtime">Airtime Saved</string>
+    <string name="filter_stats_droprate">Drop rate</string>
+    <string name="filter_stats_airtime">Airtime saved</string>
     <string name="filter_reset_header">CRITICAL ACTION: FULL FILTER RESET</string>
-    <string name="filter_reset_desc">Resets all rules, whitelist entries, and match counters to 0 and turns the filter off. Sends \'filter RESET\'.</string>
+    <string name="filter_reset_desc">Resets all rules, whitelist entries and match counters to 0 and turns the filter off. Sends \'filter RESET\'.</string>
     <string name="filter_reset_slide_text">Swipe right for \'filter RESET\'</string>
 
     <!-- Mesh Care Screen -->
@@ -162,13 +162,13 @@
     <string name="care_active_badge">Active</string>
 
     <!-- Disclaimer Dialog (First Launch) -->
-    <string name="disclaimer_title">⚠ Important Notice</string>
+    <string name="disclaimer_title">⚠ Important notice</string>
     <string name="disclaimer_ai_notice">This is AI-generated software — no warranty of any kind.</string>
     <string name="disclaimer_body">Please read the following carefully before using this app to configure LoRa repeater hardware.</string>
-    <string name="disclaimer_point_liability">This software is provided AS-IS without any warranty. The developers accept no liability for damage to hardware, network disruptions, or regulatory violations caused by use of this app.</string>
+    <string name="disclaimer_point_liability">This software is provided AS IS without any warranty. The developers accept no liability for damage to hardware, network disruptions or regulatory violations caused by use of this app.</string>
     <string name="disclaimer_point_regulations">You are solely responsible for complying with all applicable radio regulations in your country. In Germany and the EU, the EU868 band is subject to ETSI EN 300 220 and BNetzA frequency plans. Exceeding allowed ERP/EIRP levels is illegal and may result in fines.</string>
     <string name="disclaimer_point_responsibility">Use this app at your own risk. Always verify that your repeater configuration complies with local radio law before transmitting.</string>
-    <string name="disclaimer_accept_note">By tapping \'Confirm\', you confirm that you have read, understood, and agree to all conditions above.</string>
+    <string name="disclaimer_accept_note">By tapping \'Confirm\' you confirm that you have read, understood and agree to all conditions above.</string>
     <string name="disclaimer_accept_btn">I Confirm — Use at Own Risk</string>
 
     <!-- Device Capability Labels -->
@@ -199,16 +199,36 @@
 
     <string name="menu_cli">CLI Console</string>
     <string name="menu_cli_sub">Direct command terminal &amp; log</string>
+    <string name="menu_backup">Backup &amp; Restore</string>
+    <string name="menu_backup_sub">Save &amp; install MeshCore JSON backups</string>
     <string name="menu_about">About &amp; License</string>
-    <string name="menu_about_sub">GNU GPLv3, Open Source &amp; Info</string>
+    <string name="menu_about_sub">GNU GPLv3, open source &amp; info</string>
     <string name="about_title">Repeater Configurator</string>
-    <string name="about_license_title">License: GNU GPLv3 (Free Software)</string>
-    <string name="about_license_body">Free and Open Source Software licensed under GNU GPLv3. Everyone may use, study, modify, and redistribute it under GPLv3 terms. Provided WITHOUT ANY WARRANTY ("AS IS").</string>
-    <string name="about_ai_title">AI-Assisted Development</string>
-    <string name="about_ai_body">Created with AI assistance for the MeshCore &amp; ZephCore &amp; DDMC (Dutch MeshCore) community. The operator remains solely responsible for complying with local RF regulations.</string>
-    <string name="about_credits_title">Open-Source Components</string>
-    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT License)\n• MeshCore / ZephCore &amp; DDMC (Dutch MeshCore) CLI Protocol</string>
-    <string name="about_show_disclaimer">Show Startup Disclaimer Again</string>
+    <string name="about_license_title">License: GNU GPLv3 (free software)</string>
+    <string name="about_license_body">Free and open source software licensed under GNU GPLv3. Everyone may use, study, modify and redistribute it under GPLv3 terms. Provided WITHOUT ANY WARRANTY (\"AS IS\").</string>
+    <string name="about_ai_title">AI-assisted development</string>
+    <string name="about_ai_body">Created with AI assistance based on the open source code of MeshCore, ZephCore and Dutch MeshCore. The operator remains solely responsible for complying with local radio regulations.</string>
+    <string name="about_credits_title">Open source components</string>
+    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT License)\n• OpenStreetMap map tiles (© OpenStreetMap contributors, ODbL)</string>
+    <string name="about_show_disclaimer">Show disclaimer again</string>
     <string name="lang_nl">NL</string>
     <string name="lang_fr">FR</string>
+    <string name="menu_hardware_antenna">Hardware &amp; Antenna</string>
+    <string name="menu_hardware_antenna_sub">Board, battery &amp; antenna gain</string>
+    <string name="menu_radio_config">Radio &amp; Region</string>
+    <string name="menu_radio_config_sub">Frequency, LoRa profile &amp; TX power</string>
+    <string name="menu_identity_location">Identity &amp; Location</string>
+    <string name="menu_identity_location_sub">Name, coordinates &amp; passwords</string>
+    <string name="menu_routing_adverts">Routing &amp; Adverts</string>
+    <string name="menu_routing_adverts_sub">Forwarding, timing &amp; beacons</string>
+    <string name="about_privacy_title">Privacy policy</string>
+    <string name="about_privacy_body">1) No servers of our own, no tracking: all settings, filter lists and JSON backups stay exclusively on your device. The app collects no usage data.\n\n2) Bluetooth &amp; location: for BLE scans Android requires the location permission (up to Android 11) and enabled location services. GPS data is only used for the repeater\'s location and is never passed on to third parties.\n\n3) Map tiles (OpenStreetMap): when you open the location map, map tiles are loaded from tile.openstreetmap.org (OpenStreetMap Foundation). For technical reasons your IP address is transmitted to that server.</string>
+    <string name="conn_admin_password_label">Admin password (max. 15)</string>
+    <string name="menu_blacklist">Blacklist</string>
+    <string name="menu_blacklist_sub">Block channels &amp; paths</string>
+    <string name="menu_whitelist">Whitelist</string>
+    <string name="menu_whitelist_sub">Allowed channels &amp; paths</string>
+    <string name="menu_blocked_not_connected">Please connect to a repeater first.</string>
+    <string name="menu_blocked_unsupported">This function is not supported by the connected firmware or connection.</string>
+    <string name="menu_blocked_filter_active">Please switch off the active packet filter first.</string>
 </resources>

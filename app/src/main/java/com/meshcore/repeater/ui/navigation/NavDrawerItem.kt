@@ -1,13 +1,7 @@
 package com.meshcore.repeater.ui.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Terminal
-import androidx.compose.material.icons.filled.CellTower
-import androidx.compose.material.icons.filled.ElectricBolt
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Memory
-import androidx.compose.material.icons.filled.Usb
+import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.meshcore.repeater.R
 
@@ -17,36 +11,15 @@ enum class NavDrawerItem(
     val icon: ImageVector,
     val subtitleRes: Int
 ) {
-    CONNECTION(
-        route = "connection",
-        titleRes = R.string.menu_connection,
-        icon = Icons.Default.Usb,
-        subtitleRes = R.string.menu_connection_sub
-    ),
-    RADIO_ANTENNA(
-        route = "radio_antenna",
-        titleRes = R.string.menu_radio,
-        icon = Icons.Default.CellTower,
-        subtitleRes = R.string.menu_radio_sub
-    ),
-    FILTER_WHITELIST(
-        route = "filter_whitelist",
-        titleRes = R.string.menu_filter,
-        icon = Icons.Default.FilterList,
-        subtitleRes = R.string.menu_filter_sub
-    ),
-    MESH_CARE(
-        route = "mesh_care",
-        titleRes = R.string.menu_mesh_care,
-        icon = Icons.Default.ElectricBolt,
-        subtitleRes = R.string.menu_mesh_care_sub
-    ),
-    HARDWARE_STATUS(
-        route = "hardware_status",
-        titleRes = R.string.menu_hardware,
-        icon = Icons.Default.Memory,
-        subtitleRes = R.string.menu_hardware_sub
-    ),
+    CONNECTION("connection", R.string.menu_connection, Icons.Default.Usb, R.string.menu_connection_sub),
+    MESH_CARE("mesh_care", R.string.menu_mesh_care, Icons.Default.ElectricBolt, R.string.menu_mesh_care_sub),
+    HARDWARE_ANTENNA("hardware_antenna", R.string.menu_hardware_antenna, Icons.Default.Memory, R.string.menu_hardware_antenna_sub),
+    RADIO_CONFIG("radio_config", R.string.menu_radio_config, Icons.Default.CellTower, R.string.menu_radio_config_sub),
+    IDENTITY_LOCATION("identity_location", R.string.menu_identity_location, Icons.Default.PersonPinCircle, R.string.menu_identity_location_sub),
+    ROUTING_ADVERTS("routing_adverts", R.string.menu_routing_adverts, Icons.Default.AltRoute, R.string.menu_routing_adverts_sub),
+    BLACKLIST("blacklist", R.string.menu_blacklist, Icons.Default.Block, R.string.menu_blacklist_sub),
+    WHITELIST("whitelist", R.string.menu_whitelist, Icons.Default.VerifiedUser, R.string.menu_whitelist_sub),
     CLI_CONSOLE("cli_console", R.string.menu_cli, Icons.Default.Terminal, R.string.menu_cli_sub),
+    BACKUP("backup", R.string.menu_backup, Icons.Default.Backup, R.string.menu_backup_sub),
     ABOUT("about", R.string.menu_about, Icons.Default.Info, R.string.menu_about_sub)
 }

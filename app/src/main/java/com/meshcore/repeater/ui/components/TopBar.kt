@@ -1,5 +1,6 @@
 package com.meshcore.repeater.ui.components
 
+import com.meshcore.repeater.i18n.tr
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -61,6 +62,17 @@ fun RepeaterTopBar(
 
                 Spacer(modifier = Modifier.weight(1f))
 
+                // Rolle des direkt verbundenen Geräts (oben rechts): direkter Repeater (USB-CLI) oder Companion
+                if (connectionState is ConnectionState.Connected && (capabilities.isDirectRepeater || capabilities.isCompanion || capabilities.firmwareVersion.isNotBlank())) {
+                    val companion = capabilities.isCompanion && !capabilities.isDirectRepeater
+                    val roleColor = if (companion) bColors.cobalt else bColors.successGreen
+                    Text(
+                        text = if (companion) tr("Companion") else tr("Repeater"),
+                        fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false, color = roleColor,
+                        modifier = Modifier.clip(BauhausCornerShape).background(roleColor.copy(alpha = 0.14f)).padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                    if (meshCareState.isActive) Spacer(modifier = Modifier.width(6.dp))
+                }
                 // Schonmodus warning pill
                 if (meshCareState.isActive) {
                     Row(
@@ -72,7 +84,7 @@ fun RepeaterTopBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Bolt,
-                            contentDescription = "Schonmodus",
+                            contentDescription = tr("Schonmodus"),
                             tint = bColors.ochre,
                             modifier = Modifier.size(16.dp)
                         )

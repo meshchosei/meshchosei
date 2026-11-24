@@ -40,15 +40,36 @@ object InputValidator {
         }
     }
 
+    /** Untergrenze von "set tx" (SX1262: -9 dBm). */
+    const val MIN_TX_DBM = -9.0
+
     /**
-     * TX-Leistung: -10 bis 30 dBm
+     * TX-Leistung: [MIN_TX_DBM] bis [maxDbm]. [maxDbm] kommt aus dem aktiven Board-Profil
+     * (RadioAntennaConfig.maxTxInputDbm), damit UI, Speichern und Validierung dieselbe Grenze nutzen.
      */
-    fun validateTxPowerDbm(value: Double): ValidationResult {
+    fun validateTxPowerDbm(value: Double, maxDbm: Double = 30.0): ValidationResult {
         return when {
-            value < -10.0 || value > 30.0 -> ValidationResult.Error("TX power must be between -10 and 30 dBm")
+            value < MIN_TX_DBM || value > maxDbm -> ValidationResult.Error("TX power must be between ${MIN_TX_DBM.toInt()} and ${maxDbm.toInt()} dBm")
             else -> ValidationResult.Ok
         }
     }
+
+    // === Identität & Standort =================================================
+
+    /** Breitengrad als Dezimalzahl (Punkt oder Komma) im Bereich -90..90. */
+    fun isValidLatitude(input: String): Boolean =
+        input.trim().replace(',', '.').toDoubleOrNull()?.let { it.isFinite() && it in -90.0..90.0 } == true
+
+    /** Längengrad als Dezimalzahl (Punkt oder Komma) im Bereich -180..180. */
+    fun isValidLongitude(input: String): Boolean =
+        input.trim().replace(',', '.').toDoubleOrNull()?.let { it.isFinite() && it in -180.0..180.0 } == true
+
+    /** Länge des MeshCore-Private-Keys in Hex-Zeichen (PRV_KEY_SIZE = 64 Byte). */
+    const val PRIVATE_KEY_HEX_LEN = 128
+    private val PRIVATE_KEY_HEX = Regex("^[0-9a-fA-F]{$PRIVATE_KEY_HEX_LEN}$")
+
+    /** Private Key für "set prv.key": exakt 64 Byte = 128 Hex-Zeichen, nur 0-9/a-f. */
+    fun isValidPrivateKeyHex(input: String): Boolean = PRIVATE_KEY_HEX.matches(input.trim())
 
     /**
      * Spreading Factor: 6–12

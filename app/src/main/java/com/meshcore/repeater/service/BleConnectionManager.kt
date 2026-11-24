@@ -1,4 +1,5 @@
 package com.meshcore.repeater.service
+import com.meshcore.repeater.i18n.tr
 import android.os.Build
 
 import android.annotation.SuppressLint
@@ -22,6 +23,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.UUID
 
 class BleConnectionManager(
@@ -30,10 +34,14 @@ class BleConnectionManager(
     private val onDataReceived: (String) -> Unit,
     private val onFrameReceived: (ByteArray) -> Unit,
     private val onError: (String) -> Unit,
-    private val onConnectionChanged: (Boolean, String?) -> Unit
+    private val onConnectionChanged: (Boolean, String?) -> Unit,
+    private val onLinkLost: (String) -> Unit = {}
 ) {
+    @Volatile private var linkEstablished = false
+    @Volatile private var userDisconnect = false
     companion object {
         private const val TAG = "BleConnMgr"
+        private const val GAP_BETWEEN_WRITES_MS = 135L
 
         // Nordic UART Service (NUS)
         val NUS_SERVICE_UUID: UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
@@ -79,7 +87,7 @@ class BleConnectionManager(
 
         override fun onScanFailed(errorCode: Int) {
             _isScanning.value = false
-            if (errorCode != 1) onError("BLE-Scan fehlgeschlagen (Fehlercode $errorCode)")
+            if (errorCode != 1) onError(tr("BLE-Scan fehlgeschlagen (Fehlercode {0})", errorCode))
         }
     }
 
@@ -112,7 +120,7 @@ class BleConnectionManager(
             scanner.startScan(null, settings, scanCallback)
         } catch (e: Exception) {
             _isScanning.value = false
-            onError("Scan-Start fehlgeschlagen: ${e.message}")
+            onError(tr("Scan-Start fehlgeschlagen: {0}", e.message))
             return
         }
 
@@ -134,172 +142,303 @@ class BleConnectionManager(
         }
     }
 
+    private var connectJob: Job? = null
+    @Volatile private var closedGatt: BluetoothGatt? = null
+    private var connectRetryAddress: String? = null
+
+    /**
+     * Sauberer Verbindungsaufbau (gegen GATT-Status 147/133):
+     *  1. laufenden Scan stoppen
+     *  2. evtl. noch offene BluetoothGatt-Instanz mit disconnect() + close() schließen
+     *  3. mindestens 400 ms warten, bis der Android-BLE-Stack die alte Verbindung freigegeben hat
+     *  4. erst dann connectGatt()
+     */
     @SuppressLint("MissingPermission")
-    fun connect(address: String) {
-        stopScan()
-        stopScan()
+    fun connect(address: String, isRetry: Boolean = false) {
         val adapter = bluetoothAdapter ?: return
         val device = try {
             adapter.getRemoteDevice(address)
         } catch (e: Exception) {
-            onError("Ungültige BLE-Adresse: $address")
+            onError(tr("Ungültige BLE-Adresse: {0}", address))
             return
         }
+        connectJob?.cancel()
+        connectJob = scope.launch(Dispatchers.Main) {
+            val hadScan = _isScanning.value
+            stopScan()
+            val hadGatt = closeGattQuietly()
+            delay(if (hadGatt || hadScan || isRetry) 600L else 400L)
+            userDisconnect = false
+            linkEstablished = false
+            connectRetryAddress = if (isRetry) null else address
+            synchronized(lineBuffer) { lineBuffer.clear() }
+            activeGatt = device.connectGatt(context, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
+        }
+    }
 
-        disconnect()
-        activeGatt = device.connectGatt(context, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
+    /** Schließt eine evtl. offene GATT-Instanz OHNE onConnectionChanged-Callback (kein falsches "Getrennt" beim Verbinden). */
+    @SuppressLint("MissingPermission")
+    private fun closeGattQuietly(): Boolean {
+        val g = activeGatt ?: return false
+        stopWriter()
+        closedGatt = g
+        userDisconnect = true
+        activeGatt = null
+        rxCharacteristic = null
+        linkEstablished = false
+        try { g.disconnect() } catch (_: Exception) {}
+        try { g.close() } catch (_: Exception) {}
+        return true
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Streng sequentielle GATT-Initialisierung (nie zwei GATT-Operationen gleichzeitig):
+    //   1) CONNECTED          -> requestMtu(247)
+    //   2) onMtuChanged       -> discoverServices()
+    //   3) onServicesDiscovered -> Notification-Descriptor schreiben
+    //   4) onDescriptorWrite  -> EINMALIG onConnectionChanged(true)
+    // ---------------------------------------------------------------------------------------
+    @Volatile private var negotiatedMtu = 23
+    @Volatile private var servicesRequested = false
+    @Volatile private var readyNotified = false
+    private var mtuFallbackJob: Job? = null
+
+    @SuppressLint("MissingPermission")
+    private fun requestServiceDiscovery(gatt: BluetoothGatt) {
+        if (servicesRequested) return
+        servicesRequested = true
+        mtuFallbackJob?.cancel()
+        if (!gatt.discoverServices()) failSetup(gatt, "BLE: Dienstsuche konnte nicht gestartet werden.")
+    }
+
+    /** Verbindung ist vollständig eingerichtet (Notifications aktiv) – genau einmal melden. */
+    private fun markReady(gatt: BluetoothGatt) {
+        if (readyNotified) return
+        readyNotified = true
+        linkEstablished = true
+        startWriter()
+        val name = gatt.device?.name ?: gatt.device?.address ?: "MeshCore BLE"
+        scope.launch(Dispatchers.Main) { onConnectionChanged(true, name) }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun failSetup(gatt: BluetoothGatt, msg: String) {
+        scope.launch(Dispatchers.Main) { onError(msg) }
+        try { gatt.disconnect() } catch (_: Exception) {}
     }
 
     private val gattCallback = object : BluetoothGattCallback() {
         @SuppressLint("MissingPermission")
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    val name = gatt?.device?.name ?: gatt?.device?.address ?: "BLE-Companion"
-                    scope.launch(Dispatchers.Main) {
-                        onConnectionChanged(true, name)
-                    }
-                    gatt?.requestMtu(512)
-                    gatt?.discoverServices()
-                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                    scope.launch(Dispatchers.Main) {
-                        onConnectionChanged(false, null)
-                    }
-                    activeGatt?.close()
-                    activeGatt = null
-                }
-            } else {
+            // Späte Callbacks einer bereits geschlossenen bzw. fremden GATT-Instanz ignorieren
+            if (gatt != null && (gatt === closedGatt || (activeGatt != null && gatt !== activeGatt))) { try { gatt.close() } catch (_: Exception) {}; return }
+            if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED && gatt != null) {
+                // linkEstablished erst in markReady(): Abbruch während der Einrichtung = Verbindungsfehler, kein "Link verloren"
+                negotiatedMtu = 23; servicesRequested = false; readyNotified = false
+                // Schritt 1: MTU aushandeln. Kommt kein onMtuChanged (manche Stacks), nach 1,5 s trotzdem weiter.
+                if (!gatt.requestMtu(247)) { requestServiceDiscovery(gatt); return }
+                mtuFallbackJob?.cancel()
+                mtuFallbackJob = scope.launch(Dispatchers.Main) { delay(1500L); if (activeGatt === gatt) requestServiceDiscovery(gatt) }
+                return
+            }
+            if (newState == BluetoothProfile.STATE_DISCONNECTED || status != BluetoothGatt.GATT_SUCCESS) {
+                val wasUp = linkEstablished
+                val byUser = userDisconnect
+                linkEstablished = false
+                readyNotified = false
+                mtuFallbackJob?.cancel()
+                stopWriter()
+                try { activeGatt?.close() } catch (_: Exception) {}
+                activeGatt = null
+                rxCharacteristic = null
+                val retryAddr = connectRetryAddress
                 scope.launch(Dispatchers.Main) {
-                    onError("BLE-Verbindungsfehler: Status $status")
+                    if (!byUser && !wasUp && retryAddr != null && (status == 147 || status == 133 || status == 62)) {
+                        // Einmaliger automatischer Neuversuch nach Stack-Fehler beim Verbindungsaufbau
+                        connectRetryAddress = null
+                        connect(retryAddr, isRetry = true)
+                        return@launch
+                    }
+                    when {
+                        byUser -> {}
+                        wasUp -> onLinkLost(describeGattStatus(status))
+                        else -> onError(if (status == 147) "BLE-Verbindungsaufbau fehlgeschlagen (Status 147 – Timeout). Gerät eingeschaltet und in Reichweite?" else tr("BLE-Verbindung fehlgeschlagen (Status {0})", status))
+                    }
                     onConnectionChanged(false, null)
                 }
-                activeGatt?.close()
-                activeGatt = null
             }
+        }
+
+        override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
+            if (gatt == null || gatt !== activeGatt) return
+            if (status == BluetoothGatt.GATT_SUCCESS) negotiatedMtu = mtu
+            // Schritt 2: erst nach der MTU-Antwort die Dienste suchen
+            requestServiceDiscovery(gatt)
         }
 
         @SuppressLint("MissingPermission")
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS && gatt != null) {
-                val nusService = gatt.getService(NUS_SERVICE_UUID)
-                if (nusService != null) {
-                    rxCharacteristic = nusService.getCharacteristic(NUS_RX_CHAR_UUID)
-                    val txCharacteristic = nusService.getCharacteristic(NUS_TX_CHAR_UUID)
-
-                    if (txCharacteristic != null) {
-                        gatt.setCharacteristicNotification(txCharacteristic, true)
-                        val descriptor = txCharacteristic.getDescriptor(CLIENT_CONFIG_DESCRIPTOR)
-                        if (descriptor != null) {
-                            @Suppress("DEPRECATION")
-                            descriptor.value = android.bluetooth.BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                            @Suppress("DEPRECATION")
-                            gatt.writeDescriptor(descriptor)
-                        } else {
-                            scope.launch(Dispatchers.Main) { onConnectionChanged(true, gatt.device?.name ?: "MeshCore BLE") }
-                        }
-                    }
-                }
+            if (gatt == null || gatt !== activeGatt) return
+            val nusService = if (status == BluetoothGatt.GATT_SUCCESS) gatt.getService(NUS_SERVICE_UUID) else null
+            val rx = nusService?.getCharacteristic(NUS_RX_CHAR_UUID)
+            val txCharacteristic = nusService?.getCharacteristic(NUS_TX_CHAR_UUID)
+            if (rx == null || txCharacteristic == null) { failSetup(gatt, "Kein aktiver BLE-UART-Dienst."); return }
+            rxCharacteristic = rx
+            gatt.setCharacteristicNotification(txCharacteristic, true)
+            val descriptor = txCharacteristic.getDescriptor(CLIENT_CONFIG_DESCRIPTOR)
+            if (descriptor == null) { markReady(gatt); return }
+            // Schritt 3: Notifications einschalten
+            val started = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                gatt.writeDescriptor(descriptor, android.bluetooth.BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) == BluetoothGatt.GATT_SUCCESS
+            } else {
+                @Suppress("DEPRECATION")
+                descriptor.value = android.bluetooth.BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                @Suppress("DEPRECATION")
+                gatt.writeDescriptor(descriptor)
             }
+            if (!started) failSetup(gatt, "Kein aktiver BLE-UART-Dienst.")
         }
 
-        @SuppressLint("MissingPermission")
         override fun onDescriptorWrite(gatt: BluetoothGatt?, descriptor: android.bluetooth.BluetoothGattDescriptor?, status: Int) {
-            try { gatt?.requestMtu(247) } catch (_: Exception) {}
-            scope.launch(Dispatchers.Main) {
-                onConnectionChanged(true, gatt?.device?.name ?: "MeshCore BLE")
-            }
+            if (gatt == null || gatt !== activeGatt) return
+            // Schritt 4: erst jetzt ist die Verbindung nutzbar
+            if (status == BluetoothGatt.GATT_SUCCESS) markReady(gatt) else failSetup(gatt, tr("BLE-Verbindung fehlgeschlagen (Status {0})", status))
+        }
+
+        override fun onCharacteristicWrite(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?, status: Int) {
+            pendingWrite?.complete(status == BluetoothGatt.GATT_SUCCESS)
+        }
+
+        // Android 13+: Wert kommt als Parameter (kein Überschreiben durch die nächste Notification)
+        override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, value: ByteArray) {
+            if (characteristic.uuid == NUS_TX_CHAR_UUID) handleNotification(value)
         }
 
         @Deprecated("Deprecated in Java")
-        override fun onCharacteristicChanged(
-            gatt: BluetoothGatt?,
-            characteristic: BluetoothGattCharacteristic?
-        ) {
+        override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
             if (characteristic?.uuid == NUS_TX_CHAR_UUID) {
                 @Suppress("DEPRECATION")
-                val data = characteristic.value ?: return
-                if (data.isEmpty()) return
+                val data = characteristic.value?.copyOf() ?: return
+                handleNotification(data)
+            }
+        }
+    }
 
-                val opcode = data[0]
-                // Prüfen, ob es sich um ein binäres MeshCore Companion-Paket handelt
-                val isCompanionPacket = when (opcode) {
-                    RepeaterProtocol.PACKET_OK,
-                    RepeaterProtocol.PACKET_ERROR,
-                    RepeaterProtocol.PACKET_CONTACT_START,
-                    RepeaterProtocol.PACKET_CONTACT,
-                    RepeaterProtocol.PACKET_CONTACT_END,
-                    RepeaterProtocol.PACKET_SELF_INFO,
-                    RepeaterProtocol.PACKET_SENT,
-                    RepeaterProtocol.PACKET_CONTACT_MSG_V3,
-                    RepeaterProtocol.PACKET_CLI_REPLY -> true
-                    else -> false
+    private fun handleNotification(data: ByteArray) {
+        if (data.isEmpty()) return
+        val opcode = data[0].toInt() and 0xFF
+        // MeshCore/ZephCore Companion: alle Response-Codes < 0x20, alle Push-Codes >= 0x80.
+        val isCompanionPacket = opcode < 0x20 || opcode >= 0x80
+        if (isCompanionPacket) {
+            scope.launch(Dispatchers.Main) { onFrameReceived(data) }
+        } else {
+            // Fallback: Als ASCII-Textzeilen parsen
+            val text = String(data, Charsets.UTF_8)
+            synchronized(lineBuffer) {
+                lineBuffer.append(text)
+                while (lineBuffer.contains("\n")) {
+                    val line = lineBuffer.substring(0, lineBuffer.indexOf("\n")).trimEnd('\r')
+                    lineBuffer.delete(0, lineBuffer.indexOf("\n") + 1)
+                    if (line.isNotEmpty()) scope.launch(Dispatchers.Main) { onDataReceived(line) }
                 }
+            }
+        }
+    }
 
-                if (isCompanionPacket) {
-                    scope.launch(Dispatchers.Main) {
-                        onFrameReceived(data)
+    // ---------------------------------------------------------------------------------------
+    // Eine einzige Schreib-Warteschlange für ALLE BLE-Schreibvorgänge (Frames und Text).
+    // Jeder Schreibvorgang wartet auf onCharacteristicWrite, bevor der nächste startet.
+    // Companion-Frames werden nie zerteilt (BLE-Companion = 1 Frame pro Write): passt ein Frame
+    // nicht in (MTU − 3), wird er verworfen statt abgeschnitten.
+    // ---------------------------------------------------------------------------------------
+    private class WriteItem(val data: ByteArray, val isFrame: Boolean)
+    private var writeChannel: Channel<WriteItem>? = null
+    private var writerJob: Job? = null
+    @Volatile private var pendingWrite: CompletableDeferred<Boolean>? = null
+
+    private fun startWriter() {
+        stopWriter()
+        val ch = Channel<WriteItem>(Channel.UNLIMITED)
+        writeChannel = ch
+        writerJob = scope.launch(Dispatchers.IO) {
+            for (item in ch) {
+                val maxLen = (negotiatedMtu - 3).coerceAtLeast(20)
+                if (item.isFrame) {
+                    if (item.data.size > maxLen) {
+                        launch(Dispatchers.Main) { onError(tr("BLE-Frame zu lang für MTU ({0} > {1} Byte) – nicht gesendet.", item.data.size, maxLen)) }
+                        continue
                     }
+                    writeChunk(item.data)
                 } else {
-                    // Fallback: Als ASCII-Textzeilen parsen
-                    val text = String(data, Charsets.UTF_8)
-                    synchronized(lineBuffer) {
-                        lineBuffer.append(text)
-                        while (lineBuffer.contains("\n")) {
-                            val line = lineBuffer.substring(0, lineBuffer.indexOf("\n")).trimEnd('\r')
-                            lineBuffer.delete(0, lineBuffer.indexOf("\n") + 1)
-                            if (line.isNotEmpty()) {
-                                scope.launch(Dispatchers.Main) {
-                                    onDataReceived(line)
-                                }
-                            }
-                        }
+                    var off = 0
+                    while (off < item.data.size) {
+                        val end = minOf(off + maxLen, item.data.size)
+                        if (!writeChunk(item.data.copyOfRange(off, end))) break
+                        off = end
                     }
                 }
             }
         }
     }
 
-    @SuppressLint("MissingPermission")
-    fun sendBytes(frame: ByteArray) {
-        val gatt = activeGatt
-        val rx = rxCharacteristic
-        if (gatt == null || rx == null) {
-            onError("Kein aktiver BLE-UART-Dienst.")
-            return
-        }
+    private fun stopWriter() {
+        writeChannel?.close(); writeChannel = null
+        writerJob?.cancel(); writerJob = null
+        pendingWrite?.complete(false); pendingWrite = null
+    }
 
-        scope.launch(Dispatchers.IO) {
-            synchronized(this@BleConnectionManager) {
+    @SuppressLint("MissingPermission")
+    private suspend fun writeChunk(chunk: ByteArray): Boolean {
+        val gatt = activeGatt ?: return false
+        val rx = rxCharacteristic ?: return false
+        val done = CompletableDeferred<Boolean>()
+        pendingWrite = done
+        val started = try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                gatt.writeCharacteristic(rx, chunk, BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE) == BluetoothGatt.GATT_SUCCESS
+            } else {
                 rx.writeType = BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
                 @Suppress("DEPRECATION")
-                rx.value = frame
+                rx.value = chunk
                 @Suppress("DEPRECATION")
                 gatt.writeCharacteristic(rx)
-                Thread.sleep(135)
             }
-        }
+        } catch (e: Exception) { false }
+        if (!started) { pendingWrite = null; delay(60L); return false }
+        withTimeoutOrNull(1000L) { done.await() }
+        pendingWrite = null
+        delay(GAP_BETWEEN_WRITES_MS) // Companion verarbeitet Frames nacheinander
+        return true
     }
 
-    @SuppressLint("MissingPermission")
-    fun send(command: String) {
-        val gatt = activeGatt
-        val rx = rxCharacteristic
-        if (gatt == null || rx == null) {
+    fun sendBytes(frame: ByteArray) {
+        val ch = writeChannel
+        if (activeGatt == null || rxCharacteristic == null || ch == null) {
             onError("Kein aktiver BLE-UART-Dienst.")
             return
         }
+        ch.trySend(WriteItem(frame.copyOf(), isFrame = true))
+    }
 
-        scope.launch(Dispatchers.IO) {
-            val toSend = if (command.endsWith("\n")) command else "$command\r\n"
-            @Suppress("DEPRECATION")
-            rx.value = toSend.toByteArray(Charsets.UTF_8)
-            @Suppress("DEPRECATION")
-            gatt.writeCharacteristic(rx)
+    fun send(command: String) {
+        val ch = writeChannel
+        if (activeGatt == null || rxCharacteristic == null || ch == null) {
+            onError("Kein aktiver BLE-UART-Dienst.")
+            return
         }
+        val toSend = if (command.endsWith("\n")) command else "$command\r\n"
+        ch.trySend(WriteItem(toSend.toByteArray(Charsets.UTF_8), isFrame = false))
     }
 
     @SuppressLint("MissingPermission")
     fun disconnect() {
+        connectJob?.cancel()
+        mtuFallbackJob?.cancel()
+        stopWriter()
+        readyNotified = false
+        connectRetryAddress = null
+        userDisconnect = true
+        linkEstablished = false
         try {
             activeGatt?.disconnect()
             activeGatt?.close()
@@ -307,6 +446,15 @@ class BleConnectionManager(
         activeGatt = null
         rxCharacteristic = null
         onConnectionChanged(false, null)
+    }
+
+    private fun describeGattStatus(status: Int): String = when (status) {
+        8 -> "Bluetooth-Verbindung abgerissen (Timeout) – Gerät ausgeschaltet oder außer Reichweite."
+        19 -> "Gerät hat die Bluetooth-Verbindung beendet (ausgeschaltet/neu gestartet?)."
+        22 -> "Bluetooth-Verbindung vom Smartphone beendet."
+        133 -> "Bluetooth-Verbindung verloren (GATT-Fehler 133)."
+        147 -> "Bluetooth-Verbindung verloren (Timeout, Status 147)."
+        else -> tr("Bluetooth-Verbindung verloren (Status {0}).", status)
     }
 
     fun destroy() {

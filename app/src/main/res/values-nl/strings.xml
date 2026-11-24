@@ -1,15 +1,15 @@
 <resources>
     <!-- App & General -->
-    <string name="app_name">Repeater Configurator</string>
-    <string name="app_title_repeater">REPEATER</string>
-    <string name="app_title_configurator">CONFIGURATOR</string>
-    <string name="app_edition_subtitle">ZephCore &amp; DDMC (Dutch MeshCore) BW2 Edition</string>
+    <string name="app_name">meshchōsei</string>
+    <string name="app_title_repeater">meshchōsei</string>
+    <string name="app_title_configurator">VOOR MESHCORE</string>
+    <string name="app_edition_subtitle">ZephCore, DMC, Dutch MeshCore BW2 Edition</string>
     <string name="app_version_tag">v1.18.2 • Dutch-MeshCore Filter</string>
     <string name="action_ok">OK</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
-    <string name="action_delete">Delete</string>
-    <string name="action_add">Add</string>
+    <string name="action_delete">Verwijderen</string>
+    <string name="action_add">Toevoegen</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_connect">Connect</string>
     <string name="action_disconnect">Disconnect</string>
@@ -20,22 +20,24 @@
     <string name="drawer_section_appearance">Design &amp; Language</string>
     <string name="drawer_theme_title">Theme Mode</string>
     <string name="drawer_language_title">App Language</string>
-    <string name="theme_system">System</string>
-    <string name="theme_light">Light</string>
-    <string name="theme_dark">Dark</string>
-    <string name="lang_system">System</string>
+    <string name="theme_system">Systeem</string>
+    <string name="theme_light">Licht</string>
+    <string name="theme_dark">Donker</string>
+    <string name="lang_system">Systeem</string>
     <string name="lang_de">Deutsch</string>
     <string name="lang_en">English</string>
 
     <!-- Navigation Menu -->
-    <string name="menu_connection">Connection</string>
-    <string name="menu_connection_sub">USB-Serial OTG &amp; BLE-Companion</string>
+    <string name="menu_connection">Verbinding</string>
+    <string name="menu_connection_sub">USB-serieel &amp; Bluetooth</string>
+    <string name="menu_basic_setup">Basisinstellingen</string>
+    <string name="menu_basic_setup_sub">Identiteit, GPS, Toegang &amp; Routing</string>
     <string name="menu_radio">Radio, Country &amp; Antenna</string>
     <string name="menu_radio_sub">EU868 Presets, EIRP &amp; Compliance</string>
-    <string name="menu_filter">Filter &amp; Whitelist</string>
-    <string name="menu_filter_sub">Packet Filter &amp; Rules</string>
-    <string name="menu_mesh_care">Mesh Care Mode</string>
-    <string name="menu_mesh_care_sub">Auto-Revert Watchdog (5/10 min)</string>
+    <string name="menu_filter">Filter &amp; whitelist</string>
+    <string name="menu_filter_sub">Witte &amp; zwarte lijsten</string>
+    <string name="menu_mesh_care">Mesh-spaarmodus</string>
+    <string name="menu_mesh_care_sub">Netwerkbescherming</string>
     <string name="menu_hardware">Hardware &amp; Status</string>
     <string name="menu_hardware_sub">LEDs, GPS &amp; Solar/Battery</string>
 
@@ -47,7 +49,7 @@
     <string name="status_no_device">No device paired</string>
     <string name="status_active">Active</string>
     <string name="status_care_mode">Care Mode</string>
-    <string name="topbar_menu_desc">Open Menu</string>
+    <string name="topbar_menu_desc">Menu openen</string>
 
     <!-- Connection Screen -->
     <string name="conn_physical_interface">PHYSICAL INTERFACE</string>
@@ -93,62 +95,62 @@
     <string name="radio_compliance_unlocked">WARNING: Compliance lock disabled!</string>
     <string name="radio_compliance_switch">Unlock Legal Power Limit</string>
 
-    <!-- Filter Screen (ZephCore &amp; DDMC (Dutch MeshCore) BW2) -->
-    <string name="filter_header">PACKET FILTER &amp; RULES</string>
-    <string name="filter_master_switch">Packet filter active (filter on/off)</string>
-    <string name="filter_master_on_desc">Filter engine running</string>
-    <string name="filter_master_off_desc">Disabled: Forwarding all packets</string>
-    <string name="filter_dryrun_switch">Dry-Run test mode (filter dryrun on)</string>
-    <string name="filter_dryrun_on_desc">Counts matches only, drops no packets</string>
-    <string name="filter_dryrun_off_desc">Live mode: Unwanted packets dropped</string>
-    <string name="filter_mode_select">Select Filter Mode:</string>
-    <string name="filter_mode_blacklist">Blacklist Mode</string>
-    <string name="filter_mode_blacklist_desc">Standard Blacklist Mode: All packets forwarded except blocked rules.</string>
-    <string name="filter_mode_whitelist">Whitelist Mode (Strict)</string>
-    <string name="filter_mode_whitelist_desc">Strict Whitelist Mode: Only registered channels and paths will be forwarded.</string>
-    <string name="filter_banner_whitelist">Strict Whitelist Mode: Only registered channels and paths will be forwarded.</string>
-    <string name="filter_banner_blacklist">Standard Blacklist Mode: Everything is forwarded except blocked rules.</string>
+    <!-- Filter Screen (ZephCore, DMC, Dutch MeshCore BW2) -->
+    <string name="filter_header">PAKKETFILTER &amp; REGELS</string>
+    <string name="filter_master_switch">Pakketfilter actief (filter on/off)</string>
+    <string name="filter_master_on_desc">Filterengine actief</string>
+    <string name="filter_master_off_desc">Uitgeschakeld: alle pakketten worden doorgestuurd</string>
+    <string name="filter_dryrun_switch">Dry-run-testmodus (filter dryrun on)</string>
+    <string name="filter_dryrun_on_desc">Telt alleen treffers, verwerpt geen pakketten</string>
+    <string name="filter_dryrun_off_desc">Live-modus: ongewenste pakketten worden verworpen</string>
+    <string name="filter_mode_select">Filtermodus kiezen:</string>
+    <string name="filter_mode_blacklist">Blacklistmodus</string>
+    <string name="filter_mode_blacklist_desc">Standaard blacklistmodus: alles wordt doorgestuurd, behalve geblokkeerde regels.</string>
+    <string name="filter_mode_whitelist">Whitelistmodus (streng)</string>
+    <string name="filter_mode_whitelist_desc">Strenge whitelistmodus: alleen geregistreerde kanalen en paden worden doorgestuurd.</string>
+    <string name="filter_banner_whitelist">Strenge whitelistmodus: alleen geregistreerde kanalen en paden worden doorgestuurd.</string>
+    <string name="filter_banner_blacklist">Standaard blacklistmodus: alles wordt doorgestuurd, behalve geblokkeerde regels.</string>
 
     <!-- Whitelist Controls -->
-    <string name="filter_wl_channel_header">WHITELIST CHANNEL ALLOWLIST</string>
-    <string name="filter_wl_presets_title">Quick select popular channels:</string>
-    <string name="filter_wl_channel_input_hint">Channel name (e.g. #regional or Public)</string>
-    <string name="filter_wl_channels_count">Allowed Channels (%d):</string>
-    <string name="filter_wl_path_header">WHITELIST PATH PREFIXES (2-8 HEX)</string>
-    <string name="filter_wl_path_input_hint">Path hex prefix (e.g. a1b2)</string>
+    <string name="filter_wl_channel_header">WHITELIST TOEGESTANE KANALEN</string>
+    <string name="filter_wl_presets_title">Snelkeuze populaire kanalen:</string>
+    <string name="filter_wl_channel_input_hint">Kanaalnaam (bijv. #regional of Public)</string>
+    <string name="filter_wl_channels_count">Toegestane kanalen (%d):</string>
+    <string name="filter_wl_path_header">WHITELIST PADPREFIXEN (2-8 HEX)</string>
+    <string name="filter_wl_path_input_hint">Hex-padprefix (bijv. a1b2)</string>
     <string name="filter_wl_path_comment_hint">Node description (optional)</string>
-    <string name="filter_wl_paths_count">Allowed Paths (%d):</string>
+    <string name="filter_wl_paths_count">Toegestane paden (%d):</string>
 
     <!-- Blacklist Controls (Filter.cpp) -->
-    <string name="filter_bl_channel_header">BLOCKED CHANNELS (filter channel add/remove)</string>
-    <string name="filter_bl_channel_input_hint">Channel name to block (e.g. #spam)</string>
-    <string name="filter_bl_channels_count">Blocked Channels (%d):</string>
-    <string name="filter_bl_path_header">BLOCKED PATH PREFIXES (filter path add/remove)</string>
-    <string name="filter_bl_path_input_hint">Rogue path prefix (2-8 hex digits)</string>
-    <string name="filter_bl_paths_count">Blocked Paths (%d):</string>
-    <string name="filter_rules_header">CONTENT RULES: SENDER &amp; TEXT (filter sender/text)</string>
-    <string name="filter_sender_sub">Blocked Senders</string>
-    <string name="filter_text_sub">Blocked Text Content</string>
-    <string name="filter_pattern_hint">Pattern (e.g. bad_bot or spam_word)</string>
-    <string name="filter_secs_hint">Duration (s, 0=perm)</string>
+    <string name="filter_bl_channel_header">GEBLOKKEERDE KANALEN (filter channel add/remove)</string>
+    <string name="filter_bl_channel_input_hint">Te blokkeren kanaalnaam (bijv. #spam)</string>
+    <string name="filter_bl_channels_count">Geblokkeerde kanalen (%d):</string>
+    <string name="filter_bl_path_header">GEBLOKKEERDE PADPREFIXEN (filter path add/remove)</string>
+    <string name="filter_bl_path_input_hint">Padprefix van stoorzender (2-8 hex-tekens)</string>
+    <string name="filter_bl_paths_count">Geblokkeerde paden (%d):</string>
+    <string name="filter_rules_header">INHOUDSREGELS: AFZENDER &amp; TEKST (filter sender/text)</string>
+    <string name="filter_sender_sub">Geblokkeerde afzenders</string>
+    <string name="filter_text_sub">Geblokkeerde tekstinhoud</string>
+    <string name="filter_pattern_hint">Patroon (bijv. bad_bot of spam_woord)</string>
+    <string name="filter_secs_hint">Duur (s, 0=permanent)</string>
     <string name="filter_prob_hint">Drop % (1-100)</string>
-    <string name="filter_watch_header">WATCH CHANNELS (filter watch add/remove)</string>
-    <string name="filter_watch_desc">Channels decrypted by the repeater to apply sender/text rules and age limits.</string>
-    <string name="filter_watch_input_hint">Watch channel name (e.g. #emergency)</string>
-    <string name="filter_watch_count">Watched Channels (%d):</string>
-    <string name="filter_params_header">AGE &amp; HOP LIMIT (filter age / hops)</string>
-    <string name="filter_age_label">Max Message Age (Minutes, 0=off):</string>
-    <string name="filter_hops_label">Max Allowed Hops (0-64):</string>
+    <string name="filter_watch_header">WATCH-KANALEN (filter watch add/remove)</string>
+    <string name="filter_watch_desc">Kanalen die de repeater ontsleutelt om afzender-/tekstregels en leeftijdsgrenzen toe te passen.</string>
+    <string name="filter_watch_input_hint">Naam watch-kanaal (bijv. #nood)</string>
+    <string name="filter_watch_count">Gevolgde kanalen (%d):</string>
+    <string name="filter_params_header">LEEFTIJDSGRENS &amp; HOPLIMIET (filter age / hops)</string>
+    <string name="filter_age_label">Max. berichtleeftijd (minuten, 0=uit):</string>
+    <string name="filter_hops_label">Max. toegestane hops (0-64):</string>
 
     <!-- Filter Stats & Reset -->
-    <string name="filter_stats_header">FILTER STATISTICS &amp; DROPS</string>
-    <string name="filter_stats_allowed">Allowed</string>
-    <string name="filter_stats_dropped">Dropped</string>
-    <string name="filter_stats_droprate">Drop Rate</string>
-    <string name="filter_stats_airtime">Airtime Saved</string>
-    <string name="filter_reset_header">CRITICAL ACTION: FULL FILTER RESET</string>
-    <string name="filter_reset_desc">Resets all rules, whitelist entries, and match counters to 0 and turns the filter off. Sends \'filter RESET\'.</string>
-    <string name="filter_reset_slide_text">Swipe right for \'filter RESET\'</string>
+    <string name="filter_stats_header">FILTERSTATISTIEKEN &amp; TREFFERS</string>
+    <string name="filter_stats_allowed">Doorgelaten</string>
+    <string name="filter_stats_dropped">Verworpen</string>
+    <string name="filter_stats_droprate">Drop-rate</string>
+    <string name="filter_stats_airtime">Airtime bespaard</string>
+    <string name="filter_reset_header">KRITIEKE ACTIE: FILTER VOLLEDIG RESETTEN</string>
+    <string name="filter_reset_desc">Zet alle regels, whitelistvermeldingen en trefferstellers op 0 en schakelt het filter uit. Verzendt \'filter RESET\'.</string>
+    <string name="filter_reset_slide_text">Naar rechts vegen voor \'filter RESET\'</string>
 
     <!-- Mesh Care Screen -->
     <string name="care_header">MESH CARE WATCHDOG</string>
@@ -162,20 +164,20 @@
     <string name="care_active_badge">Active</string>
 
     <!-- Disclaimer Dialog (First Launch) -->
-    <string name="disclaimer_title">⚠ Important Notice</string>
-    <string name="disclaimer_ai_notice">This is AI-generated software — no warranty of any kind.</string>
-    <string name="disclaimer_body">Please read the following carefully before using this app to configure LoRa repeater hardware.</string>
-    <string name="disclaimer_point_liability">This software is provided AS-IS without any warranty. The developers accept no liability for damage to hardware, network disruptions, or regulatory violations caused by use of this app.</string>
-    <string name="disclaimer_point_regulations">You are solely responsible for complying with all applicable radio regulations in your country. In Germany and the EU, the EU868 band is subject to ETSI EN 300 220 and BNetzA frequency plans. Exceeding allowed ERP/EIRP levels is illegal and may result in fines.</string>
-    <string name="disclaimer_point_responsibility">Use this app at your own risk. Always verify that your repeater configuration complies with local radio law before transmitting.</string>
-    <string name="disclaimer_accept_note">By tapping \'Confirm\', you confirm that you have read, understood, and agree to all conditions above.</string>
+    <string name="disclaimer_title">⚠ Belangrijke mededeling</string>
+    <string name="disclaimer_ai_notice">Dit is door AI gegenereerde software — zonder enige garantie.</string>
+    <string name="disclaimer_body">Lees het volgende zorgvuldig voordat je deze app gebruikt om LoRa-repeaterhardware te configureren.</string>
+    <string name="disclaimer_point_liability">Deze software wordt ZONDER ENIGE GARANTIE geleverd. De ontwikkelaars aanvaarden geen aansprakelijkheid voor schade aan hardware, netwerkstoringen of overtredingen van radiovoorschriften door het gebruik van deze app.</string>
+    <string name="disclaimer_point_regulations">Je bent zelf verantwoordelijk voor het naleven van alle geldende radiovoorschriften in je land. In de EU valt de EU868-band onder ETSI EN 300 220 en de nationale frequentieplannen. Het overschrijden van toegestane ERP/EIRP-waarden is illegaal en kan tot boetes leiden.</string>
+    <string name="disclaimer_point_responsibility">Gebruik deze app op eigen risico. Controleer altijd of je repeaterconfiguratie voldoet aan de lokale radiowetgeving voordat je uitzendt.</string>
+    <string name="disclaimer_accept_note">Door op \'Bevestigen\' te tikken bevestig je dat je alle bovenstaande voorwaarden hebt gelezen, begrepen en aanvaard.</string>
     <string name="disclaimer_accept_btn">I Confirm — Use at Own Risk</string>
 
     <!-- Device Capability Labels -->
     <string name="caps_unsupported">Not supported by this firmware</string>
     <string name="caps_detecting">Detecting firmware capabilities…</string>
     <string name="caps_no_gps">GPS not available on this hardware</string>
-    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore &amp; DDMC (Dutch MeshCore) BW2 firmware</string>
+    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore, DMC, Dutch MeshCore BW2 firmware</string>
     <string name="offline_preview_label">Offline Preview Mode</string>
 
     <!-- Connection Gate -->
@@ -197,18 +199,38 @@
     <string name="hw_reboot_dialog_title">Confirm Repeater Reboot</string>
     <string name="hw_reboot_dialog_desc">This will restart the repeater hardware. The active connection will disconnect.</string>
 
-    <string name="menu_cli">CLI Console</string>
-    <string name="menu_cli_sub">Direct command terminal &amp; log</string>
-    <string name="menu_about">About &amp; License</string>
-    <string name="menu_about_sub">GNU GPLv3, Open Source &amp; Info</string>
-    <string name="about_title">Repeater Configurator</string>
-    <string name="about_license_title">License: GNU GPLv3 (Free Software)</string>
-    <string name="about_license_body">Free and Open Source Software licensed under GNU GPLv3. Everyone may use, study, modify, and redistribute it under GPLv3 terms. Provided WITHOUT ANY WARRANTY ("AS IS").</string>
-    <string name="about_ai_title">AI-Assisted Development</string>
-    <string name="about_ai_body">Created with AI assistance for the MeshCore &amp; ZephCore &amp; DDMC (Dutch MeshCore) community. The operator remains solely responsible for complying with local RF regulations.</string>
-    <string name="about_credits_title">Open-Source Components</string>
-    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT License)\n• MeshCore / ZephCore &amp; DDMC (Dutch MeshCore) CLI Protocol</string>
-    <string name="about_show_disclaimer">Show Startup Disclaimer Again</string>
+    <string name="menu_cli">CLI-console</string>
+    <string name="menu_cli_sub">Opdrachtterminal &amp; log</string>
+    <string name="menu_backup">Back-up &amp; herstel</string>
+    <string name="menu_backup_sub">Back-up &amp; herstel</string>
+    <string name="menu_about">Over &amp; licentie</string>
+    <string name="menu_about_sub">GPLv3-licentie &amp; info</string>
+    <string name="about_title">meshchōsei</string>
+    <string name="about_license_title">Licentie: GNU GPLv3 (vrije software)</string>
+    <string name="about_license_body">Vrije opensourcesoftware onder GNU GPLv3. Iedereen mag haar gebruiken, bestuderen, aanpassen en onder de GPLv3-voorwaarden verspreiden. Geleverd ZONDER ENIGE GARANTIE (\"AS IS\").</string>
+    <string name="about_ai_title">AI-ondersteunde ontwikkeling</string>
+    <string name="about_ai_body">Ontwikkeld met AI-ondersteuning op basis van de open broncode van MeshCore, ZephCore en Dutch MeshCore. De beheerder blijft zelf verantwoordelijk voor het naleven van de wettelijke radiovoorschriften.</string>
+    <string name="about_credits_title">Gebruikte opensourcecomponenten</string>
+    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT-licentie)\n• OpenStreetMap-kaarttegels (© OpenStreetMap-bijdragers, ODbL)</string>
+    <string name="about_show_disclaimer">Disclaimer opnieuw tonen</string>
     <string name="lang_nl">NL</string>
     <string name="lang_fr">FR</string>
+    <string name="menu_hardware_antenna">Hardware &amp; antenne</string>
+    <string name="menu_hardware_antenna_sub">Board, accu &amp; antenne</string>
+    <string name="menu_radio_config">Radio &amp; regio</string>
+    <string name="menu_radio_config_sub">Frequentie, profiel &amp; vermogen</string>
+    <string name="menu_identity_location">Identiteit &amp; locatie</string>
+    <string name="menu_identity_location_sub">Naam, locatie &amp; toegang</string>
+    <string name="menu_routing_adverts">Routing &amp; adverts</string>
+    <string name="menu_routing_adverts_sub">Routering, bakens &amp; timing</string>
+    <string name="about_privacy_title">Privacyverklaring</string>
+    <string name="about_privacy_body">1) Geen eigen servers, geen tracking: alle instellingen, filterlijsten en JSON-back-ups blijven uitsluitend lokaal op je apparaat. De app verzamelt geen gebruiksgegevens.\n\n2) Bluetooth &amp; locatie: voor BLE-scans vereist Android de locatietoestemming (tot Android 11) en ingeschakelde locatiediensten. GPS-gegevens worden alleen gebruikt voor de locatie van de repeater en nooit aan derden doorgegeven.\n\n3) Kaarttegels (OpenStreetMap): bij het openen van de locatiekaart worden kaarttegels geladen van tile.openstreetmap.org (OpenStreetMap Foundation). Daarbij wordt om technische redenen je IP-adres naar die server verzonden.</string>
+    <string name="conn_admin_password_label">Admin-wachtwoord (max. 15)</string>
+    <string name="menu_blacklist">Zwarte lijst</string>
+    <string name="menu_blacklist_sub">Kanalen &amp; paden blokkeren</string>
+    <string name="menu_whitelist">Witte lijst</string>
+    <string name="menu_whitelist_sub">Toegestane kanalen &amp; paden</string>
+    <string name="menu_blocked_not_connected">Maak eerst verbinding met een repeater.</string>
+    <string name="menu_blocked_unsupported">Deze functie wordt niet ondersteund door de verbonden firmware of verbinding.</string>
+    <string name="menu_blocked_filter_active">Schakel eerst het actieve pakketfilter uit.</string>
 </resources>

@@ -1,15 +1,15 @@
 <resources>
     <!-- App & General -->
-    <string name="app_name">Repeater Configurator</string>
-    <string name="app_title_repeater">REPEATER</string>
-    <string name="app_title_configurator">CONFIGURATOR</string>
-    <string name="app_edition_subtitle">ZephCore &amp; DDMC (Dutch MeshCore) BW2 Edition</string>
+    <string name="app_name">meshchōsei</string>
+    <string name="app_title_repeater">meshchōsei</string>
+    <string name="app_title_configurator">POUR MESHCORE</string>
+    <string name="app_edition_subtitle">ZephCore, DMC, Dutch MeshCore BW2 Edition</string>
     <string name="app_version_tag">v1.18.2 • Dutch-MeshCore Filter</string>
     <string name="action_ok">OK</string>
     <string name="action_cancel">Annuler</string>
     <string name="action_save">Save</string>
-    <string name="action_delete">Delete</string>
-    <string name="action_add">Add</string>
+    <string name="action_delete">Supprimer</string>
+    <string name="action_add">Ajouter</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_connect">Connect</string>
     <string name="action_disconnect">Disconnect</string>
@@ -20,22 +20,24 @@
     <string name="drawer_section_appearance">Design &amp; Language</string>
     <string name="drawer_theme_title">Theme Mode</string>
     <string name="drawer_language_title">App Language</string>
-    <string name="theme_system">System</string>
-    <string name="theme_light">Light</string>
-    <string name="theme_dark">Dark</string>
-    <string name="lang_system">System</string>
+    <string name="theme_system">Système</string>
+    <string name="theme_light">Clair</string>
+    <string name="theme_dark">Sombre</string>
+    <string name="lang_system">Système</string>
     <string name="lang_de">Deutsch</string>
     <string name="lang_en">English</string>
 
     <!-- Navigation Menu -->
     <string name="menu_connection">Connexion</string>
-    <string name="menu_connection_sub">USB-Serial OTG &amp; BLE-Companion</string>
+    <string name="menu_connection_sub">Port série &amp; Bluetooth</string>
+    <string name="menu_basic_setup">Configuration de base</string>
+    <string name="menu_basic_setup_sub">Identité, GPS, Accès &amp; Routage</string>
     <string name="menu_radio">Radio, Country &amp; Antenna</string>
     <string name="menu_radio_sub">EU868 Presets, EIRP &amp; Compliance</string>
-    <string name="menu_filter">Filter &amp; Whitelist</string>
-    <string name="menu_filter_sub">Packet Filter &amp; Rules</string>
-    <string name="menu_mesh_care">Mesh Care Mode</string>
-    <string name="menu_mesh_care_sub">Auto-Revert Watchdog (5/10 min)</string>
+    <string name="menu_filter">Filtre &amp; liste blanche</string>
+    <string name="menu_filter_sub">Listes blanches &amp; noires</string>
+    <string name="menu_mesh_care">Mode ménagement mesh</string>
+    <string name="menu_mesh_care_sub">Protection du réseau</string>
     <string name="menu_hardware">Hardware &amp; Status</string>
     <string name="menu_hardware_sub">LEDs, GPS &amp; Solar/Battery</string>
 
@@ -47,7 +49,7 @@
     <string name="status_no_device">No device paired</string>
     <string name="status_active">Active</string>
     <string name="status_care_mode">Care Mode</string>
-    <string name="topbar_menu_desc">Open Menu</string>
+    <string name="topbar_menu_desc">Ouvrir le menu</string>
 
     <!-- Connection Screen -->
     <string name="conn_physical_interface">PHYSICAL INTERFACE</string>
@@ -93,62 +95,62 @@
     <string name="radio_compliance_unlocked">WARNING: Compliance lock disabled!</string>
     <string name="radio_compliance_switch">Unlock Legal Power Limit</string>
 
-    <!-- Filter Screen (ZephCore &amp; DDMC (Dutch MeshCore) BW2) -->
-    <string name="filter_header">PACKET FILTER &amp; RULES</string>
-    <string name="filter_master_switch">Packet filter active (filter on/off)</string>
-    <string name="filter_master_on_desc">Filter engine running</string>
-    <string name="filter_master_off_desc">Disabled: Forwarding all packets</string>
-    <string name="filter_dryrun_switch">Dry-Run test mode (filter dryrun on)</string>
-    <string name="filter_dryrun_on_desc">Counts matches only, drops no packets</string>
-    <string name="filter_dryrun_off_desc">Live mode: Unwanted packets dropped</string>
-    <string name="filter_mode_select">Select Filter Mode:</string>
-    <string name="filter_mode_blacklist">Blacklist Mode</string>
-    <string name="filter_mode_blacklist_desc">Standard Blacklist Mode: All packets forwarded except blocked rules.</string>
-    <string name="filter_mode_whitelist">Whitelist Mode (Strict)</string>
-    <string name="filter_mode_whitelist_desc">Strict Whitelist Mode: Only registered channels and paths will be forwarded.</string>
-    <string name="filter_banner_whitelist">Strict Whitelist Mode: Only registered channels and paths will be forwarded.</string>
-    <string name="filter_banner_blacklist">Standard Blacklist Mode: Everything is forwarded except blocked rules.</string>
+    <!-- Filter Screen (ZephCore, DMC, Dutch MeshCore BW2) -->
+    <string name="filter_header">FILTRE DE PAQUETS &amp; RÈGLES</string>
+    <string name="filter_master_switch">Filtre de paquets actif (filter on/off)</string>
+    <string name="filter_master_on_desc">Moteur de filtrage en marche</string>
+    <string name="filter_master_off_desc">Désactivé : tous les paquets sont relayés</string>
+    <string name="filter_dryrun_switch">Mode test dry-run (filter dryrun on)</string>
+    <string name="filter_dryrun_on_desc">Compte seulement les correspondances, ne rejette aucun paquet</string>
+    <string name="filter_dryrun_off_desc">Mode actif : les paquets indésirables sont rejetés</string>
+    <string name="filter_mode_select">Choisir le mode de filtrage :</string>
+    <string name="filter_mode_blacklist">Mode liste noire</string>
+    <string name="filter_mode_blacklist_desc">Mode liste noire standard : tout est relayé sauf les règles bloquées.</string>
+    <string name="filter_mode_whitelist">Mode liste blanche (strict)</string>
+    <string name="filter_mode_whitelist_desc">Mode liste blanche strict : seuls les canaux et chemins enregistrés sont relayés.</string>
+    <string name="filter_banner_whitelist">Mode liste blanche strict : seuls les canaux et chemins enregistrés sont relayés.</string>
+    <string name="filter_banner_blacklist">Mode liste noire standard : tout est relayé sauf les règles bloquées.</string>
 
     <!-- Whitelist Controls -->
-    <string name="filter_wl_channel_header">WHITELIST CHANNEL ALLOWLIST</string>
-    <string name="filter_wl_presets_title">Quick select popular channels:</string>
-    <string name="filter_wl_channel_input_hint">Channel name (e.g. #regional or Public)</string>
-    <string name="filter_wl_channels_count">Allowed Channels (%d):</string>
-    <string name="filter_wl_path_header">WHITELIST PATH PREFIXES (2-8 HEX)</string>
-    <string name="filter_wl_path_input_hint">Path hex prefix (e.g. a1b2)</string>
+    <string name="filter_wl_channel_header">LISTE BLANCHE DES CANAUX AUTORISÉS</string>
+    <string name="filter_wl_presets_title">Sélection rapide des canaux courants :</string>
+    <string name="filter_wl_channel_input_hint">Nom du canal (p. ex. #regional ou Public)</string>
+    <string name="filter_wl_channels_count">Canaux autorisés (%d) :</string>
+    <string name="filter_wl_path_header">LISTE BLANCHE DES PRÉFIXES DE CHEMIN (2-8 HEX)</string>
+    <string name="filter_wl_path_input_hint">Préfixe hex du chemin (p. ex. a1b2)</string>
     <string name="filter_wl_path_comment_hint">Node description (optional)</string>
-    <string name="filter_wl_paths_count">Allowed Paths (%d):</string>
+    <string name="filter_wl_paths_count">Chemins autorisés (%d) :</string>
 
     <!-- Blacklist Controls (Filter.cpp) -->
-    <string name="filter_bl_channel_header">BLOCKED CHANNELS (filter channel add/remove)</string>
-    <string name="filter_bl_channel_input_hint">Channel name to block (e.g. #spam)</string>
-    <string name="filter_bl_channels_count">Blocked Channels (%d):</string>
-    <string name="filter_bl_path_header">BLOCKED PATH PREFIXES (filter path add/remove)</string>
-    <string name="filter_bl_path_input_hint">Rogue path prefix (2-8 hex digits)</string>
-    <string name="filter_bl_paths_count">Blocked Paths (%d):</string>
-    <string name="filter_rules_header">CONTENT RULES: SENDER &amp; TEXT (filter sender/text)</string>
-    <string name="filter_sender_sub">Blocked Senders</string>
-    <string name="filter_text_sub">Blocked Text Content</string>
-    <string name="filter_pattern_hint">Pattern (e.g. bad_bot or spam_word)</string>
-    <string name="filter_secs_hint">Duration (s, 0=perm)</string>
-    <string name="filter_prob_hint">Drop % (1-100)</string>
-    <string name="filter_watch_header">WATCH CHANNELS (filter watch add/remove)</string>
-    <string name="filter_watch_desc">Channels decrypted by the repeater to apply sender/text rules and age limits.</string>
-    <string name="filter_watch_input_hint">Watch channel name (e.g. #emergency)</string>
-    <string name="filter_watch_count">Watched Channels (%d):</string>
-    <string name="filter_params_header">AGE &amp; HOP LIMIT (filter age / hops)</string>
-    <string name="filter_age_label">Max Message Age (Minutes, 0=off):</string>
-    <string name="filter_hops_label">Max Allowed Hops (0-64):</string>
+    <string name="filter_bl_channel_header">CANAUX BLOQUÉS (filter channel add/remove)</string>
+    <string name="filter_bl_channel_input_hint">Nom du canal à bloquer (p. ex. #spam)</string>
+    <string name="filter_bl_channels_count">Canaux bloqués (%d) :</string>
+    <string name="filter_bl_path_header">PRÉFIXES DE CHEMIN BLOQUÉS (filter path add/remove)</string>
+    <string name="filter_bl_path_input_hint">Préfixe de chemin perturbateur (2-8 chiffres hex)</string>
+    <string name="filter_bl_paths_count">Chemins bloqués (%d) :</string>
+    <string name="filter_rules_header">RÈGLES DE CONTENU : EXPÉDITEUR &amp; TEXTE (filter sender/text)</string>
+    <string name="filter_sender_sub">Expéditeurs bloqués</string>
+    <string name="filter_text_sub">Contenus texte bloqués</string>
+    <string name="filter_pattern_hint">Motif (p. ex. bad_bot ou mot_spam)</string>
+    <string name="filter_secs_hint">Durée (s, 0=permanent)</string>
+    <string name="filter_prob_hint">Rejet % (1-100)</string>
+    <string name="filter_watch_header">CANAUX SURVEILLÉS (filter watch add/remove)</string>
+    <string name="filter_watch_desc">Canaux déchiffrés par le répéteur pour appliquer les règles expéditeur/texte et les limites d\'âge.</string>
+    <string name="filter_watch_input_hint">Nom du canal surveillé (p. ex. #urgence)</string>
+    <string name="filter_watch_count">Canaux surveillés (%d) :</string>
+    <string name="filter_params_header">LIMITE D\'ÂGE &amp; DE SAUTS (filter age / hops)</string>
+    <string name="filter_age_label">Âge max. des messages (minutes, 0=désactivé) :</string>
+    <string name="filter_hops_label">Sauts max. autorisés (0-64) :</string>
 
     <!-- Filter Stats & Reset -->
-    <string name="filter_stats_header">FILTER STATISTICS &amp; DROPS</string>
-    <string name="filter_stats_allowed">Allowed</string>
-    <string name="filter_stats_dropped">Dropped</string>
-    <string name="filter_stats_droprate">Drop Rate</string>
-    <string name="filter_stats_airtime">Airtime Saved</string>
-    <string name="filter_reset_header">CRITICAL ACTION: FULL FILTER RESET</string>
-    <string name="filter_reset_desc">Resets all rules, whitelist entries, and match counters to 0 and turns the filter off. Sends \'filter RESET\'.</string>
-    <string name="filter_reset_slide_text">Swipe right for \'filter RESET\'</string>
+    <string name="filter_stats_header">STATISTIQUES DU FILTRE &amp; REJETS</string>
+    <string name="filter_stats_allowed">Autorisés</string>
+    <string name="filter_stats_dropped">Rejetés</string>
+    <string name="filter_stats_droprate">Taux de rejet</string>
+    <string name="filter_stats_airtime">Temps d\'antenne économisé</string>
+    <string name="filter_reset_header">ACTION CRITIQUE : RÉINITIALISATION COMPLÈTE DU FILTRE</string>
+    <string name="filter_reset_desc">Remet à 0 toutes les règles, entrées de liste blanche et compteurs, puis désactive le filtre. Envoie \'filter RESET\'.</string>
+    <string name="filter_reset_slide_text">Glisser à droite pour \'filter RESET\'</string>
 
     <!-- Mesh Care Screen -->
     <string name="care_header">MESH CARE WATCHDOG</string>
@@ -162,20 +164,20 @@
     <string name="care_active_badge">Active</string>
 
     <!-- Disclaimer Dialog (First Launch) -->
-    <string name="disclaimer_title">⚠ Important Notice</string>
-    <string name="disclaimer_ai_notice">This is AI-generated software — no warranty of any kind.</string>
-    <string name="disclaimer_body">Please read the following carefully before using this app to configure LoRa repeater hardware.</string>
-    <string name="disclaimer_point_liability">This software is provided AS-IS without any warranty. The developers accept no liability for damage to hardware, network disruptions, or regulatory violations caused by use of this app.</string>
-    <string name="disclaimer_point_regulations">You are solely responsible for complying with all applicable radio regulations in your country. In Germany and the EU, the EU868 band is subject to ETSI EN 300 220 and BNetzA frequency plans. Exceeding allowed ERP/EIRP levels is illegal and may result in fines.</string>
-    <string name="disclaimer_point_responsibility">Use this app at your own risk. Always verify that your repeater configuration complies with local radio law before transmitting.</string>
-    <string name="disclaimer_accept_note">By tapping \'Confirm\', you confirm that you have read, understood, and agree to all conditions above.</string>
+    <string name="disclaimer_title">⚠ Avis important</string>
+    <string name="disclaimer_ai_notice">Ceci est un logiciel généré par IA — sans aucune garantie.</string>
+    <string name="disclaimer_body">Veuillez lire attentivement ce qui suit avant d\'utiliser cette application pour configurer du matériel de répéteur LoRa.</string>
+    <string name="disclaimer_point_liability">Ce logiciel est fourni EN L\'ÉTAT, sans aucune garantie. Les développeurs déclinent toute responsabilité pour les dommages matériels, perturbations du réseau ou infractions à la réglementation radio liés à l\'utilisation de cette application.</string>
+    <string name="disclaimer_point_regulations">Vous êtes seul responsable du respect de toutes les réglementations radio applicables dans votre pays. Dans l\'UE, la bande EU868 relève de l\'ETSI EN 300 220 et des plans de fréquences nationaux. Dépasser les niveaux ERP/EIRP autorisés est illégal et peut entraîner des amendes.</string>
+    <string name="disclaimer_point_responsibility">Utilisez cette application à vos propres risques. Vérifiez toujours que la configuration de votre répéteur est conforme à la législation radio locale avant d\'émettre.</string>
+    <string name="disclaimer_accept_note">En touchant \'Confirmer\', vous confirmez avoir lu, compris et accepté toutes les conditions ci-dessus.</string>
     <string name="disclaimer_accept_btn">I Confirm — Use at Own Risk</string>
 
     <!-- Device Capability Labels -->
     <string name="caps_unsupported">Not supported by this firmware</string>
     <string name="caps_detecting">Detecting firmware capabilities…</string>
     <string name="caps_no_gps">GPS not available on this hardware</string>
-    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore &amp; DDMC (Dutch MeshCore) BW2 firmware</string>
+    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore, DMC, Dutch MeshCore BW2 firmware</string>
     <string name="offline_preview_label">Offline Preview Mode</string>
 
     <!-- Connection Gate -->
@@ -197,18 +199,38 @@
     <string name="hw_reboot_dialog_title">Confirm Repeater Reboot</string>
     <string name="hw_reboot_dialog_desc">This will restart the repeater hardware. The active connection will disconnect.</string>
 
-    <string name="menu_cli">CLI Console</string>
-    <string name="menu_cli_sub">Direct command terminal &amp; log</string>
-    <string name="menu_about">About &amp; License</string>
-    <string name="menu_about_sub">GNU GPLv3, Open Source &amp; Info</string>
-    <string name="about_title">Repeater Configurator</string>
-    <string name="about_license_title">License: GNU GPLv3 (Free Software)</string>
-    <string name="about_license_body">Free and Open Source Software licensed under GNU GPLv3. Everyone may use, study, modify, and redistribute it under GPLv3 terms. Provided WITHOUT ANY WARRANTY ("AS IS").</string>
-    <string name="about_ai_title">AI-Assisted Development</string>
-    <string name="about_ai_body">Created with AI assistance for the MeshCore &amp; ZephCore &amp; DDMC (Dutch MeshCore) community. The operator remains solely responsible for complying with local RF regulations.</string>
-    <string name="about_credits_title">Open-Source Components</string>
-    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT License)\n• MeshCore / ZephCore &amp; DDMC (Dutch MeshCore) CLI Protocol</string>
-    <string name="about_show_disclaimer">Show Startup Disclaimer Again</string>
+    <string name="menu_cli">Console CLI</string>
+    <string name="menu_cli_sub">Terminal de commandes</string>
+    <string name="menu_backup">Sauvegarde &amp; restauration</string>
+    <string name="menu_backup_sub">Sauvegarde &amp; restauration</string>
+    <string name="menu_about">À propos &amp; licence</string>
+    <string name="menu_about_sub">Licence GPLv3 &amp; infos</string>
+    <string name="about_title">meshchōsei</string>
+    <string name="about_license_title">Licence : GNU GPLv3 (logiciel libre)</string>
+    <string name="about_license_body">Logiciel libre et open source sous licence GNU GPLv3. Chacun peut l\'utiliser, l\'étudier, le modifier et le redistribuer selon les termes de la GPLv3. Fourni SANS AUCUNE GARANTIE (« EN L\'ÉTAT »).</string>
+    <string name="about_ai_title">Développement assisté par IA</string>
+    <string name="about_ai_body">Développé avec l\'aide de l\'IA à partir du code source ouvert de MeshCore, ZephCore et Dutch MeshCore. L\'exploitant reste seul responsable du respect de la réglementation radio.</string>
+    <string name="about_credits_title">Composants open source utilisés</string>
+    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (licence MIT)\n• Tuiles OpenStreetMap (© contributeurs OpenStreetMap, ODbL)</string>
+    <string name="about_show_disclaimer">Afficher à nouveau l\'avertissement</string>
     <string name="lang_nl">NL</string>
     <string name="lang_fr">FR</string>
+    <string name="menu_hardware_antenna">Matériel &amp; antenne</string>
+    <string name="menu_hardware_antenna_sub">Carte, batterie &amp; antenne</string>
+    <string name="menu_radio_config">Radio &amp; région</string>
+    <string name="menu_radio_config_sub">Fréquence, profil &amp; puissance</string>
+    <string name="menu_identity_location">Identité &amp; position</string>
+    <string name="menu_identity_location_sub">Nom, position &amp; accès</string>
+    <string name="menu_routing_adverts">Routage &amp; adverts</string>
+    <string name="menu_routing_adverts_sub">Routage, balises &amp; timing</string>
+    <string name="about_privacy_title">Politique de confidentialité</string>
+    <string name="about_privacy_body">1) Aucun serveur propre, aucun pistage : tous les paramètres, listes de filtres et sauvegardes JSON restent exclusivement sur votre appareil. L\'application ne collecte aucune donnée d\'utilisation.\n\n2) Bluetooth &amp; localisation : pour les scans BLE, Android exige l\'autorisation de localisation (jusqu\'à Android 11) et des services de localisation activés. Les données GPS servent uniquement à la position du répéteur et ne sont jamais transmises à des tiers.\n\n3) Tuiles de carte (OpenStreetMap) : à l\'ouverture de la carte de position, des tuiles sont chargées depuis tile.openstreetmap.org (OpenStreetMap Foundation). Pour des raisons techniques, votre adresse IP est transmise à ce serveur.</string>
+    <string name="conn_admin_password_label">Mot de passe admin (15 max)</string>
+    <string name="menu_blacklist">Liste noire</string>
+    <string name="menu_blacklist_sub">Bloquer canaux &amp; chemins</string>
+    <string name="menu_whitelist">Liste blanche</string>
+    <string name="menu_whitelist_sub">Canaux &amp; chemins autorisés</string>
+    <string name="menu_blocked_not_connected">Veuillez d\'abord vous connecter à un répéteur.</string>
+    <string name="menu_blocked_unsupported">Cette fonction n\'est pas prise en charge par le firmware ou la connexion actuels.</string>
+    <string name="menu_blocked_filter_active">Veuillez d\'abord désactiver le filtre de paquets actif.</string>
 </resources>

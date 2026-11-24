@@ -38,6 +38,18 @@ data class WatchChannel(
     val name: String
 )
 
+/**
+ * Exklusive Menü-Freigabe für Blacklist/Whitelist:
+ *  - Filter aus (activeMode == null): alle von der Firmware unterstützten Filter-Menüs aktiv
+ *  - Filter an im Blacklist-Modus: nur Blacklist; im Whitelist-Modus: nur Whitelist
+ */
+object FilterMenuRules {
+    fun blacklistEnabled(supportsBlacklist: Boolean, activeMode: FilterMode?): Boolean =
+        supportsBlacklist && (activeMode == null || activeMode == FilterMode.BLACKLIST)
+    fun whitelistEnabled(supportsWhitelist: Boolean, activeMode: FilterMode?): Boolean =
+        supportsWhitelist && (activeMode == null || activeMode == FilterMode.WHITELIST)
+}
+
 data class FilterStats(
     val filterEnabled: Boolean = false,
     val dryRun: Boolean = false,
@@ -49,6 +61,10 @@ data class FilterStats(
     val savedAirtimeMs: Long = 0L,
     val lastResetTime: String = "-"
 ) {
+    /** Tatsächlich wirksamer Modus: null = Filter ausgeschaltet ("OFF"). */
+    val activeMode: FilterMode?
+        get() = if (filterEnabled) mode else null
+
     val dropRatePercent: Float
         get() {
             val total = allowedPackets + droppedPackets

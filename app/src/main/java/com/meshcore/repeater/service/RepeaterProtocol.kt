@@ -114,6 +114,7 @@ object RepeaterProtocol {
     const val CMD_APP_START = 0x01.toByte()
     const val CMD_SEND_TXT_MSG = 0x02.toByte()
     const val CMD_GET_CONTACTS = 0x04.toByte()
+    const val CMD_DEVICE_QUERY = 0x16.toByte()
     const val CMD_SEND_LOGIN = 0x1A.toByte()
     const val CMD_RUN_CLI_COMMAND = 0x42.toByte()
 
@@ -124,8 +125,16 @@ object RepeaterProtocol {
     const val PACKET_CONTACT_END = 0x04.toByte()
     const val PACKET_SELF_INFO = 0x05.toByte()
     const val PACKET_SENT = 0x06.toByte()
+    const val PACKET_DEVICE_INFO = 0x0D.toByte()
     const val PACKET_CONTACT_MSG_V3 = 0x10.toByte()
     const val PACKET_CLI_REPLY = 0x1D.toByte()
+    const val PACKET_CONTACT_MSG_V2 = 0x07.toByte()   // RESP_CODE_CONTACT_MSG_RECV (app_ver < 3)
+    const val PACKET_NO_MORE_MESSAGES = 0x0A.toByte() // Antwort auf CMD_SYNC_NEXT_MESSAGE bei leerer Queue
+    const val PUSH_MSG_WAITING = 0x83.toByte()        // Companion: Nachricht(en) in der Offline-Queue
+    const val PUSH_LOGIN_SUCCESS = 0x85.toByte()
+    const val PUSH_LOGIN_FAIL = 0x86.toByte()
+
+    const val CMD_SYNC_NEXT_MESSAGE = 0x0A.toByte()
 
     const val TXT_TYPE_PLAIN = 0.toByte()
     const val TXT_TYPE_CLI_DATA = 1.toByte() // Standard MeshCore Remote-CLI Nachrichtentyp
@@ -158,14 +167,30 @@ object RepeaterProtocol {
         return sb.toString()
     }
 
-    // CMD_APP_START: cmd(1) + ver(1) + res(2) + timestamp(4) = 8 Bytes
+    // CMD_SYNC_NEXT_MESSAGE: holt die nächste Nachricht (z. B. Remote-CLI-Antwort) aus der Companion-Offline-Queue
+    fun buildSyncNextMessageFrame(): ByteArray = byteArrayOf(CMD_SYNC_NEXT_MESSAGE)
+
+    // Parse RESP_CODE_CONTACT_MSG_RECV (v2): [0x07][6-byte prefix][path_len][txt_type][timestamp(4)][text...]
+    fun parseContactMsgV2(data: ByteArray): Pair<ByteArray, String>? {
+        if (data.size < 13 || data[0] != PACKET_CONTACT_MSG_V2) return null
+        val prefix = data.copyOfRange(1, 7)
+        val text = String(data, 13, data.size - 13, StandardCharsets.UTF_8).trimEnd('\u0000', '\r', '\n')
+        return prefix to text
+    }
+
+    fun buildDeviceQueryFrame(appVer: Int = 3): ByteArray =
+        byteArrayOf(CMD_DEVICE_QUERY, (appVer and 0xFF).toByte())
+
+    // CMD_APP_START: cmd(1) + ver(1) + res(2) + timestamp(4) + appName + NUL
     fun buildAppStartFrame(appVer: Int = 3): ByteArray {
-        val frame = ByteArray(8)
+        val nameBytes = "RepeaterCfg\u0000".toByteArray(StandardCharsets.UTF_8)
+        val frame = ByteArray(8 + nameBytes.size)
         frame[0] = CMD_APP_START
         frame[1] = (appVer and 0xFF).toByte()
         frame[2] = 0
         frame[3] = 0
         putLe32(frame, 4, System.currentTimeMillis() / 1000L)
+        System.arraycopy(nameBytes, 0, frame, 8, nameBytes.size)
         return frame
     }
 
@@ -228,7 +253,11 @@ object RepeaterProtocol {
 
         val type = data[offset++].toInt() and 0xFF
         val flags = data[offset++].toInt() and 0xFF
-        val outPathLen = data[offset++].toInt() and 0xFF
+        // out_path_len (MeshCore Packet.h): Bits 0–5 = Hop-Anzahl, Bits 6–7 = Hash-Größe − 1.
+        // 0xFF = OUT_PATH_UNKNOWN (kein bekannter Pfad -> Flood) -> -1. Ohne Maske würde ein direkter
+        // Kontakt mit 2-Byte-Hashes (0x40) fälschlich als "64 Hops" erscheinen.
+        val rawPathLen = data[offset++].toInt() and 0xFF
+        val outPathLen = if (rawPathLen == 0xFF) -1 else rawPathLen and 0x3F
 
         offset += MAX_PATH_SIZE // Path bytes überspringen
 
@@ -289,16 +318,21 @@ object RepeaterProtocol {
         return line?.trim()
     }
 
-    fun parseFilterStats(text: String, current: FilterStats): FilterStats {
+    private val FILTER_ON_RE = Regex("""^filter:?\s+on\b""")
+    private val FILTER_OFF_RE = Regex("""^filter:?\s+off\b""")
+    private val MODE_RE = Regex("""\bmode:?\s+(whitelist|blacklist)\b""")
+
+        fun parseFilterStats(text: String, current: FilterStats): FilterStats {
         var updated = current
         val lines = text.lines()
         for (line in lines) {
-            val lower = line.lowercase(Locale.ROOT)
+            val lower = line.trim().removePrefix(">").trim().lowercase(Locale.ROOT)
             when {
-                lower.contains("filter: enabled") || lower.contains("filter is on") || lower.contains("filter: on") || lower.contains("enabled: 1") || lower.contains("enabled: true") -> {
+                // Ein/Aus: "Filter on: Blocked [...]" (Status), "Filter: on" / "Filter: off" (Befehlsantwort)
+                FILTER_ON_RE.containsMatchIn(lower) || lower.contains("filter: enabled") || lower.contains("filter is on") -> {
                     updated = updated.copy(filterEnabled = true)
                 }
-                lower.contains("filter: disabled") || lower.contains("filter is off") || lower.contains("filter: off") || lower.contains("enabled: 0") || lower.contains("enabled: false") -> {
+                FILTER_OFF_RE.containsMatchIn(lower) || lower.contains("filter: disabled") || lower.contains("filter is off") -> {
                     updated = updated.copy(filterEnabled = false)
                 }
                 lower.contains("dryrun: on") || lower.contains("dry-run on") || lower.contains("dryrun: enabled") -> {
@@ -307,11 +341,9 @@ object RepeaterProtocol {
                 lower.contains("dryrun: off") || lower.contains("dry-run off") || lower.contains("dryrun: disabled") -> {
                     updated = updated.copy(dryRun = false)
                 }
-                lower.contains("mode: whitelist") || lower.contains("mode whitelist") -> {
-                    updated = updated.copy(mode = FilterMode.WHITELIST)
-                }
-                lower.contains("mode: blacklist") || lower.contains("mode blacklist") -> {
-                    updated = updated.copy(mode = FilterMode.BLACKLIST)
+                // Modus: exakt "mode whitelist" bzw. "mode blacklist" (nicht die Hilfe "filter mode [blacklist|whitelist]")
+                MODE_RE.find(lower) != null -> {
+                    updated = updated.copy(mode = if (MODE_RE.find(lower)!!.groupValues[1] == "whitelist") FilterMode.WHITELIST else FilterMode.BLACKLIST)
                 }
                 lower.contains("allowed:") -> {
                     val count = line.substringAfter("allowed:").trim().split(" ").firstOrNull()?.toLongOrNull()

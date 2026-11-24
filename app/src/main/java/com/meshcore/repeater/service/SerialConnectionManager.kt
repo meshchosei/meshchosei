@@ -1,5 +1,6 @@
 package com.meshcore.repeater.service
 
+import com.meshcore.repeater.i18n.tr
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -18,6 +19,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.Channel
 import java.io.IOException
 
 class SerialConnectionManager(
@@ -27,7 +29,8 @@ class SerialConnectionManager(
     private val onError: (String) -> Unit,
     private val onConnectionChanged: (Boolean, String?) -> Unit,
     private val onFrameReceived: (ByteArray) -> Unit = {},
-    private val onDevicesChanged: () -> Unit = {}
+    private val onDevicesChanged: () -> Unit = {},
+    private val onLinkLost: (String) -> Unit = {}
 ) {
     companion object {
         private const val TAG = "SerialConnMgr"
@@ -36,6 +39,7 @@ class SerialConnectionManager(
 
     private val usbManager = context.getSystemService(Context.USB_SERVICE) as? UsbManager
     private var usbSerialPort: UsbSerialPort? = null
+    private var connectedDeviceId: Int? = null
     private var readJob: Job? = null
 
     private var pendingConnectDevice: UsbDevice? = null
@@ -44,8 +48,17 @@ class SerialConnectionManager(
     private val usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
             if (intent?.action == UsbManager.ACTION_USB_DEVICE_ATTACHED || intent?.action == UsbManager.ACTION_USB_DEVICE_DETACHED) {
+                val dev: UsbDevice? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                }
                 scope.launch(Dispatchers.Main) {
-                    if (intent.action == UsbManager.ACTION_USB_DEVICE_DETACHED && usbSerialPort != null) disconnect()
+                    if (intent.action == UsbManager.ACTION_USB_DEVICE_DETACHED && usbSerialPort != null &&
+                        (dev == null || connectedDeviceId == null || dev.deviceId == connectedDeviceId)) {
+                        linkLost("USB-Gerät wurde getrennt (Kabel abgezogen oder Repeater ausgeschaltet).")
+                    }
                     onDevicesChanged()
                 }
                 return
@@ -75,7 +88,7 @@ class SerialConnectionManager(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.registerReceiver(usbReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) context.registerReceiver(usbReceiver, filter, Context.RECEIVER_NOT_EXPORTED) else context.registerReceiver(usbReceiver, filter)
+            context.registerReceiver(usbReceiver, filter)
         }
     }
 
@@ -138,10 +151,10 @@ class SerialConnectionManager(
         try {
             val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager)
             val driver = availableDrivers.firstOrNull { it.device.deviceId == device.deviceId }
-                ?: throw IOException("Treiber nicht gefunden.")
+                ?: throw IOException(tr("Treiber nicht gefunden."))
 
             val connection = manager.openDevice(driver.device)
-                ?: throw IOException("Konnte USB-Verbindung nicht öffnen. Berechtigung fehlt?")
+                ?: throw IOException(tr("Konnte USB-Verbindung nicht öffnen. Berechtigung fehlt?"))
 
             val port = driver.ports[0]
             port.open(connection)
@@ -149,66 +162,82 @@ class SerialConnectionManager(
             port.dtr = true
             port.rts = true
 
+            generation++
             usbSerialPort = port
+            connectedDeviceId = device.deviceId
             val name = device.productName ?: device.deviceName ?: "USB-Node"
             onConnectionChanged(true, name)
 
             startReading(port)
         } catch (e: Exception) {
             Log.e(TAG, "Error connecting USB", e)
-            onError("USB-Verbindung fehlgeschlagen: ${e.message}")
+            onError(tr("USB-Verbindung fehlgeschlagen: {0}", e.message))
             disconnect()
         }
     }
 
+    /**
+     * Liest USB-Serial und trennt sauber zwischen
+     *  - Companion-Frames:  '>' (0x3E) + len_lo + len_hi + payload   (len 1..1024, payload[0] = Response < 0x20 / Push >= 0x80)
+     *  - CLI-Textzeilen:    z. B. Echo "get name" und Antwort "  -> > MeinRepeater"
+     * Früher galt jedes '>' als Frame-Start: Das '>' in "  -> > Name" wurde verschluckt und der Rest
+     * blieb bis zum nächsten USB-Paket im Puffer hängen – Name/Owner kamen dadurch nie sauber an.
+     */
     private fun startReading(port: UsbSerialPort) {
         readJob?.cancel()
         readJob = scope.launch(Dispatchers.IO) {
             val buffer = ByteArray(2048)
-            val lineBuffer = StringBuilder()
-            val rawBytes = java.io.ByteArrayOutputStream()
+            val pending = java.io.ByteArrayOutputStream()   // noch nicht entschiedene Bytes (angefangener Frame)
+            val text = java.io.ByteArrayOutputStream()      // aktuelle Textzeile
+            var pendingSince = 0L
+
+            fun flushLine() {
+                val line = String(text.toByteArray(), Charsets.UTF_8).trimEnd('\r', '\n')
+                text.reset()
+                if (line.isNotBlank()) launch(Dispatchers.Main) { onDataReceived(line) }
+            }
 
             while (isActive && usbSerialPort != null) {
                 try {
                     val len = port.read(buffer, 100)
-                    if (len > 0) {
-                        rawBytes.write(buffer, 0, len)
-                        var arr = rawBytes.toByteArray()
-                        var offset = 0
-                        while (offset + 3 <= arr.size && arr[offset] == 0x3E.toByte()) {
-                            val pLen = (arr[offset + 1].toInt() and 0xFF) or ((arr[offset + 2].toInt() and 0xFF) shl 8)
-                            if (offset + 3 + pLen <= arr.size) {
-                                val payload = arr.copyOfRange(offset + 3, offset + 3 + pLen)
-                                scope.launch(Dispatchers.Main) { onFrameReceived(payload) }
-                                offset += 3 + pLen
-                            } else break
-                        }
-                        if (offset > 0) {
-                            rawBytes.reset()
-                            if (offset < arr.size) rawBytes.write(arr, offset, arr.size - offset)
-                            continue
-                        }
-                        if (arr.isNotEmpty() && arr[0] != 0x3E.toByte()) {
-                            rawBytes.reset()
-                            val chunk = String(arr, Charsets.UTF_8)
-                            lineBuffer.append(chunk)
-
-                        while (lineBuffer.contains("\n")) {
-                            val line = lineBuffer.substring(0, lineBuffer.indexOf("\n")).trimEnd('\r')
-                            lineBuffer.delete(0, lineBuffer.indexOf("\n") + 1)
-                            if (line.isNotEmpty()) {
-                                launch(Dispatchers.Main) {
-                                    onDataReceived(line)
+                    if (len > 0) { pending.write(buffer, 0, len); pendingSince = System.currentTimeMillis() }
+                    val arr = pending.toByteArray()
+                    var i = 0
+                    var waitForMore = false
+                    while (i < arr.size) {
+                        val b = arr[i]
+                        if (b == 0x3E.toByte()) {
+                            if (arr.size - i < 4) {
+                                // Zu wenig Bytes, um zu entscheiden: kurz auf mehr Daten warten, sonst als Text behandeln
+                                if (System.currentTimeMillis() - pendingSince < 300L) { waitForMore = true; break }
+                            } else {
+                                val pLen = (arr[i + 1].toInt() and 0xFF) or ((arr[i + 2].toInt() and 0xFF) shl 8)
+                                val code = arr[i + 3].toInt() and 0xFF
+                                if (pLen in 1..1024 && (code < 0x20 || code >= 0x80)) {
+                                    if (i + 3 + pLen > arr.size) {
+                                        if (System.currentTimeMillis() - pendingSince < 1500L) { waitForMore = true; break }
+                                    } else {
+                                        val payload = arr.copyOfRange(i + 3, i + 3 + pLen)
+                                        launch(Dispatchers.Main) { onFrameReceived(payload) }
+                                        i += 3 + pLen
+                                        continue
+                                    }
                                 }
                             }
                         }
-                        }
+                        // normales Textzeichen
+                        if (b == 0x0A.toByte()) flushLine() else text.write(b.toInt())
+                        i++
                     }
-                } catch (e: IOException) {
-                    if (isActive) {
+                    pending.reset()
+                    if (waitForMore) pending.write(arr, i, arr.size - i)
+                    // Prompt/Teilzeile ohne Zeilenende (z. B. "> ") nach kurzer Ruhe trotzdem ausgeben
+                    if (len <= 0 && !waitForMore && text.size() > 0 && System.currentTimeMillis() - pendingSince > 400L) flushLine()
+                } catch (e: Exception) {
+                    if (e is kotlinx.coroutines.CancellationException) throw e
+                    if (isActive && usbSerialPort != null) {
                         launch(Dispatchers.Main) {
-                            onError("USB-Leseabbruch: ${e.message}")
-                            disconnect()
+                            linkLost(tr("USB-Lesefehler – Verbindung zum Gerät verloren ({0}).", e.message ?: e.javaClass.simpleName))
                         }
                     }
                     break
@@ -218,37 +247,56 @@ class SerialConnectionManager(
         }
     }
 
-    fun sendBytes(frame: ByteArray) {
-        val port = usbSerialPort ?: return
-        scope.launch(Dispatchers.IO) {
+    // ---------------------------------------------------------------------------------------
+    // Alle USB-Schreibvorgänge laufen über EINEN Schreib-Channel mit genau einem Consumer:
+    // Reihenfolge bleibt erhalten, Frames/Textzeilen können sich nicht überholen oder verschachteln.
+    // Jeder Eintrag trägt die Verbindungs-Generation -> nach Trennen/Neuverbinden wird nichts Altes geschrieben.
+    // ---------------------------------------------------------------------------------------
+    private class UsbWrite(val generation: Int, val bytes: ByteArray, val timeoutMs: Int, val isFrame: Boolean)
+    private val writeChannel = Channel<UsbWrite>(Channel.UNLIMITED)
+    @Volatile private var generation = 0
+    private val writerJob: Job = scope.launch(Dispatchers.IO) {
+        for (w in writeChannel) {
+            val port = usbSerialPort
+            if (port == null || w.generation != generation) continue
             try {
-                val wrapped = ByteArray(3 + frame.size)
-                wrapped[0] = 0x3C.toByte()
-                wrapped[1] = (frame.size and 0xFF).toByte()
-                wrapped[2] = ((frame.size shr 8) and 0xFF).toByte()
-                System.arraycopy(frame, 0, wrapped, 3, frame.size)
-                port.write(wrapped, 500)
-            } catch (e: Exception) { Log.e(TAG, "USB frame write error", e) }
+                port.write(w.bytes, w.timeoutMs)
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                Log.e(TAG, "USB write error", e)
+                val reason = if (w.isFrame) tr("USB-Schreibfehler – Gerät antwortet nicht mehr ({0}).", e.message ?: e.javaClass.simpleName)
+                             else tr("USB-Senden fehlgeschlagen – Verbindung verloren ({0}).", e.message ?: e.javaClass.simpleName)
+                launch(Dispatchers.Main) { linkLost(reason) }
+            }
         }
+    }
+
+    fun sendBytes(frame: ByteArray) {
+        if (usbSerialPort == null) return
+        val wrapped = ByteArray(3 + frame.size)
+        wrapped[0] = 0x3C.toByte()
+        wrapped[1] = (frame.size and 0xFF).toByte()
+        wrapped[2] = ((frame.size shr 8) and 0xFF).toByte()
+        System.arraycopy(frame, 0, wrapped, 3, frame.size)
+        writeChannel.trySend(UsbWrite(generation, wrapped, 500, isFrame = true))
     }
 
     fun send(command: String) {
-        scope.launch(Dispatchers.IO) {
-            val port = usbSerialPort
-            if (port == null) {
-                launch(Dispatchers.Main) { onError("Nicht mit USB verbunden.") }
-                return@launch
-            }
-            try {
-                val toSend = if (command.endsWith("\n")) command else "$command\r\n"
-                port.write(toSend.toByteArray(Charsets.UTF_8), 2000)
-            } catch (e: Exception) {
-                launch(Dispatchers.Main) { onError("Senden fehlgeschlagen: ${e.message}") }
-            }
-        }
+        if (usbSerialPort == null) { onError("Nicht mit USB verbunden."); return }
+        val toSend = if (command.endsWith("\n")) command else "$command\r\n"
+        writeChannel.trySend(UsbWrite(generation, toSend.toByteArray(Charsets.UTF_8), 2000, isFrame = false))
+    }
+
+    /** Unerwarteter Verbindungsabbruch: einmalig melden und sauber trennen. */
+    private fun linkLost(reason: String) {
+        if (usbSerialPort == null) return
+        onLinkLost(reason)
+        disconnect()
     }
 
     fun disconnect() {
+        generation++ // noch wartende Schreibvorgänge der alten Verbindung verwerfen
+        connectedDeviceId = null
         readJob?.cancel()
         readJob = null
         try {
@@ -260,6 +308,8 @@ class SerialConnectionManager(
 
     fun destroy() {
         disconnect()
+        writeChannel.close()
+        writerJob.cancel()
         try {
             context.unregisterReceiver(usbReceiver)
         } catch (_: Exception) {}

@@ -1,11 +1,15 @@
 package com.meshcore.repeater.ui.components
 
+import com.meshcore.repeater.i18n.tr
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -59,6 +65,40 @@ import com.meshcore.repeater.ui.navigation.NavDrawerItem
 import com.meshcore.repeater.ui.theme.BauhausCornerShape
 import com.meshcore.repeater.ui.theme.LocalBauhausColors
 
+/**
+ * Zustandsbehafteter Wrapper: sammelt die sich sekündlich ändernden Flows (Mesh-Care-Countdown,
+ * Filter-Statistik) erst HIER ein, damit nicht der gesamte MainAppContent samt
+ * ModalNavigationDrawer jede Sekunde neu komponiert wird (Ursache für ruckelndes/zurückschnappendes Menü).
+ */
+@Composable
+fun AppDrawerHost(
+    currentRoute: NavDrawerItem,
+    connectionState: ConnectionState,
+    meshCareFlow: kotlinx.coroutines.flow.StateFlow<MeshCareState>,
+    filterStatsFlow: kotlinx.coroutines.flow.StateFlow<FilterStats>,
+    themeMode: ThemeMode,
+    appLanguage: AppLanguage,
+    firmwareVersion: String,
+    navigationAllowed: Boolean,
+    meshCareAvailable: Boolean,
+    supportsBlacklist: Boolean = false,
+    supportsWhitelist: Boolean = false,
+    onStartGuidedSetup: () -> Unit,
+    onItemClick: (NavDrawerItem) -> Unit,
+    onThemeChange: (ThemeMode) -> Unit,
+    onLanguageChange: (AppLanguage) -> Unit,
+    onShowDisclaimer: () -> Unit
+) {
+    val meshCareState by meshCareFlow.collectAsState()
+    val filterStats by filterStatsFlow.collectAsState()
+    AppDrawerSheet(
+        currentRoute = currentRoute, connectionState = connectionState, meshCareState = meshCareState, filterStats = filterStats,
+        themeMode = themeMode, appLanguage = appLanguage, firmwareVersion = firmwareVersion, navigationAllowed = navigationAllowed,
+        meshCareAvailable = meshCareAvailable, supportsBlacklist = supportsBlacklist, supportsWhitelist = supportsWhitelist, onStartGuidedSetup = onStartGuidedSetup, onItemClick = onItemClick,
+        onThemeChange = onThemeChange, onLanguageChange = onLanguageChange, onShowDisclaimer = onShowDisclaimer
+    )
+}
+
 @Composable
 fun AppDrawerSheet(
     currentRoute: NavDrawerItem,
@@ -68,12 +108,14 @@ fun AppDrawerSheet(
     themeMode: ThemeMode,
     appLanguage: AppLanguage,
     firmwareVersion: String = "",
-    offlinePreviewEnabled: Boolean,
     navigationAllowed: Boolean,
+    meshCareAvailable: Boolean = true,
+    supportsBlacklist: Boolean = false,
+    supportsWhitelist: Boolean = false,
+    onStartGuidedSetup: () -> Unit = {},
     onItemClick: (NavDrawerItem) -> Unit,
     onThemeChange: (ThemeMode) -> Unit,
     onLanguageChange: (AppLanguage) -> Unit,
-    onOfflinePreviewChange: (Boolean) -> Unit,
     onShowDisclaimer: () -> Unit
 ) {
     val bColors = LocalBauhausColors.current
@@ -81,8 +123,11 @@ fun AppDrawerSheet(
     ModalDrawerSheet(
         drawerContainerColor = MaterialTheme.colorScheme.surface,
         drawerContentColor = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.width(316.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())
+        // Kein verticalScroll direkt auf dem Sheet (unbegrenzte Höhe störte das Drawer-Layout/-Swipen);
+        // gescrollt wird nur der innere Inhalt.
+        modifier = Modifier.width(316.dp)
     ) {
+        Column(Modifier.fillMaxHeight().verticalScroll(androidx.compose.foundation.rememberScrollState())) {
         // === Drawer Header ===
         Column(
             modifier = Modifier
@@ -91,21 +136,8 @@ fun AppDrawerSheet(
                 .padding(20.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(BauhausCornerShape)
-                        .background(bColors.signalRed.copy(alpha = 0.18f))
-                        .border(1.dp, bColors.signalRed.copy(alpha = 0.4f), BauhausCornerShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CellTower,
-                        contentDescription = null,
-                        tint = bColors.signalRed,
-                        modifier = Modifier.size(26.dp)
-                    )
-                }
+                // Markenzeichen: "ō"-Emblem mit den 3 Funk-Blitzen
+                MeshchoseiLogoIcon(size = 44.dp)
 
                 Spacer(modifier = Modifier.width(12.dp))
 
@@ -117,13 +149,28 @@ fun AppDrawerSheet(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 17.sp
                     )
-                    Text(
-                        text = stringResource(R.string.app_title_configurator),
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = 2.sp,
-                        color = bColors.signalRed,
-                        fontSize = 11.sp
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.app_title_configurator),
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 1.5.sp,
+                            color = bColors.signalRed,
+                            fontSize = 9.sp,
+                            lineHeight = 11.sp
+                        )
+                        Row(
+                            verticalAlignment = Alignment.Bottom,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Box(Modifier.width(2.5.dp).height(4.dp).background(bColors.signalRed))
+                            Box(Modifier.width(2.5.dp).height(7.dp).background(bColors.cobalt))
+                            Box(Modifier.width(2.5.dp).height(10.dp).background(bColors.ochre))
+                            Box(Modifier.width(14.dp).height(2.dp).background(bColors.signalRed))
+                        }
+                    }
                 }
 
 
@@ -134,22 +181,36 @@ fun AppDrawerSheet(
         HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
 
         Spacer(modifier = Modifier.height(8.dp))
+        if (navigationAllowed) {
+            androidx.compose.material3.Button(
+                onClick = onStartGuidedSetup,
+                shape = BauhausCornerShape,
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = bColors.cobalt),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)
+            ) {
+                Text(tr("▶ Geführtes Setup starten"), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            }
+        }
 
         // === Navigation Items ===
         NavDrawerItem.values().forEach { item ->
             val isSelected = currentRoute == item
-            val isEnabled = item == NavDrawerItem.CONNECTION || item == NavDrawerItem.ABOUT || navigationAllowed
+            val isEnabled = (item == NavDrawerItem.CONNECTION || item == NavDrawerItem.ABOUT || navigationAllowed) &&
+                (item != NavDrawerItem.MESH_CARE || meshCareAvailable) &&
+                (item != NavDrawerItem.BLACKLIST || supportsBlacklist) &&      // nur wenn die Firmware Sperrlisten kann
+                (item != NavDrawerItem.WHITELIST || supportsWhitelist)         // nur wenn die Firmware "filter wl" kann
 
             val badgeText = when (item) {
-                NavDrawerItem.MESH_CARE -> if (meshCareState.isActive) meshCareState.formattedRemainingTime else null
-                NavDrawerItem.FILTER_WHITELIST -> if (filterStats.mode == FilterMode.WHITELIST) "WL" else null
-                NavDrawerItem.CONNECTION -> if (connectionState is ConnectionState.Connected) stringResource(R.string.status_active) else null
+                NavDrawerItem.MESH_CARE -> null
+                NavDrawerItem.BLACKLIST -> if (filterStats.activeMode == FilterMode.BLACKLIST) "ON" else null
+                NavDrawerItem.WHITELIST -> if (filterStats.activeMode == FilterMode.WHITELIST) "ON" else null
                 else -> null
             }
 
             val badgeColor = when (item) {
                 NavDrawerItem.MESH_CARE -> bColors.ochre
-                NavDrawerItem.FILTER_WHITELIST -> bColors.cobalt
+                NavDrawerItem.BLACKLIST -> bColors.signalRed
+                NavDrawerItem.WHITELIST -> bColors.cobalt
                 NavDrawerItem.CONNECTION -> bColors.signalRed
                 else -> bColors.successGreen
             }
@@ -176,14 +237,17 @@ fun AppDrawerSheet(
                                 isSelected -> bColors.signalRed
                                 else -> MaterialTheme.colorScheme.onSurface
                             },
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis
                         )
                         Text(
                             text = stringResource(item.subtitleRes),
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
                                 alpha = if (isEnabled) 1f else 0.35f
-                            )
+                            ),
+                            lineHeight = 13.sp,
+                            maxLines = 2, overflow = TextOverflow.Ellipsis
                         )
                     }
                 },
@@ -204,12 +268,14 @@ fun AppDrawerSheet(
                 },
                 selected = isSelected,
                 onClick = { onItemClick(item) },
+                shape = BauhausCornerShape,
                 colors = NavigationDrawerItemDefaults.colors(
                     selectedContainerColor = bColors.signalRed.copy(alpha = 0.10f),
                     unselectedContainerColor = Color.Transparent
                 ),
                 modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                    .padding(horizontal = 8.dp, vertical = 1.dp)
+                    .heightIn(min = 58.dp)
                     .clip(BauhausCornerShape)
                     .alpha(if (isEnabled) 1f else 0.5f)
             )
@@ -291,6 +357,7 @@ fun AppDrawerSheet(
                     }
                 }
             }
+        }
         }
     }
 }

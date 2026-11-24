@@ -1,5 +1,8 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.i18n.tr
+import com.meshcore.repeater.ui.theme.BauhausCornerShape
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -98,14 +101,14 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
 
                 Column {
                     Text(
-                        text = "Was bewirkt der Mesh-Schonmodus?",
+                        text = tr("Was bewirkt der Mesh-Schonmodus?"),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 15.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Bei Wartungsarbeiten und Remote-Konfiguration über das Mesh drosselt dieser Modus die Sendeleistung des Repeaters temporär, um umliegende Nodes nicht durch Testsendungen zu überlasten.\n\nEin automatischer Watchdog-Timer (5 oder 10 Min.) garantiert: Bricht der Kontakt ab, kehrt der Repeater selbstständig auf die reguläre Leistung zurück!",
+                        text = tr("Bei Wartungsarbeiten und Remote-Konfiguration über das Mesh senkt dieser Modus die Sendeleistung des Repeaters vorübergehend (set tx), um umliegende Nodes nicht durch Testsendungen zu überlasten.\n\nNach Ablauf der gewählten Zeit (5 oder 10 Min.) oder beim Beenden stellt die App die ursprüngliche Leistung wieder her. Reißt die Verbindung ab, wird das beim nächsten Verbinden mit diesem Repeater automatisch nachgeholt."),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -132,7 +135,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "SCHONMODUS AKTIV",
+                        text = tr("SCHONMODUS AKTIV"),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
                         color = bColors.ochre
@@ -168,24 +171,23 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
-                            Text("Gedrosselte Leistung", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(tr("Gedrosselte Leistung"), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("%.1f dBm".format(meshCare.reducedTxPowerDbm), fontWeight = FontWeight.Bold, color = bColors.ochre)
                         }
                         Column {
-                            Text("Gespeicherte Basisleistung", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(tr("Gespeicherte Basisleistung"), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("%.1f dBm".format(meshCare.savedOriginalTxPowerDbm), fontWeight = FontWeight.Bold, color = bColors.signalRed)
                         }
                         Column {
-                            Text("Watchdog-Dauer", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(meshCare.duration.label, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                            Text(tr("Watchdog-Dauer"), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(tr(meshCare.duration.label), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Row(modifier = Modifier.fillMaxWidth()) {
-                        Button(
-                            onClick = { viewModel.extendMeshCare() },
+                        Button(shape = BauhausCornerShape, onClick = { viewModel.extendMeshCare() },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(48.dp),
@@ -193,13 +195,12 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                         ) {
                             Icon(Icons.Default.Refresh, contentDescription = null, tint = Color.Black)
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Watchdog auffrischen", color = Color.Black, fontWeight = FontWeight.SemiBold)
+                            Text(tr("Auffrischen"), color = Color.Black, fontWeight = FontWeight.SemiBold)
                         }
 
                         Spacer(modifier = Modifier.width(10.dp))
 
-                        OutlinedButton(
-                            onClick = { viewModel.stopMeshCare() },
+                        OutlinedButton(shape = BauhausCornerShape, onClick = { viewModel.stopMeshCare() },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(48.dp),
@@ -207,7 +208,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                         ) {
                             Icon(Icons.Default.Stop, contentDescription = null)
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Sofort beenden")
+                            Text(tr("Beenden"))
                         }
                     }
                 }
@@ -221,7 +222,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "1. Watchdog-Zeitfenster wählen:",
+                        text = tr("1. Watchdog-Zeitfenster wählen:"),
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -229,10 +230,9 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
 
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         WatchdogDuration.values().forEach { dur ->
-                            FilterChip(
-                                selected = selectedDuration == dur,
+                            FilterChip(shape = BauhausCornerShape, selected = selectedDuration == dur,
                                 onClick = { selectedDuration = dur },
-                                label = { Text(dur.label) },
+                                label = { Text(tr(dur.label)) },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = bColors.signalRed,
                                     selectedLabelColor = Color.Black
@@ -244,7 +244,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "2. Drosselungs-Sendeleistung wählen:",
+                        text = tr("2. Drosselungs-Sendeleistung wählen:"),
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -253,8 +253,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                     val powerOptions = listOf(2.0, 5.0, 8.0, 10.0)
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         powerOptions.forEach { p ->
-                            FilterChip(
-                                selected = selectedReducedDbm == p,
+                            FilterChip(shape = BauhausCornerShape, selected = selectedReducedDbm == p,
                                 onClick = { selectedReducedDbm = p },
                                 label = { Text("%.0f dBm".format(p)) },
                                 colors = FilterChipDefaults.filterChipColors(
@@ -268,8 +267,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                     Spacer(modifier = Modifier.height(20.dp))
 
                     // Summary & Start Button
-                    Button(
-                        onClick = { viewModel.startMeshCare(selectedDuration, selectedReducedDbm) },
+                    Button(onClick = { viewModel.startMeshCare(selectedDuration, selectedReducedDbm) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp),
@@ -279,7 +277,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                         Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Mesh-Schonmodus starten (${selectedDuration.label})",
+                            text = tr("Mesh-Schonmodus starten ({0})", tr(selectedDuration.label)),
                             color = Color.Black,
                             fontWeight = FontWeight.Bold
                         )
@@ -301,7 +299,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                     Icon(Icons.Default.Info, contentDescription = null, tint = bColors.cobalt)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "ZephCore tempradio Mechanismus",
+                        text = tr("So funktioniert die Rücksetzung"),
                         fontWeight = FontWeight.Bold,
                         color = bColors.cobalt
                     )
@@ -310,7 +308,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = "Die Firmware speichert den ursprünglichen Funkzustand im RAM. Der Befehl 'tempradio' setzt einen Hardware-Timer. Solange die App Befehle sendet, wird dieser Timer zurückgesetzt. Falls das Smartphone ausgeschaltet wird, die Funkverbindung abreißt oder die App beendet wird, greift der autonome Zephyr-Watchdog im Repeater und reaktiviert die reguläre Sendeleistung ohne manuelles Zutun.",
+                    text = tr("Die Firmware kennt keinen temporären Befehl für die Sendeleistung: 'tempradio' ändert nur Frequenz, Bandbreite, SF und CR. Die App setzt die reduzierte Leistung deshalb per 'set tx' (im Flash gespeichert) und merkt sich die ursprüngliche Leistung. Läuft die Zeit ab oder beendest du den Modus, sendet die App 'set tx' mit dem alten Wert. Ist die Verbindung dann getrennt, holt die App die Rücksetzung beim nächsten Verbinden mit diesem Repeater automatisch nach."),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

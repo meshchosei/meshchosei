@@ -1,5 +1,7 @@
 package com.meshcore.repeater.model
 
+import com.meshcore.repeater.i18n.tr
+
 enum class ConnectionType(val displayName: String) {
     USB_SERIAL("USB-Serial (OTG)"),
     BLE_COMPANION("BLE Companion (Remote)")
@@ -26,7 +28,7 @@ data class UsbSerialDeviceItem(
     val portNumber: Int = 0
 ) {
     val displayName: String
-        get() = productName ?: manufacturerName ?: "USB-Gerät ($vendorId:$productId)"
+        get() = productName ?: manufacturerName ?: tr("USB-Gerät ({0}:{1})", vendorId, productId)
 }
 
 data class BleDeviceItem(
@@ -35,7 +37,7 @@ data class BleDeviceItem(
     val rssi: Int
 ) {
     val displayName: String
-        get() = if (name.isNullOrBlank()) "Unbekannter Node ($address)" else name
+        get() = if (name.isNullOrBlank()) tr("Unbekannter Node ({0})", address) else name
 }
 
 data class TerminalLogEntry(
@@ -50,7 +52,7 @@ data class MeshContact(
     val keyPrefix: String, // z. B. erste 12 Zeichen
     val type: Int, // 1 = CHAT, 2 = REPEATER, 3 = ROOM, 4 = SENSOR
     val flags: Int = 0,
-    val outPathLen: Int = 0, // Hops
+    val outPathLen: Int = 0, // Hops (0 = direkt, -1 = kein bekannter Pfad / Flood)
     val name: String,
     val lastAdvertTimestamp: Long = 0L,
     val gpsLat: Double = 0.0,

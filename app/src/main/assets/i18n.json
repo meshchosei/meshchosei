@@ -1,0 +1,2337 @@
+{
+ "App beenden?": [
+  "Exit app?",
+  "App afsluiten?",
+  "Quitter l'application ?"
+ ],
+ "Möchtest du den meshchōsei wirklich schließen?": [
+  "Do you really want to close meshchōsei?",
+  "Wil je meshchōsei echt sluiten?",
+  "Voulez-vous vraiment fermer meshchōsei ?"
+ ],
+ "Beenden": [
+  "Exit",
+  "Afsluiten",
+  "Quitter"
+ ],
+ "Abbrechen": [
+  "Cancel",
+  "Annuleren",
+  "Annuler"
+ ],
+ "Bitte zuerst mit einem Repeater verbinden.": [
+  "Please connect to a repeater first.",
+  "Maak eerst verbinding met een repeater.",
+  "Veuillez d'abord vous connecter à un répéteur."
+ ],
+ "Anmeldung am Repeater \"{0}\"…": [
+  "Logging in to repeater \"{0}\"…",
+  "Aanmelden bij repeater \"{0}\"…",
+  "Connexion au répéteur \"{0}\"…"
+ ],
+ "← Zurück": [
+  "← Back",
+  "← Terug",
+  "← Retour"
+ ],
+ "Setup {0} / 5": [
+  "Setup {0} / 5",
+  "Setup {0} / 5",
+  "Configuration {0} / 5"
+ ],
+ "Speichern & Weiter →": [
+  "Save & Next →",
+  "Opslaan & verder →",
+  "Enregistrer & suivant →"
+ ],
+ "Speichern & Fertig": [
+  "Save & Finish",
+  "Opslaan & voltooien",
+  "Enregistrer & terminer"
+ ],
+ "Weiter →": [
+  "Next →",
+  "Verder →",
+  "Suivant →"
+ ],
+ "Fertig": [
+  "Finish",
+  "Voltooien",
+  "Terminer"
+ ],
+ "Abfrage {0} von {1}": [
+  "Query {0} of {1}",
+  "Opvraging {0} van {1}",
+  "Requête {0} sur {1}"
+ ],
+ "USB-Verbindung fehlgeschlagen: {0}": [
+  "USB connection failed: {0}",
+  "USB-verbinding mislukt: {0}",
+  "Échec de la connexion USB : {0}"
+ ],
+ "USB-Lesefehler – Verbindung zum Gerät verloren ({0}).": [
+  "USB read error – connection to device lost ({0}).",
+  "USB-leesfout – verbinding met apparaat verloren ({0}).",
+  "Erreur de lecture USB – connexion à l'appareil perdue ({0})."
+ ],
+ "USB-Schreibfehler – Gerät antwortet nicht mehr ({0}).": [
+  "USB write error – device no longer responding ({0}).",
+  "USB-schrijffout – apparaat reageert niet meer ({0}).",
+  "Erreur d'écriture USB – l'appareil ne répond plus ({0})."
+ ],
+ "USB-Senden fehlgeschlagen – Verbindung verloren ({0}).": [
+  "USB send failed – connection lost ({0}).",
+  "USB-verzenden mislukt – verbinding verloren ({0}).",
+  "Échec de l'envoi USB – connexion perdue ({0})."
+ ],
+ "BLE-Scan fehlgeschlagen (Fehlercode {0})": [
+  "BLE scan failed (error code {0})",
+  "BLE-scan mislukt (foutcode {0})",
+  "Échec du scan BLE (code d'erreur {0})"
+ ],
+ "Scan-Start fehlgeschlagen: {0}": [
+  "Scan start failed: {0}",
+  "Starten van scan mislukt: {0}",
+  "Échec du démarrage du scan : {0}"
+ ],
+ "Ungültige BLE-Adresse: {0}": [
+  "Invalid BLE address: {0}",
+  "Ongeldig BLE-adres: {0}",
+  "Adresse BLE invalide : {0}"
+ ],
+ "BLE-Verbindung fehlgeschlagen (Status {0})": [
+  "BLE connection failed (status {0})",
+  "BLE-verbinding mislukt (status {0})",
+  "Échec de la connexion BLE (statut {0})"
+ ],
+ "Bluetooth-Verbindung verloren (Status {0}).": [
+  "Bluetooth connection lost (status {0}).",
+  "Bluetooth-verbinding verloren (status {0}).",
+  "Connexion Bluetooth perdue (statut {0})."
+ ],
+ "\"{0}\" wird ausgeführt…": [
+  "Running \"{0}\"…",
+  "\"{0}\" wordt uitgevoerd…",
+  "Exécution de \"{0}\"…"
+ ],
+ "⚠ Verbindung getrennt: {0}": [
+  "⚠ Disconnected: {0}",
+  "⚠ Verbinding verbroken: {0}",
+  "⚠ Déconnecté : {0}"
+ ],
+ "⚠ \"{0}\" antwortet nicht mehr (ausgeschaltet oder außer Funkreichweite). Remote-Admin-Sitzung beendet.": [
+  "⚠ \"{0}\" no longer responds (switched off or out of radio range). Remote admin session ended.",
+  "⚠ \"{0}\" reageert niet meer (uitgeschakeld of buiten radiobereik). Remote-admin-sessie beëindigd.",
+  "⚠ \"{0}\" ne répond plus (éteint ou hors de portée radio). Session d'administration à distance terminée."
+ ],
+ "Backup: \"{0}\" wird gelesen…": [
+  "Backup: reading \"{0}\"…",
+  "Back-up: \"{0}\" wordt gelezen…",
+  "Sauvegarde : lecture de \"{0}\"…"
+ ],
+ "Backup wird installiert: {0}…": [
+  "Installing backup: {0}…",
+  "Back-up wordt geïnstalleerd: {0}…",
+  "Installation de la sauvegarde : {0}…"
+ ],
+ "Backup installiert ({0} Befehle). Funk-/Key-Änderungen ggf. erst nach Neustart aktiv – danach \"Neu einlesen\".": [
+  "Backup installed ({0} commands). Radio/key changes may only take effect after a reboot – then use \"Re-read\".",
+  "Back-up geïnstalleerd ({0} opdrachten). Radio-/sleutelwijzigingen zijn mogelijk pas na een herstart actief – daarna \"Opnieuw inlezen\".",
+  "Sauvegarde installée ({0} commandes). Les changements radio/clé ne sont peut-être actifs qu'après un redémarrage – puis \"Relire\"."
+ ],
+ "Backup installiert, {0} von {1} abgelehnt/ohne Antwort: {2}": [
+  "Backup installed, {0} of {1} rejected/unanswered: {2}",
+  "Back-up geïnstalleerd, {0} van {1} geweigerd/zonder antwoord: {2}",
+  "Sauvegarde installée, {0} sur {1} refusées/sans réponse : {2}"
+ ],
+ "TX-Empfehlung {0} dBm übernommen – unter \"Funk & Region\" anpassen und speichern.": [
+  "TX recommendation {0} dBm applied – adjust and save under \"Radio & Region\".",
+  "TX-advies {0} dBm overgenomen – aanpassen en opslaan onder \"Radio & regio\".",
+  "Recommandation TX {0} dBm appliquée – ajustez et enregistrez sous \"Radio & région\"."
+ ],
+ "{0} Funkeinstellung(en) übertragen – neue Funkparameter ggf. erst nach Neustart aktiv.": [
+  "{0} radio setting(s) sent – new radio parameters may only take effect after a reboot.",
+  "{0} radio-instelling(en) verzonden – nieuwe radioparameters zijn mogelijk pas na een herstart actief.",
+  "{0} paramètre(s) radio envoyé(s) – les nouveaux paramètres radio ne seront peut-être actifs qu'après un redémarrage."
+ ],
+ "{0} Funkeinstellung(en) übertragen.": [
+  "{0} radio setting(s) sent.",
+  "{0} radio-instelling(en) verzonden.",
+  "{0} paramètre(s) radio envoyé(s)."
+ ],
+ "Temporärer Funk-Test ({0} Min.)": [
+  "Temporary radio test ({0} min.)",
+  "Tijdelijke radiotest ({0} min.)",
+  "Test radio temporaire ({0} min.)"
+ ],
+ "{0} Einstellung(en) übertragen!": [
+  "{0} setting(s) sent!",
+  "{0} instelling(en) verzonden!",
+  "{0} paramètre(s) envoyé(s) !"
+ ],
+ "{0} von {1} Einstellung(en) bestätigt – bitte prüfen.": [
+  "{0} of {1} setting(s) confirmed – please check.",
+  "{0} van {1} instelling(en) bevestigd – controleer a.u.b.",
+  "{0} sur {1} paramètre(s) confirmé(s) – veuillez vérifier."
+ ],
+ "BESTÄTIGT": [
+  "CONFIRMED",
+  "BEVESTIGD",
+  "CONFIRMÉ"
+ ],
+ "Schonmodus": [
+  "Care mode",
+  "Spaarmodus",
+  "Mode ménagement"
+ ],
+ "Bestätigen": [
+  "Confirm",
+  "Bevestigen",
+  "Confirmer"
+ ],
+ "© OpenStreetMap-Mitwirkende": [
+  "© OpenStreetMap contributors",
+  "© OpenStreetMap-bijdragers",
+  "© contributeurs OpenStreetMap"
+ ],
+ "Zoom {0} · ziehen = verschieben": [
+  "Zoom {0} · drag = move",
+  "Zoom {0} · slepen = verschuiven",
+  "Zoom {0} · glisser = déplacer"
+ ],
+ "Ziehen oder tippen = Standort setzen": [
+  "Drag or tap = set location",
+  "Slepen of tikken = locatie instellen",
+  "Glisser ou toucher = définir la position"
+ ],
+ "▶ Geführtes Setup starten": [
+  "▶ Start guided setup",
+  "▶ Begeleide setup starten",
+  "▶ Lancer la configuration guidée"
+ ],
+ "Tippen oder ziehen zum Starten": [
+  "Tap or drag to start",
+  "Tik of sleep om te starten",
+  "Touchez ou glissez pour commencer"
+ ],
+ "Punkte: {0}": [
+  "Score: {0}",
+  "Punten: {0}",
+  "Points : {0}"
+ ],
+ "  · neuer Highscore!": [
+  "  · new high score!",
+  "  · nieuwe highscore!",
+  "  · nouveau record !"
+ ],
+ "Nochmal": [
+  "Again",
+  "Opnieuw",
+  "Rejouer"
+ ],
+ "Schließen": [
+  "Close",
+  "Sluiten",
+  "Fermer"
+ ],
+ "Status laden": [
+  "Load status",
+  "Status laden",
+  "Charger l'état"
+ ],
+ "Hash: {0}": [
+  "Hash: {0}",
+  "Hash: {0}",
+  "Hash : {0}"
+ ],
+ "Leeren": [
+  "Clear",
+  "Wissen",
+  "Effacer"
+ ],
+ "Kopiert!": [
+  "Copied!",
+  "Gekopieerd!",
+  "Copié !"
+ ],
+ "Kopieren": [
+  "Copy",
+  "Kopiëren",
+  "Copier"
+ ],
+ "Hilfe": [
+  "Help",
+  "Help",
+  "Aide"
+ ],
+ "Verbinde...": [
+  "Connecting...",
+  "Verbinden...",
+  "Connexion..."
+ ],
+ "Fehler: {0}": [
+  "Error: {0}",
+  "Fout: {0}",
+  "Erreur : {0}"
+ ],
+ "Keine aktive Verbindung": [
+  "No active connection",
+  "Geen actieve verbinding",
+  "Aucune connexion active"
+ ],
+ "Eingeloggt": [
+  "Logged in",
+  "Ingelogd",
+  "Connecté"
+ ],
+ "Wähle USB-OTG oder BLE-Companion (Mesh OTA)": [
+  "Choose USB-OTG or BLE companion (Mesh OTA)",
+  "Kies USB-OTG of BLE-companion (Mesh OTA)",
+  "Choisissez USB-OTG ou compagnon BLE (Mesh OTA)"
+ ],
+ "Trennen": [
+  "Disconnect",
+  "Verbreken",
+  "Déconnecter"
+ ],
+ "USB-Serial (OTG)": [
+  "USB-Serial (OTG)",
+  "USB-serieel (OTG)",
+  "USB-série (OTG)"
+ ],
+ "BLE Companion (Mesh OTA)": [
+  "BLE Companion (Mesh OTA)",
+  "BLE-companion (Mesh OTA)",
+  "Compagnon BLE (Mesh OTA)"
+ ],
+ "Erkannte OTG-Geräte ({0})": [
+  "Detected OTG devices ({0})",
+  "Gevonden OTG-apparaten ({0})",
+  "Appareils OTG détectés ({0})"
+ ],
+ "Bitte OTG-Kabel anschließen": [
+  "Please connect an OTG cable",
+  "Sluit een OTG-kabel aan",
+  "Veuillez brancher un câble OTG"
+ ],
+ "Verbinden": [
+  "Connect",
+  "Verbinden",
+  "Connecter"
+ ],
+ "Gefundene BLE-Nodes ({0})": [
+  "Found BLE nodes ({0})",
+  "Gevonden BLE-nodes ({0})",
+  "Nœuds BLE trouvés ({0})"
+ ],
+ "Suche nach Bluetooth-Nodes...": [
+  "Searching for Bluetooth nodes...",
+  "Zoeken naar Bluetooth-nodes...",
+  "Recherche de nœuds Bluetooth..."
+ ],
+ "Verbinde dich per Bluetooth mit deinem Companion-Node (um empfangene Repeater über das Mesh zu steuern) oder direkt mit einem BLE-fähigen Repeater.\n\nTippe oben auf 'Scan'.": [
+  "Connect via Bluetooth to your companion node (to control repeaters received over the mesh) or directly to a BLE-capable repeater.\n\nTap 'Scan' above.",
+  "Verbind via Bluetooth met je companion-node (om via de mesh ontvangen repeaters te bedienen) of direct met een repeater met BLE.\n\nTik bovenaan op 'Scan'.",
+  "Connectez-vous en Bluetooth à votre nœud compagnon (pour piloter les répéteurs reçus via le mesh) ou directement à un répéteur compatible BLE.\n\nTouchez 'Scan' en haut."
+ ],
+ "{0} • RSSI: {1} dBm": [
+  "{0} • RSSI: {1} dBm",
+  "{0} • RSSI: {1} dBm",
+  "{0} • RSSI : {1} dBm"
+ ],
+ "Koppeln": [
+  "Pair",
+  "Koppelen",
+  "Associer"
+ ],
+ "Repeater-Auswahl ({0})": [
+  "Repeater selection ({0})",
+  "Repeaterkeuze ({0})",
+  "Choix du répéteur ({0})"
+ ],
+ "Companion Mesh-Kontakte": [
+  "Companion mesh contacts",
+  "Companion-meshcontacten",
+  "Contacts mesh du compagnon"
+ ],
+ "Nur Repeater": [
+  "Repeaters only",
+  "Alleen repeaters",
+  "Répéteurs uniquement"
+ ],
+ "Nur aktive Pfade": [
+  "Active paths only",
+  "Alleen actieve paden",
+  "Chemins actifs uniquement"
+ ],
+ "Repeater suchen (Name oder Key)...": [
+  "Search repeater (name or key)...",
+  "Repeater zoeken (naam of sleutel)...",
+  "Rechercher un répéteur (nom ou clé)..."
+ ],
+ "Suche löschen": [
+  "Clear search",
+  "Zoekopdracht wissen",
+  "Effacer la recherche"
+ ],
+ "Repeater-Login": [
+  "Repeater login",
+  "Repeater-login",
+  "Connexion au répéteur"
+ ],
+ "Direkt (0 Hops)": [
+  "Direct (0 hops)",
+  "Direct (0 hops)",
+  "Direct (0 saut)"
+ ],
+ "{0} Hops": [
+  "{0} hops",
+  "{0} hops",
+  "{0} sauts"
+ ],
+ "Flood (kein direkter Pfad)": [
+  "Flood (no direct path)",
+  "Flood (geen direct pad)",
+  "Flood (pas de chemin direct)"
+ ],
+ "Admin aktiv": [
+  "Admin active",
+  "Admin actief",
+  "Admin actif"
+ ],
+ "Nicht eingeloggt": [
+  "Not logged in",
+  "Niet ingelogd",
+  "Non connecté"
+ ],
+ "Admin-Passwort (max 15 Zeichen)": [
+  "Admin password (max 15 characters)",
+  "Admin-wachtwoord (max. 15 tekens)",
+  "Mot de passe admin (15 caractères max.)"
+ ],
+ "Lade...": [
+  "Loading...",
+  "Laden...",
+  "Chargement..."
+ ],
+ "Keine Repeater in der Kontaktliste.": [
+  "No repeaters in the contact list.",
+  "Geen repeaters in de contactenlijst.",
+  "Aucun répéteur dans la liste de contacts."
+ ],
+ "Keine Kontakte empfangen.": [
+  "No contacts received.",
+  "Geen contacten ontvangen.",
+  "Aucun contact reçu."
+ ],
+ "0 Hops (Direkt)": [
+  "0 hops (direct)",
+  "0 hops (direct)",
+  "0 saut (direct)"
+ ],
+ "Flood (unbekannt)": [
+  "Flood (unknown)",
+  "Flood (onbekend)",
+  "Flood (inconnu)"
+ ],
+ "Ausgewählt": [
+  "Selected",
+  "Gekozen",
+  "Sélectionné"
+ ],
+ "Wählen": [
+  "Select",
+  "Kiezen",
+  "Choisir"
+ ],
+ "✓ Alle Parameter eingelesen": [
+  "✓ All parameters read",
+  "✓ Alle parameters ingelezen",
+  "✓ Tous les paramètres lus"
+ ],
+ "Parameter unvollständig eingelesen": [
+  "Parameters incompletely read",
+  "Parameters onvolledig ingelezen",
+  "Paramètres lus de façon incomplète"
+ ],
+ "Neu einlesen": [
+  "Re-read",
+  "Opnieuw inlezen",
+  "Relire"
+ ],
+ "Node Public Key:": [
+  "Node public key:",
+  "Publieke sleutel van node:",
+  "Clé publique du nœud :"
+ ],
+ "(Wird beim Verbinden ermittelt)": [
+  "(Determined on connect)",
+  "(Wordt bij verbinden bepaald)",
+  "(Déterminée à la connexion)"
+ ],
+ "Node-Schlüssel neu setzen (nur bei Neuaufbau)": [
+  "Reset node key (only when rebuilding)",
+  "Node-sleutel opnieuw instellen (alleen bij herbouw)",
+  "Redéfinir la clé du nœud (uniquement en cas de reconstruction)"
+ ],
+ "Repeater-Name (set name)": [
+  "Repeater name (set name)",
+  "Repeaternaam (set name)",
+  "Nom du répéteur (set name)"
+ ],
+ "Besitzer / Kontakt-Info (set owner.info)": [
+  "Owner / contact info (set owner.info)",
+  "Eigenaar / contactinfo (set owner.info)",
+  "Propriétaire / contact (set owner.info)"
+ ],
+ "STANDORT & PRIVATSPHÄRE-VERSATZ": [
+  "LOCATION & PRIVACY OFFSET",
+  "LOCATIE & PRIVACY-VERSCHUIVING",
+  "POSITION & DÉCALAGE DE CONFIDENTIALITÉ"
+ ],
+ "Kein Standort gesetzt – auf die Karte tippen oder Koordinaten eingeben.": [
+  "No location set – tap the map or enter coordinates.",
+  "Geen locatie ingesteld – tik op de kaart of voer coördinaten in.",
+  "Aucune position définie – touchez la carte ou saisissez des coordonnées."
+ ],
+ "Breitengrad (lat)": [
+  "Latitude (lat)",
+  "Breedtegraad (lat)",
+  "Latitude (lat)"
+ ],
+ "Längengrad (lon)": [
+  "Longitude (lon)",
+  "Lengtegraad (lon)",
+  "Longitude (lon)"
+ ],
+ "±200 m Privatsphäre-Versatz (verschiebt den Marker):": [
+  "±200 m privacy offset (moves the marker):",
+  "±200 m privacy-verschuiving (verplaatst de markering):",
+  "Décalage de confidentialité ±200 m (déplace le repère) :"
+ ],
+ "🎲 200m Zufall": [
+  "🎲 200 m random",
+  "🎲 200 m willekeurig",
+  "🎲 200 m aléatoire"
+ ],
+ "ZUGRIFFSKONTROLLE": [
+  "ACCESS CONTROL",
+  "TOEGANGSBEHEER",
+  "CONTRÔLE D'ACCÈS"
+ ],
+ "Neues Admin-Passwort (leer = unverändert)": [
+  "New admin password (empty = unchanged)",
+  "Nieuw admin-wachtwoord (leeg = ongewijzigd)",
+  "Nouveau mot de passe admin (vide = inchangé)"
+ ],
+ "Gast-Passwort (leer = unverändert)": [
+  "Guest password (empty = unchanged)",
+  "Gastwachtwoord (leeg = ongewijzigd)",
+  "Mot de passe invité (vide = inchangé)"
+ ],
+ "Gast-Passwort löschen (offener Zugang)": [
+  "Delete guest password (open access)",
+  "Gastwachtwoord verwijderen (open toegang)",
+  "Supprimer le mot de passe invité (accès libre)"
+ ],
+ "Speichern": [
+  "Save",
+  "Opslaan",
+  "Enregistrer"
+ ],
+ "Node-Identität neu setzen?": [
+  "Reset node identity?",
+  "Node-identiteit opnieuw instellen?",
+  "Redéfinir l'identité du nœud ?"
+ ],
+ "Neuer Private Key (64-Byte Hex)": [
+  "New private key (64-byte hex)",
+  "Nieuwe private key (64-byte hex)",
+  "Nouvelle clé privée (hex 64 octets)"
+ ],
+ "Setzen": [
+  "Set",
+  "Instellen",
+  "Définir"
+ ],
+ "ROUTING, ADVERTS & STATUS-LEDS": [
+  "ROUTING, ADVERTS & STATUS LEDS",
+  "ROUTING, ADVERTS & STATUS-LEDS",
+  "ROUTAGE, ADVERTS & LED D'ÉTAT"
+ ],
+ "Repeater-Weiterleitung aktiv (set repeat)": [
+  "Repeater forwarding active (set repeat)",
+  "Repeater-doorsturing actief (set repeat)",
+  "Relais du répéteur actif (set repeat)"
+ ],
+ "Pfad-Hash-Modus (Node-ID Breite):": [
+  "Path hash mode (node ID width):",
+  "Pad-hashmodus (breedte node-ID):",
+  "Mode de hachage du chemin (largeur de l'ID) :"
+ ],
+ "Schleifen-Erkennung (loop.detect):": [
+  "Loop detection (loop.detect):",
+  "Lusdetectie (loop.detect):",
+  "Détection de boucles (loop.detect) :"
+ ],
+ "Status-LEDs (set leds):": [
+  "Status LEDs (set leds):",
+  "Status-LEDs (set leds):",
+  "LED d'état (set leds) :"
+ ],
+ "Advert (Min)": [
+  "Advert (min)",
+  "Advert (min)",
+  "Advert (min)"
+ ],
+ "Flood-Adv (Std)": [
+  "Flood adv (h)",
+  "Flood-adv (u)",
+  "Flood adv (h)"
+ ],
+ "Mehrfache Empfangsbestätigungen (multi.acks = 1)": [
+  "Multiple acknowledgements (multi.acks = 1)",
+  "Meervoudige ontvangstbevestigingen (multi.acks = 1)",
+  "Accusés de réception multiples (multi.acks = 1)"
+ ],
+ "Advert senden": [
+  "Send advert",
+  "Advert verzenden",
+  "Envoyer un advert"
+ ],
+ "Neu starten": [
+  "Reboot",
+  "Herstarten",
+  "Redémarrer"
+ ],
+ "Repeater neu starten?": [
+  "Reboot repeater?",
+  "Repeater herstarten?",
+  "Redémarrer le répéteur ?"
+ ],
+ "Der Repeater wird neu gestartet, um alle gespeicherten Einstellungen zu übernehmen.": [
+  "The repeater will reboot to apply all saved settings.",
+  "De repeater wordt herstart om alle opgeslagen instellingen over te nemen.",
+  "Le répéteur va redémarrer pour appliquer tous les paramètres enregistrés."
+ ],
+ "Gespeichert: {0}": [
+  "Saved: {0}",
+  "Opgeslagen: {0}",
+  "Enregistré : {0}"
+ ],
+ "Speichern fehlgeschlagen.": [
+  "Saving failed.",
+  "Opslaan mislukt.",
+  "Échec de l'enregistrement."
+ ],
+ "Datei konnte nicht gelesen werden.": [
+  "File could not be read.",
+  "Bestand kon niet worden gelezen.",
+  "Le fichier n'a pas pu être lu."
+ ],
+ "Backup erstellen und laden ist erst möglich, wenn ein Repeater verbunden ist.": [
+  "Creating and loading backups is only possible while a repeater is connected.",
+  "Back-ups maken en laden kan alleen als er een repeater verbonden is.",
+  "La création et le chargement de sauvegardes ne sont possibles qu'avec un répéteur connecté."
+ ],
+ "BACKUP ERSTELLEN": [
+  "CREATE BACKUP",
+  "BACK-UP MAKEN",
+  "CRÉER UNE SAUVEGARDE"
+ ],
+ "Liest alle Einstellungen und Regionen vom verbundenen Repeater und speichert sie im MeshCore/PEmesh-JSON-Format.": [
+  "Reads all settings and regions from the connected repeater and saves them in MeshCore/PEmesh JSON format.",
+  "Leest alle instellingen en regio's van de verbonden repeater en slaat ze op in MeshCore/PEmesh-JSON-formaat.",
+  "Lit tous les paramètres et régions du répéteur connecté et les enregistre au format JSON MeshCore/PEmesh."
+ ],
+ "Private Key (prv.key) mitsichern": [
+  "Include private key (prv.key)",
+  "Private key (prv.key) meenemen",
+  "Inclure la clé privée (prv.key)"
+ ],
+ "Nur über USB-Direktverbindung auslesbar. Datei danach sicher aufbewahren!": [
+  "Only readable via direct USB connection. Store the file safely afterwards!",
+  "Alleen via directe USB-verbinding uitleesbaar. Bewaar het bestand daarna veilig!",
+  "Lisible uniquement via une connexion USB directe. Conservez ensuite le fichier en lieu sûr !"
+ ],
+ "Backup erstellen & speichern ({0})": [
+  "Create & save backup ({0})",
+  "Back-up maken & opslaan ({0})",
+  "Créer & enregistrer la sauvegarde ({0})"
+ ],
+ "BACKUP LADEN & INSTALLIEREN": [
+  "LOAD & INSTALL BACKUP",
+  "BACK-UP LADEN & INSTALLEREN",
+  "CHARGER & INSTALLER UNE SAUVEGARDE"
+ ],
+ "Backup-Datei (.json) öffnen": [
+  "Open backup file (.json)",
+  "Back-upbestand (.json) openen",
+  "Ouvrir un fichier de sauvegarde (.json)"
+ ],
+ "Vorschau: {0}": [
+  "Preview: {0}",
+  "Voorbeeld: {0}",
+  "Aperçu : {0}"
+ ],
+ "vars: {0} übertragbar": [
+  "vars: {0} transferable",
+  "vars: {0} overdraagbaar",
+  "vars : {0} transférables"
+ ],
+ ", {0} \"XXX\"-Platzhalter ignoriert": [
+  ", {0} \"XXX\" placeholders ignored",
+  ", {0} \"XXX\"-plaatshouders genegeerd",
+  ", {0} espaces réservés \"XXX\" ignorés"
+ ],
+ "Platzhalter – ignoriert": [
+  "Placeholder – ignored",
+  "Plaatshouder – genegeerd",
+  "Espace réservé – ignoré"
+ ],
+ "ungültig – ignoriert": [
+  "invalid – ignored",
+  "ongeldig – genegeerd",
+  "invalide – ignoré"
+ ],
+ "nicht ausgewählt": [
+  "not selected",
+  "niet gekozen",
+  "non sélectionné"
+ ],
+ "(leer)": [
+  "(empty)",
+  "(leeg)",
+  "(vide)"
+ ],
+ "Regionen: {0}  ·  Home: {1}  ·  Default: {2}": [
+  "Regions: {0}  ·  Home: {1}  ·  Default: {2}",
+  "Regio's: {0}  ·  Home: {1}  ·  Standaard: {2}",
+  "Régions : {0}  ·  Home : {1}  ·  Défaut : {2}"
+ ],
+ "Private Key (prv.key) übernehmen": [
+  "Apply private key (prv.key)",
+  "Private key (prv.key) overnemen",
+  "Appliquer la clé privée (prv.key)"
+ ],
+ "Ändert die Node-Identität! Nur beim Wiederherstellen DESSELBEN Repeaters.": [
+  "Changes the node identity! Only when restoring THE SAME repeater.",
+  "Wijzigt de node-identiteit! Alleen bij herstel van DEZELFDE repeater.",
+  "Modifie l'identité du nœud ! Uniquement pour restaurer LE MÊME répéteur."
+ ],
+ "Nicht im Backup enthalten.": [
+  "Not included in the backup.",
+  "Niet in de back-up opgenomen.",
+  "Non inclus dans la sauvegarde."
+ ],
+ "Gast-Passwort übernehmen": [
+  "Apply guest password",
+  "Gastwachtwoord overnemen",
+  "Appliquer le mot de passe invité"
+ ],
+ "Gast-Passwort übernehmen (nicht im Backup enthalten)": [
+  "Apply guest password (not included in the backup)",
+  "Gastwachtwoord overnemen (niet in de back-up opgenomen)",
+  "Appliquer le mot de passe invité (non inclus dans la sauvegarde)"
+ ],
+ "Backup installieren ({0} Befehle)": [
+  "Install backup ({0} commands)",
+  "Back-up installeren ({0} opdrachten)",
+  "Installer la sauvegarde ({0} commandes)"
+ ],
+ "Backup installieren?": [
+  "Install backup?",
+  "Back-up installeren?",
+  "Installer la sauvegarde ?"
+ ],
+ "{0} Befehle werden nacheinander an den Repeater gesendet (Einstellungen, Regionen + \"region save\"; Funkparameter und Key zuletzt).": [
+  "{0} commands will be sent to the repeater one by one (settings, regions + \"region save\"; radio parameters and key last).",
+  "{0} opdrachten worden een voor een naar de repeater gestuurd (instellingen, regio's + \"region save\"; radioparameters en sleutel als laatste).",
+  "{0} commandes seront envoyées une à une au répéteur (paramètres, régions + \"region save\" ; paramètres radio et clé en dernier)."
+ ],
+ "\n\nDer Private Key wird überschrieben – die Node-Identität ändert sich.": [
+  "\n\nThe private key will be overwritten – the node identity changes.",
+  "\n\nDe private key wordt overschreven – de node-identiteit verandert.",
+  "\n\nLa clé privée sera écrasée – l'identité du nœud change."
+ ],
+ "Installieren": [
+  "Install",
+  "Installeren",
+  "Installer"
+ ],
+ "Was bewirkt der Mesh-Schonmodus?": [
+  "What does the mesh care mode do?",
+  "Wat doet de mesh-spaarmodus?",
+  "Que fait le mode ménagement du mesh ?"
+ ],
+ "SCHONMODUS AKTIV": [
+  "CARE MODE ACTIVE",
+  "SPAARMODUS ACTIEF",
+  "MODE MÉNAGEMENT ACTIF"
+ ],
+ "Gedrosselte Leistung": [
+  "Reduced power",
+  "Verlaagd vermogen",
+  "Puissance réduite"
+ ],
+ "Gespeicherte Basisleistung": [
+  "Saved base power",
+  "Opgeslagen basisvermogen",
+  "Puissance de base enregistrée"
+ ],
+ "Watchdog-Dauer": [
+  "Watchdog duration",
+  "Watchdog-duur",
+  "Durée du watchdog"
+ ],
+ "Auffrischen": [
+  "Refresh",
+  "Verversen",
+  "Actualiser"
+ ],
+ "1. Watchdog-Zeitfenster wählen:": [
+  "1. Choose watchdog time window:",
+  "1. Watchdog-tijdvenster kiezen:",
+  "1. Choisir la fenêtre du watchdog :"
+ ],
+ "2. Drosselungs-Sendeleistung wählen:": [
+  "2. Choose reduced transmit power:",
+  "2. Verlaagd zendvermogen kiezen:",
+  "2. Choisir la puissance réduite :"
+ ],
+ "Mesh-Schonmodus starten ({0})": [
+  "Start mesh care mode ({0})",
+  "Mesh-spaarmodus starten ({0})",
+  "Lancer le mode ménagement ({0})"
+ ],
+ "CLI BEFEHLSÜBERSICHT": [
+  "CLI COMMAND OVERVIEW",
+  "CLI-OPDRACHTENOVERZICHT",
+  "APERÇU DES COMMANDES CLI"
+ ],
+ "Befehl antippen zum Übernehmen": [
+  "Tap a command to insert it",
+  "Tik op een opdracht om deze over te nemen",
+  "Touchez une commande pour l'insérer"
+ ],
+ "OTA-Modus wirklich starten?": [
+  "Really start OTA mode?",
+  "OTA-modus echt starten?",
+  "Vraiment lancer le mode OTA ?"
+ ],
+ "Der Repeater wechselt in den Over-The-Air-Update-Modus (WiFi/BLE). Die Mesh-Weiterleitung wird unterbrochen und bei Abbruch ist der Repeater aus der Ferne nicht mehr erreichbar.": [
+  "The repeater switches to over-the-air update mode (WiFi/BLE). Mesh forwarding is interrupted, and if aborted the repeater is no longer reachable remotely.",
+  "De repeater schakelt naar de over-the-air-updatemodus (WiFi/BLE). Het doorsturen in de mesh wordt onderbroken en bij afbreken is de repeater op afstand niet meer bereikbaar.",
+  "Le répéteur passe en mode de mise à jour over-the-air (WiFi/BLE). Le relais mesh est interrompu et, en cas d'abandon, le répéteur n'est plus joignable à distance."
+ ],
+ "OTA jetzt starten": [
+  "Start OTA now",
+  "OTA nu starten",
+  "Lancer l'OTA maintenant"
+ ],
+ "ERKANNTE HARDWARE": [
+  "DETECTED HARDWARE",
+  "GEDETECTEERDE HARDWARE",
+  "MATÉRIEL DÉTECTÉ"
+ ],
+ "Wird beim Auslesen ermittelt...": [
+  "Determined when reading...",
+  "Wordt bij het inlezen bepaald...",
+  "Déterminé lors de la lecture..."
+ ],
+ "Netz / USB": [
+  "Mains / USB",
+  "Net / USB",
+  "Secteur / USB"
+ ],
+ "Board: {0}": [
+  "Board: {0}",
+  "Board: {0}",
+  "Carte : {0}"
+ ],
+ "Firmware: {0}": [
+  "Firmware: {0}",
+  "Firmware: {0}",
+  "Firmware : {0}"
+ ],
+ "Versorgung: {0}": [
+  "Power supply: {0}",
+  "Voeding: {0}",
+  "Alimentation : {0}"
+ ],
+ "ANTENNEN-SETUP & KABELDÄMPFUNG": [
+  "ANTENNA SETUP & CABLE LOSS",
+  "ANTENNE-SETUP & KABELDEMPING",
+  "ANTENNE & PERTES DE CÂBLE"
+ ],
+ "Montierte Antenne wählen:": [
+  "Select mounted antenna:",
+  "Gemonteerde antenne kiezen:",
+  "Choisir l'antenne montée :"
+ ],
+ "Eigener Gewinn (dBi)": [
+  "Custom gain (dBi)",
+  "Eigen versterking (dBi)",
+  "Gain personnalisé (dBi)"
+ ],
+ "Kabel- & Pigtail-Dämpfung (dB)": [
+  "Cable & pigtail loss (dB)",
+  "Kabel- & pigtaildemping (dB)",
+  "Pertes câble & pigtail (dB)"
+ ],
+ "ERP/EIRP-GRENZWERTE & TX-EMPFEHLUNG": [
+  "ERP/EIRP LIMITS & TX RECOMMENDATION",
+  "ERP/EIRP-GRENSWAARDEN & TX-ADVIES",
+  "LIMITES ERP/EIRP & RECOMMANDATION TX"
+ ],
+ "Eff. Gewinn (G−L)": [
+  "Eff. gain (G−L)",
+  "Eff. versterking (G−L)",
+  "Gain eff. (G−L)"
+ ],
+ "Gesetzl. Limit ({0})": [
+  "Legal limit ({0})",
+  "Wettelijke limiet ({0})",
+  "Limite légale ({0})"
+ ],
+ "Max. Transceiver-TX": [
+  "Max. transceiver TX",
+  "Max. transceiver-TX",
+  "TX max. de l'émetteur"
+ ],
+ "{0} dBm": [
+  "{0} dBm",
+  "{0} dBm",
+  "{0} dBm"
+ ],
+ "Hardware: {0}..{1} dBm": [
+  "Hardware: {0}..{1} dBm",
+  "Hardware: {0}..{1} dBm",
+  "Matériel : {0}..{1} dBm"
+ ],
+ "✓ Setup innerhalb des ERP-Limits (Reserve {0} dB).": [
+  "✓ Setup within the ERP limit (margin {0} dB).",
+  "✓ Setup binnen de ERP-limiet (reserve {0} dB).",
+  "✓ Configuration dans la limite ERP (marge {0} dB)."
+ ],
+ "⚠ ERP-Limit um {0} dB überschritten – TX auf max. {1} dBm reduzieren.": [
+  "⚠ ERP limit exceeded by {0} dB – reduce TX to max. {1} dBm.",
+  "⚠ ERP-limiet met {0} dB overschreden – verlaag TX naar max. {1} dBm.",
+  "⚠ Limite ERP dépassée de {0} dB – réduisez la TX à {1} dBm max."
+ ],
+ "Gesetzlich zählt die abgestrahlte Leistung (ERP/EIRP), nicht die Transceiver-Leistung: ": [
+  "Legally, the radiated power (ERP/EIRP) counts, not the transceiver power: ",
+  "Wettelijk telt het uitgestraalde vermogen (ERP/EIRP), niet het transceiververmogen: ",
+  "Légalement, c'est la puissance rayonnée (ERP/EIRP) qui compte, pas celle de l'émetteur : "
+ ],
+ "In {0} sind max. {1} dBm ERP ({2} mW) zulässig. ": [
+  "In {0}, max. {1} dBm ERP ({2} mW) is allowed. ",
+  "In {0} is max. {1} dBm ERP ({2} mW) toegestaan. ",
+  "En {0}, {1} dBm ERP ({2} mW) max. sont autorisés. "
+ ],
+ "Mit Antennengewinn und Kabelverlust ergibt sich daraus ein empfohlener TX-Wert von {0} dBm.": [
+  "With antenna gain and cable loss, this gives a recommended TX value of {0} dBm.",
+  "Met antenneversterking en kabelverlies levert dit een aanbevolen TX-waarde van {0} dBm op.",
+  "Compte tenu du gain d'antenne et des pertes de câble, la valeur TX recommandée est de {0} dBm."
+ ],
+ "Empfohlenen TX-Wert übernehmen ({0} dBm)": [
+  "Apply recommended TX value ({0} dBm)",
+  "Aanbevolen TX-waarde overnemen ({0} dBm)",
+  "Appliquer la valeur TX recommandée ({0} dBm)"
+ ],
+ "Der Wert wird nur vorgemerkt – unter \"Funk & Region\" kannst du ihn frei anpassen und speichern.": [
+  "The value is only staged – you can freely adjust and save it under \"Radio & Region\".",
+  "De waarde wordt alleen klaargezet – onder \"Radio & regio\" kun je hem vrij aanpassen en opslaan.",
+  "La valeur est seulement préparée – vous pouvez l'ajuster et l'enregistrer librement sous \"Radio & région\"."
+ ],
+ "FUNK & REGION": [
+  "RADIO & REGION",
+  "RADIO & REGIO",
+  "RADIO & RÉGION"
+ ],
+ "Regions-Preset übernehmen (Werte danach frei anpassbar):": [
+  "Apply region preset (values remain freely editable):",
+  "Regio-preset overnemen (waarden daarna vrij aanpasbaar):",
+  "Appliquer un préréglage de région (valeurs modifiables ensuite) :"
+ ],
+ "Frequenz (MHz)": [
+  "Frequency (MHz)",
+  "Frequentie (MHz)",
+  "Fréquence (MHz)"
+ ],
+ "Bandbreite (kHz)": [
+  "Bandwidth (kHz)",
+  "Bandbreedte (kHz)",
+  "Bande passante (kHz)"
+ ],
+ "Duty-Cycle (%)": [
+  "Duty cycle (%)",
+  "Duty-cycle (%)",
+  "Rapport cyclique (%)"
+ ],
+ "Empfohlener TX mit aktueller Antenne: max. {0} dBm (Antenne unter Hardware & Antenne).": [
+  "Recommended TX with current antenna: max. {0} dBm (antenna under Hardware & Antenna).",
+  "Aanbevolen TX met huidige antenne: max. {0} dBm (antenne onder Hardware & antenne).",
+  "TX recommandée avec l'antenne actuelle : {0} dBm max. (antenne sous Matériel & antenne)."
+ ],
+ "Hinweis: {0} dBm überschreitet mit der eingestellten Antenne das ERP-Limit – empfohlen max. {1} dBm.": [
+  "Note: {0} dBm exceeds the ERP limit with the configured antenna – recommended max. {1} dBm.",
+  "Let op: {0} dBm overschrijdt met de ingestelde antenne de ERP-limiet – aanbevolen max. {1} dBm.",
+  "Remarque : {0} dBm dépasse la limite ERP avec l'antenne configurée – {1} dBm max. recommandés."
+ ],
+ "USB-Timeout: Keine Antwort vom Gerät (evtl. nur Debug-USB oder kein Repeater).": [
+  "USB timeout: no response from the device (possibly debug USB only or not a repeater).",
+  "USB-time-out: geen antwoord van het apparaat (mogelijk alleen debug-USB of geen repeater).",
+  "Délai USB dépassé : aucune réponse de l'appareil (peut-être USB de débogage uniquement ou pas un répéteur)."
+ ],
+ "Nicht verbunden.": [
+  "Not connected.",
+  "Niet verbonden.",
+  "Non connecté."
+ ],
+ "Backup abgebrochen – Repeater antwortet nicht.": [
+  "Backup aborted – repeater not responding.",
+  "Back-up afgebroken – repeater reageert niet.",
+  "Sauvegarde interrompue – le répéteur ne répond pas."
+ ],
+ "Backup fehlgeschlagen – keine Werte gelesen.": [
+  "Backup failed – no values read.",
+  "Back-up mislukt – geen waarden gelezen.",
+  "Échec de la sauvegarde – aucune valeur lue."
+ ],
+ "Hinweis: Private Key ist nur über USB-Direktverbindung auslesbar – nicht im Backup enthalten.": [
+  "Note: the private key can only be read via direct USB connection – not included in the backup.",
+  "Let op: de private key is alleen via directe USB-verbinding uitleesbaar – niet in de back-up opgenomen.",
+  "Remarque : la clé privée n'est lisible que via une connexion USB directe – non incluse dans la sauvegarde."
+ ],
+ "Keine übertragbaren Einstellungen im Backup.": [
+  "No transferable settings in the backup.",
+  "Geen overdraagbare instellingen in de back-up.",
+  "Aucun paramètre transférable dans la sauvegarde."
+ ],
+ "Auslesen abgebrochen.": [
+  "Reading cancelled.",
+  "Inlezen afgebroken.",
+  "Lecture annulée."
+ ],
+ "Login vom Repeater abgelehnt – Passwort prüfen.": [
+  "Login rejected by repeater – check password.",
+  "Login door repeater geweigerd – controleer het wachtwoord.",
+  "Connexion refusée par le répéteur – vérifiez le mot de passe."
+ ],
+ "Bitte ungültige Funkwerte korrigieren (rot markierte Felder).": [
+  "Please correct invalid radio values (fields marked red).",
+  "Corrigeer ongeldige radiowaarden (rood gemarkeerde velden).",
+  "Veuillez corriger les valeurs radio invalides (champs en rouge)."
+ ],
+ "Hinweis: ERP-Grenzwert mit aktueller Antenne überschritten (siehe Hardware & Antenne).": [
+  "Note: ERP limit exceeded with the current antenna (see Hardware & Antenna).",
+  "Let op: ERP-limiet overschreden met de huidige antenne (zie Hardware & antenne).",
+  "Remarque : limite ERP dépassée avec l'antenne actuelle (voir Matériel & antenne)."
+ ],
+ "Alle Parameter werden sofort im Flash gespeichert.": [
+  "All parameters are saved to flash immediately.",
+  "Alle parameters worden direct in flash opgeslagen.",
+  "Tous les paramètres sont enregistrés immédiatement en flash."
+ ],
+ "Profil eingespielt!": [
+  "Profile applied!",
+  "Profiel toegepast!",
+  "Profil appliqué !"
+ ],
+ "Prüfe Verbindungsart (Companion / direkte CLI)…": [
+  "Checking connection type (companion / direct CLI)…",
+  "Verbindingstype controleren (companion / directe CLI)…",
+  "Vérification du type de connexion (compagnon / CLI directe)…"
+ ],
+ "Backup: Regionen werden gelesen…": [
+  "Backup: reading regions…",
+  "Back-up: regio's worden gelezen…",
+  "Sauvegarde : lecture des régions…"
+ ],
+ "Verbindung zum Repeater wird vorbereitet…": [
+  "Preparing connection to repeater…",
+  "Verbinding met repeater wordt voorbereid…",
+  "Préparation de la connexion au répéteur…"
+ ],
+ "✓ Alle Start-Abfragen abgeschlossen": [
+  "✓ All startup queries completed",
+  "✓ Alle startopvragingen voltooid",
+  "✓ Toutes les requêtes de démarrage terminées"
+ ],
+ "Lese Paket-Filter (Whitelist/Blacklist)…": [
+  "Reading packet filter (whitelist/blacklist)…",
+  "Pakketfilter lezen (whitelist/blacklist)…",
+  "Lecture du filtre de paquets (liste blanche/noire)…"
+ ],
+ "Filter-Status wird abgefragt…": [
+  "Querying filter status…",
+  "Filterstatus wordt opgevraagd…",
+  "Interrogation de l'état du filtre…"
+ ],
+ "Getrennt – keine Antwort": [
+  "Disconnected – no response",
+  "Verbroken – geen antwoord",
+  "Déconnecté – aucune réponse"
+ ],
+ "Login gesendet...": [
+  "Login sent...",
+  "Login verzonden...",
+  "Connexion envoyée..."
+ ],
+ "Keine Antwort (Timeout)": [
+  "No response (timeout)",
+  "Geen antwoord (time-out)",
+  "Aucune réponse (délai dépassé)"
+ ],
+ "Login abgelehnt (Passwort?)": [
+  "Login rejected (password?)",
+  "Login geweigerd (wachtwoord?)",
+  "Connexion refusée (mot de passe ?)"
+ ],
+ "Fehler ({0})": [
+  "Error ({0})",
+  "Fout ({0})",
+  "Erreur ({0})"
+ ],
+ "Warte auf USB-Daten...": [
+  "Waiting for USB data...",
+  "Wachten op USB-gegevens...",
+  "En attente de données USB..."
+ ],
+ "Verbinde USB...": [
+  "Connecting USB...",
+  "USB verbinden...",
+  "Connexion USB..."
+ ],
+ "Verbinde BLE...": [
+  "Connecting BLE...",
+  "BLE verbinden...",
+  "Connexion BLE..."
+ ],
+ "Companion-Node antwortet nicht mehr (ausgeschaltet oder Verbindung gestört).": [
+  "Companion node no longer responds (switched off or connection disturbed).",
+  "Companion-node reageert niet meer (uitgeschakeld of verbinding gestoord).",
+  "Le nœud compagnon ne répond plus (éteint ou connexion perturbée)."
+ ],
+ "Hardware-Board wird abgefragt…": [
+  "Querying hardware board…",
+  "Hardwareboard wordt opgevraagd…",
+  "Interrogation de la carte matérielle…"
+ ],
+ "Firmware-Version wird abgefragt…": [
+  "Querying firmware version…",
+  "Firmwareversie wordt opgevraagd…",
+  "Interrogation de la version du firmware…"
+ ],
+ "Funkparameter werden abgefragt…": [
+  "Querying radio parameters…",
+  "Radioparameters worden opgevraagd…",
+  "Interrogation des paramètres radio…"
+ ],
+ "Sendeleistung & Duty-Cycle werden abgefragt…": [
+  "Querying transmit power & duty cycle…",
+  "Zendvermogen & duty-cycle worden opgevraagd…",
+  "Interrogation de la puissance & du rapport cyclique…"
+ ],
+ "Repeater-Name wird abgefragt…": [
+  "Querying repeater name…",
+  "Repeaternaam wordt opgevraagd…",
+  "Interrogation du nom du répéteur…"
+ ],
+ "Besitzer-Info wird abgefragt…": [
+  "Querying owner info…",
+  "Eigenaarsinfo wordt opgevraagd…",
+  "Interrogation des infos propriétaire…"
+ ],
+ "Standort-Koordinaten werden abgefragt…": [
+  "Querying location coordinates…",
+  "Locatiecoördinaten worden opgevraagd…",
+  "Interrogation des coordonnées…"
+ ],
+ "Routing & Adverts werden abgefragt…": [
+  "Querying routing & adverts…",
+  "Routing & adverts worden opgevraagd…",
+  "Interrogation du routage & des adverts…"
+ ],
+ "GPS-Status wird abgefragt…": [
+  "Querying GPS status…",
+  "GPS-status wordt opgevraagd…",
+  "Interrogation de l'état GPS…"
+ ],
+ "Prüfe Geräte- & Filter-Funktionen…": [
+  "Checking device & filter features…",
+  "Apparaat- & filterfuncties controleren…",
+  "Vérification des fonctions appareil & filtre…"
+ ],
+ "Telemetrie wird abgefragt…": [
+  "Querying telemetry…",
+  "Telemetrie wordt opgevraagd…",
+  "Interrogation de la télémétrie…"
+ ],
+ "Filter-Einstellungen werden abgefragt…": [
+  "Querying filter settings…",
+  "Filterinstellingen worden opgevraagd…",
+  "Interrogation des réglages du filtre…"
+ ],
+ "USB-Gerät wurde getrennt (Kabel abgezogen oder Repeater ausgeschaltet).": [
+  "USB device disconnected (cable unplugged or repeater switched off).",
+  "USB-apparaat losgekoppeld (kabel uitgetrokken of repeater uitgeschakeld).",
+  "Appareil USB déconnecté (câble débranché ou répéteur éteint)."
+ ],
+ "USB-Berechtigung wurde verweigert.": [
+  "USB permission was denied.",
+  "USB-toestemming geweigerd.",
+  "Autorisation USB refusée."
+ ],
+ "USB-Manager ist auf diesem Gerät nicht verfügbar.": [
+  "USB manager is not available on this device.",
+  "USB-manager is op dit apparaat niet beschikbaar.",
+  "Le gestionnaire USB n'est pas disponible sur cet appareil."
+ ],
+ "Kein passender USB-Treiber für dieses Gerät gefunden.": [
+  "No suitable USB driver found for this device.",
+  "Geen geschikte USB-driver voor dit apparaat gevonden.",
+  "Aucun pilote USB adapté trouvé pour cet appareil."
+ ],
+ "Nicht mit USB verbunden.": [
+  "Not connected via USB.",
+  "Niet via USB verbonden.",
+  "Non connecté en USB."
+ ],
+ "Bluetooth ist ausgeschaltet. Bitte Bluetooth aktivieren.": [
+  "Bluetooth is switched off. Please enable Bluetooth.",
+  "Bluetooth staat uit. Schakel Bluetooth in.",
+  "Le Bluetooth est désactivé. Veuillez activer le Bluetooth."
+ ],
+ "Android-Standortdienste (GPS) sind aus – für BLE-Scan bitte Standort aktivieren.": [
+  "Android location services (GPS) are off – please enable location for BLE scanning.",
+  "Android-locatiediensten (GPS) staan uit – schakel locatie in voor de BLE-scan.",
+  "Les services de localisation Android (GPS) sont désactivés – activez la localisation pour le scan BLE."
+ ],
+ "Bluetooth ist auf diesem Gerät deaktiviert oder nicht verfügbar.": [
+  "Bluetooth is disabled or not available on this device.",
+  "Bluetooth is op dit apparaat uitgeschakeld of niet beschikbaar.",
+  "Le Bluetooth est désactivé ou indisponible sur cet appareil."
+ ],
+ "Kein aktiver BLE-UART-Dienst.": [
+  "No active BLE UART service.",
+  "Geen actieve BLE-UART-dienst.",
+  "Aucun service BLE UART actif."
+ ],
+ "Bluetooth-Verbindung abgerissen (Timeout) – Gerät ausgeschaltet oder außer Reichweite.": [
+  "Bluetooth connection dropped (timeout) – device switched off or out of range.",
+  "Bluetooth-verbinding weggevallen (time-out) – apparaat uitgeschakeld of buiten bereik.",
+  "Connexion Bluetooth interrompue (délai dépassé) – appareil éteint ou hors de portée."
+ ],
+ "Gerät hat die Bluetooth-Verbindung beendet (ausgeschaltet/neu gestartet?).": [
+  "Device closed the Bluetooth connection (switched off/rebooted?).",
+  "Apparaat heeft de Bluetooth-verbinding beëindigd (uitgeschakeld/herstart?).",
+  "L'appareil a fermé la connexion Bluetooth (éteint/redémarré ?)."
+ ],
+ "Bluetooth-Verbindung vom Smartphone beendet.": [
+  "Bluetooth connection closed by the smartphone.",
+  "Bluetooth-verbinding door de smartphone beëindigd.",
+  "Connexion Bluetooth fermée par le smartphone."
+ ],
+ "Bluetooth-Verbindung verloren (GATT-Fehler 133).": [
+  "Bluetooth connection lost (GATT error 133).",
+  "Bluetooth-verbinding verloren (GATT-fout 133).",
+  "Connexion Bluetooth perdue (erreur GATT 133)."
+ ],
+ "Bluetooth-Verbindung verloren (Timeout, Status 147).": [
+  "Bluetooth connection lost (timeout, status 147).",
+  "Bluetooth-verbinding verloren (time-out, status 147).",
+  "Connexion Bluetooth perdue (délai dépassé, statut 147)."
+ ],
+ "BLE-Verbindungsaufbau fehlgeschlagen (Status 147 – Timeout). Gerät eingeschaltet und in Reichweite?": [
+  "BLE connection setup failed (status 147 – timeout). Is the device on and in range?",
+  "BLE-verbinding opbouwen mislukt (status 147 – time-out). Staat het apparaat aan en binnen bereik?",
+  "Échec de l'établissement de la connexion BLE (statut 147 – délai). L'appareil est-il allumé et à portée ?"
+ ],
+ "DE Standard (MeshCore EU868)": [
+  "DE standard (MeshCore EU868)",
+  "DE-standaard (MeshCore EU868)",
+  "Standard DE (MeshCore EU868)"
+ ],
+ "Aktueller MeshCore EU868 Standard: 869.618 MHz, BW 62.5 kHz, SF 8, CR 4/8 (500 mW ERP, 10% Duty-Cycle)": [
+  "Current MeshCore EU868 standard: 869.618 MHz, BW 62.5 kHz, SF 8, CR 4/8 (500 mW ERP, 10% duty cycle)",
+  "Huidige MeshCore EU868-standaard: 869.618 MHz, BW 62.5 kHz, SF 8, CR 4/8 (500 mW ERP, 10% duty-cycle)",
+  "Standard MeshCore EU868 actuel : 869.618 MHz, BW 62.5 kHz, SF 8, CR 4/8 (500 mW ERP, rapport cyclique 10 %)"
+ ],
+ "DE High-Speed Test (Hamburg-Testnetz)": [
+  "DE high-speed test (Hamburg test net)",
+  "DE high-speed-test (testnet Hamburg)",
+  "Test haut débit DE (réseau test de Hambourg)"
+ ],
+ "High-Speed Mesh (z. B. Hamburg-Testnetz): 869.618 MHz, BW 62.5 kHz, SF 7, CR 4/8": [
+  "High-speed mesh (e.g. Hamburg test net): 869.618 MHz, BW 62.5 kHz, SF 7, CR 4/8",
+  "High-speed mesh (bijv. testnet Hamburg): 869.618 MHz, BW 62.5 kHz, SF 7, CR 4/8",
+  "Mesh haut débit (p. ex. réseau test de Hambourg) : 869.618 MHz, BW 62.5 kHz, SF 7, CR 4/8"
+ ],
+ "EU868 Classic / Wide": [
+  "EU868 Classic / Wide",
+  "EU868 Classic / Wide",
+  "EU868 Classic / Wide"
+ ],
+ "Klassisches Wideband EU868: 869.525 MHz, BW 250 kHz, SF 11, CR 4/5": [
+  "Classic wideband EU868: 869.525 MHz, BW 250 kHz, SF 11, CR 4/5",
+  "Klassiek wideband EU868: 869.525 MHz, BW 250 kHz, SF 11, CR 4/5",
+  "Large bande EU868 classique : 869.525 MHz, BW 250 kHz, SF 11, CR 4/5"
+ ],
+ "USA / FCC (US915)": [
+  "USA / FCC (US915)",
+  "VS / FCC (US915)",
+  "États-Unis / FCC (US915)"
+ ],
+ "FCC Part 15: 902–928 MHz, bis zu 30 dBm TX": [
+  "FCC Part 15: 902–928 MHz, up to 30 dBm TX",
+  "FCC Part 15: 902–928 MHz, tot 30 dBm TX",
+  "FCC Part 15 : 902–928 MHz, jusqu'à 30 dBm TX"
+ ],
+ "Großbritannien (UK868)": [
+  "United Kingdom (UK868)",
+  "Verenigd Koninkrijk (UK868)",
+  "Royaume-Uni (UK868)"
+ ],
+ "CUSTOM": [
+  "CUSTOM",
+  "AANGEPAST",
+  "PERSONNALISÉ"
+ ],
+ "Benutzerdefiniert / Individuell": [
+  "Custom / individual",
+  "Aangepast / individueel",
+  "Personnalisé / individuel"
+ ],
+ "Manuelle Frequenz- und Leistungsparameter": [
+  "Manual frequency and power parameters",
+  "Handmatige frequentie- en vermogensparameters",
+  "Paramètres manuels de fréquence et de puissance"
+ ],
+ "Stock-Antenne (~2.0 dBi)": [
+  "Stock antenna (~2.0 dBi)",
+  "Standaardantenne (~2.0 dBi)",
+  "Antenne d'origine (~2.0 dBi)"
+ ],
+ "Standard Rundstrahler": [
+  "Standard omnidirectional",
+  "Standaard rondstraler",
+  "Omnidirectionnelle standard"
+ ],
+ "RAK Glasfaser Omni (5.8 dBi)": [
+  "RAK fiberglass omni (5.8 dBi)",
+  "RAK glasvezel-omni (5.8 dBi)",
+  "RAK omni fibre de verre (5.8 dBi)"
+ ],
+ "Optimierte Mastantenne": [
+  "Optimised mast antenna",
+  "Geoptimaliseerde mastantenne",
+  "Antenne de mât optimisée"
+ ],
+ "Allnet High-Gain (7.3 dBi)": [
+  "Allnet high-gain (7.3 dBi)",
+  "Allnet high-gain (7.3 dBi)",
+  "Allnet haut gain (7.3 dBi)"
+ ],
+ "Hoher Antennengewinn": [
+  "High antenna gain",
+  "Hoge antenneversterking",
+  "Gain d'antenne élevé"
+ ],
+ "High-Gain / Yagi (12.0 dBi)": [
+  "High-gain / Yagi (12.0 dBi)",
+  "High-gain / Yagi (12.0 dBi)",
+  "Haut gain / Yagi (12.0 dBi)"
+ ],
+ "Richtfunk / Sehr hohe Bündelung": [
+  "Directional / very high focus",
+  "Straalverbinding / zeer sterke bundeling",
+  "Directive / très forte focalisation"
+ ],
+ "Unbekannt (+3.0 dBi Puffer)": [
+  "Unknown (+3.0 dBi buffer)",
+  "Onbekend (+3.0 dBi buffer)",
+  "Inconnue (marge +3.0 dBi)"
+ ],
+ "Konservativer Sicherheitszuschlag": [
+  "Conservative safety margin",
+  "Conservatieve veiligheidsmarge",
+  "Marge de sécurité prudente"
+ ],
+ "Eigene Antenne (Benutzerdefiniert)": [
+  "Own antenna (custom)",
+  "Eigen antenne (aangepast)",
+  "Antenne personnelle (personnalisée)"
+ ],
+ "Freie dBi-Eingabe": [
+  "Free dBi input",
+  "Vrije dBi-invoer",
+  "Saisie libre en dBi"
+ ],
+ "5 Minuten": [
+  "5 minutes",
+  "5 minuten",
+  "5 minutes"
+ ],
+ "10 Minuten": [
+  "10 minutes",
+  "10 minuten",
+  "10 minutes"
+ ],
+ "1. System, Status & Diagnose": [
+  "1. System, status & diagnostics",
+  "1. Systeem, status & diagnose",
+  "1. Système, état & diagnostic"
+ ],
+ "2. Grundeinstellungen & Funk": [
+  "2. Basic settings & radio",
+  "2. Basisinstellingen & radio",
+  "2. Réglages de base & radio"
+ ],
+ "3. Netzwerk, Adverts & Hardware": [
+  "3. Network, adverts & hardware",
+  "3. Netwerk, adverts & hardware",
+  "3. Réseau, adverts & matériel"
+ ],
+ "4. Filter – Blacklist (DMC)": [
+  "4. Filter – blacklist (DMC)",
+  "4. Filter – blacklist (DMC)",
+  "4. Filtre – liste noire (DMC)"
+ ],
+ "5. Filter – Whitelist (Custom)": [
+  "5. Filter – whitelist (custom)",
+  "5. Filter – whitelist (custom)",
+  "5. Filtre – liste blanche (custom)"
+ ],
+ "6. Wartung & OTA-Update": [
+  "6. Maintenance & OTA update",
+  "6. Onderhoud & OTA-update",
+  "6. Maintenance & mise à jour OTA"
+ ],
+ "Zeigt Firmware-Version und Build-Datum des Repeaters an.": [
+  "Shows the repeater's firmware version and build date.",
+  "Toont firmwareversie en builddatum van de repeater.",
+  "Affiche la version du firmware et la date de compilation du répéteur."
+ ],
+ "Gibt die erkannte Hardware-Plattform (z. B. Wio Tracker L1) aus.": [
+  "Prints the detected hardware platform (e.g. Wio Tracker L1).",
+  "Geeft het gedetecteerde hardwareplatform weer (bijv. Wio Tracker L1).",
+  "Indique la plateforme matérielle détectée (p. ex. Wio Tracker L1)."
+ ],
+ "Zeigt Batteriespannung (mV), USB- und Solar-Ladestatus an.": [
+  "Shows battery voltage (mV), USB and solar charging status.",
+  "Toont accuspanning (mV), USB- en zonne-laadstatus.",
+  "Affiche la tension de batterie (mV) et l'état de charge USB et solaire."
+ ],
+ "Liest die aktuelle interne UTC-Systemzeit des Repeaters aus.": [
+  "Reads the repeater's current internal UTC system time.",
+  "Leest de huidige interne UTC-systeemtijd van de repeater.",
+  "Lit l'heure système UTC interne actuelle du répéteur."
+ ],
+ "Synchronisiert die Repeater-Uhrzeit mit dem Companion.": [
+  "Synchronises the repeater clock with the companion.",
+  "Synchroniseert de klok van de repeater met de companion.",
+  "Synchronise l'horloge du répéteur avec le compagnon."
+ ],
+ "Setzt alle gesammelten Funk- und Paket-Zähler auf null zurück.": [
+  "Resets all collected radio and packet counters to zero.",
+  "Zet alle verzamelde radio- en pakkettellers op nul.",
+  "Remet à zéro tous les compteurs radio et paquets."
+ ],
+ "Kalibriert den Spannungsteiler-Faktor für die Akku-Messung.": [
+  "Calibrates the voltage divider factor for battery measurement.",
+  "Kalibreert de spanningsdelerfactor voor de accumeting.",
+  "Étalonne le facteur du diviseur de tension pour la mesure de batterie."
+ ],
+ "Startet den Repeater sofort neu (speichert alle Einstellungen).": [
+  "Reboots the repeater immediately (saves all settings).",
+  "Herstart de repeater direct (slaat alle instellingen op).",
+  "Redémarre immédiatement le répéteur (enregistre tous les paramètres)."
+ ],
+ "Schaltet den Repeater aus (nur per Taster/Reset wieder weckbar).": [
+  "Switches the repeater off (can only be woken by button/reset).",
+  "Schakelt de repeater uit (alleen via knop/reset weer te wekken).",
+  "Éteint le répéteur (réveil uniquement par bouton/reset)."
+ ],
+ "Startet den USB-Bootloader/DFU-Modus für Firmware-Updates.": [
+  "Starts the USB bootloader/DFU mode for firmware updates.",
+  "Start de USB-bootloader/DFU-modus voor firmware-updates.",
+  "Lance le bootloader USB/mode DFU pour les mises à jour du firmware."
+ ],
+ "Setzt Flash-Konfiguration zurück (Vorsicht: Werkseinstellungen!).": [
+  "Resets the flash configuration (caution: factory settings!).",
+  "Zet de flashconfiguratie terug (let op: fabrieksinstellingen!).",
+  "Réinitialise la configuration flash (attention : réglages d'usine !)."
+ ],
+ "Zeigt Frequenz (MHz), Bandbreite (kHz), SF und Coding-Rate an.": [
+  "Shows frequency (MHz), bandwidth (kHz), SF and coding rate.",
+  "Toont frequentie (MHz), bandbreedte (kHz), SF en coderingsratio.",
+  "Affiche la fréquence (MHz), la bande passante (kHz), le SF et le taux de codage."
+ ],
+ "Setzt alle LoRa-Funkparameter (EU Narrow: 869.618,62.5,8,8).": [
+  "Sets all LoRa radio parameters (EU Narrow: 869.618,62.5,8,8).",
+  "Stelt alle LoRa-radioparameters in (EU Narrow: 869.618,62.5,8,8).",
+  "Définit tous les paramètres radio LoRa (EU Narrow : 869.618,62.5,8,8)."
+ ],
+ "Testet Funkparameter temporär mit automatischem Fallback.": [
+  "Tests radio parameters temporarily with automatic fallback.",
+  "Test radioparameters tijdelijk met automatische terugval.",
+  "Teste temporairement des paramètres radio avec retour automatique."
+ ],
+ "Zeigt die aktuell eingestellte Sendeleistung in dBm an.": [
+  "Shows the currently set transmit power in dBm.",
+  "Toont het ingestelde zendvermogen in dBm.",
+  "Affiche la puissance d'émission actuelle en dBm."
+ ],
+ "Setzt die LoRa-Sendeleistung in dBm (EU-Limit beachten).": [
+  "Sets the LoRa transmit power in dBm (observe the EU limit).",
+  "Stelt het LoRa-zendvermogen in dBm in (let op de EU-limiet).",
+  "Définit la puissance d'émission LoRa en dBm (respecter la limite UE)."
+ ],
+ "Liest den Airtime-Faktor für die Sendezeit-Begrenzung aus.": [
+  "Reads the airtime factor for transmit time limiting.",
+  "Leest de airtime-factor voor de zendtijdbegrenzing.",
+  "Lit le facteur airtime pour la limitation du temps d'émission."
+ ],
+ "Setzt den Airtime-Faktor für die Sendezeit-Begrenzung.": [
+  "Sets the airtime factor for transmit time limiting.",
+  "Stelt de airtime-factor voor de zendtijdbegrenzing in.",
+  "Définit le facteur airtime pour la limitation du temps d'émission."
+ ],
+ "Begrenzt den Sende-Duty-Cycle in Prozent (EU 869.4 MHz: 10%).": [
+  "Limits the transmit duty cycle in percent (EU 869.4 MHz: 10%).",
+  "Beperkt de zend-duty-cycle in procent (EU 869.4 MHz: 10%).",
+  "Limite le rapport cyclique d'émission en pourcentage (UE 869.4 MHz : 10 %)."
+ ],
+ "Liest den aktuellen Mesh-Namen des Repeaters aus.": [
+  "Reads the repeater's current mesh name.",
+  "Leest de huidige meshnaam van de repeater.",
+  "Lit le nom mesh actuel du répéteur."
+ ],
+ "Ändert den sichtbaren Mesh-Namen des Repeaters.": [
+  "Changes the repeater's visible mesh name.",
+  "Wijzigt de zichtbare meshnaam van de repeater.",
+  "Modifie le nom mesh visible du répéteur."
+ ],
+ "Liest den gespeicherten Breitengrad (Latitude) aus.": [
+  "Reads the stored latitude.",
+  "Leest de opgeslagen breedtegraad (latitude).",
+  "Lit la latitude enregistrée."
+ ],
+ "Setzt den Breitengrad (Latitude) für die Mesh-Karte.": [
+  "Sets the latitude for the mesh map.",
+  "Stelt de breedtegraad (latitude) voor de meshkaart in.",
+  "Définit la latitude pour la carte mesh."
+ ],
+ "Liest den gespeicherten Längengrad (Longitude) aus.": [
+  "Reads the stored longitude.",
+  "Leest de opgeslagen lengtegraad (longitude).",
+  "Lit la longitude enregistrée."
+ ],
+ "Setzt den Längengrad (Longitude) für die Mesh-Karte.": [
+  "Sets the longitude for the mesh map.",
+  "Stelt de lengtegraad (longitude) voor de meshkaart in.",
+  "Définit la longitude pour la carte mesh."
+ ],
+ "Ändert das Admin-Passwort (max. 15 Zeichen).": [
+  "Changes the admin password (max. 15 characters).",
+  "Wijzigt het admin-wachtwoord (max. 15 tekens).",
+  "Modifie le mot de passe admin (15 caractères max.)."
+ ],
+ "Liest das gesetzte Lese-/Gast-Passwort aus.": [
+  "Reads the configured read/guest password.",
+  "Leest het ingestelde lees-/gastwachtwoord.",
+  "Lit le mot de passe lecture/invité défini."
+ ],
+ "Setzt das Lese-/Gast-Passwort für Statusabfragen.": [
+  "Sets the read/guest password for status queries.",
+  "Stelt het lees-/gastwachtwoord voor statusopvragingen in.",
+  "Définit le mot de passe lecture/invité pour les requêtes d'état."
+ ],
+ "Zeigt an, ob lesender Gast-Zugriff ohne Passwort aktiv ist.": [
+  "Shows whether read-only guest access without password is active.",
+  "Toont of lezende gasttoegang zonder wachtwoord actief is.",
+  "Indique si l'accès invité en lecture sans mot de passe est actif."
+ ],
+ "Erlaubt oder sperrt lesenden Gast-Zugriff ohne Admin-Passwort.": [
+  "Allows or blocks read-only guest access without admin password.",
+  "Staat lezende gasttoegang zonder admin-wachtwoord toe of blokkeert deze.",
+  "Autorise ou bloque l'accès invité en lecture sans mot de passe admin."
+ ],
+ "Zeigt an, ob die Paket-Weiterleitung (Repeater) aktiv ist.": [
+  "Shows whether packet forwarding (repeater) is active.",
+  "Toont of het doorsturen van pakketten (repeater) actief is.",
+  "Indique si le relais des paquets (répéteur) est actif."
+ ],
+ "Aktiviert oder pausiert die Paket-Weiterleitung.": [
+  "Enables or pauses packet forwarding.",
+  "Activeert of pauzeert het doorsturen van pakketten.",
+  "Active ou suspend le relais des paquets."
+ ],
+ "Liest die Sendeverzögerung bei Flood-Paketen aus.": [
+  "Reads the transmit delay for flood packets.",
+  "Leest de zendvertraging voor flood-pakketten.",
+  "Lit le délai d'émission des paquets flood."
+ ],
+ "Setzt die Sendeverzögerung bei Flood-Paketen.": [
+  "Sets the transmit delay for flood packets.",
+  "Stelt de zendvertraging voor flood-pakketten in.",
+  "Définit le délai d'émission des paquets flood."
+ ],
+ "Liest die Sendeverzögerung bei direkten Paketen aus.": [
+  "Reads the transmit delay for direct packets.",
+  "Leest de zendvertraging voor directe pakketten.",
+  "Lit le délai d'émission des paquets directs."
+ ],
+ "Setzt die Sendeverzögerung bei direkten Paketen.": [
+  "Sets the transmit delay for direct packets.",
+  "Stelt de zendvertraging voor directe pakketten in.",
+  "Définit le délai d'émission des paquets directs."
+ ],
+ "Liest die Empfangs-Verzögerung (RX-Timing) aus.": [
+  "Reads the receive delay (RX timing).",
+  "Leest de ontvangstvertraging (RX-timing).",
+  "Lit le délai de réception (timing RX)."
+ ],
+ "Setzt die Empfangs-Verzögerung (RX-Timing).": [
+  "Sets the receive delay (RX timing).",
+  "Stelt de ontvangstvertraging (RX-timing) in.",
+  "Définit le délai de réception (timing RX)."
+ ],
+ "Zeigt den Status der mehrfachen Empfangsbestätigungen an.": [
+  "Shows the status of multiple acknowledgements.",
+  "Toont de status van meervoudige ontvangstbevestigingen.",
+  "Affiche l'état des accusés de réception multiples."
+ ],
+ "Aktiviert (1) oder deaktiviert (0) mehrfache ACKs.": [
+  "Enables (1) or disables (0) multiple ACKs.",
+  "Activeert (1) of deactiveert (0) meervoudige ACK's.",
+  "Active (1) ou désactive (0) les ACK multiples."
+ ],
+ "Aktiviert den Tiefschlafmodus zwischen Funkaktivitäten.": [
+  "Enables deep sleep mode between radio activities.",
+  "Activeert de diepe slaapmodus tussen radioactiviteiten.",
+  "Active le mode veille profonde entre les activités radio."
+ ],
+ "Deaktiviert den Tiefschlafmodus (Dauerbetrieb).": [
+  "Disables deep sleep mode (continuous operation).",
+  "Deactiveert de diepe slaapmodus (continu bedrijf).",
+  "Désactive le mode veille profonde (fonctionnement continu)."
+ ],
+ "Sendet sofort ein Mesh-Advert-Paket zur Bekanntmachung aus.": [
+  "Immediately sends a mesh advert packet for announcement.",
+  "Verzendt direct een mesh-advertpakket ter aankondiging.",
+  "Envoie immédiatement un paquet advert mesh d'annonce."
+ ],
+ "Sendet ein lokales Zero-Hop-Advert ohne Weiterleitung.": [
+  "Sends a local zero-hop advert without forwarding.",
+  "Verzendt een lokale zero-hop-advert zonder doorsturen.",
+  "Envoie un advert local zero-hop sans relais."
+ ],
+ "Liest das lokale Advert-Intervall in Minuten aus.": [
+  "Reads the local advert interval in minutes.",
+  "Leest het lokale advert-interval in minuten.",
+  "Lit l'intervalle d'advert local en minutes."
+ ],
+ "Setzt das lokale Advert-Intervall in Minuten (60–240).": [
+  "Sets the local advert interval in minutes (60–240).",
+  "Stelt het lokale advert-interval in minuten in (60–240).",
+  "Définit l'intervalle d'advert local en minutes (60–240)."
+ ],
+ "Liest das Intervall für netzweite Flood-Adverts (Std) aus.": [
+  "Reads the interval for network-wide flood adverts (h).",
+  "Leest het interval voor netwerkbrede flood-adverts (u).",
+  "Lit l'intervalle des adverts flood sur tout le réseau (h)."
+ ],
+ "Setzt das Flood-Advert-Intervall in Stunden.": [
+  "Sets the flood advert interval in hours.",
+  "Stelt het flood-advert-interval in uren in.",
+  "Définit l'intervalle d'advert flood en heures."
+ ],
+ "Liest das maximale Hop-Limit für Flood-Pakete aus.": [
+  "Reads the maximum hop limit for flood packets.",
+  "Leest de maximale hoplimiet voor flood-pakketten.",
+  "Lit la limite maximale de sauts des paquets flood."
+ ],
+ "Setzt das maximale Hop-Limit für Flood-Pakete.": [
+  "Sets the maximum hop limit for flood packets.",
+  "Stelt de maximale hoplimiet voor flood-pakketten in.",
+  "Définit la limite maximale de sauts des paquets flood."
+ ],
+ "Liest die eingestellte Pfad-Hash-Breite (0=1B, 1=2B, 2=3B) aus.": [
+  "Reads the configured path hash width (0=1B, 1=2B, 2=3B).",
+  "Leest de ingestelde pad-hashbreedte (0=1B, 1=2B, 2=3B).",
+  "Lit la largeur de hachage de chemin définie (0=1o, 1=2o, 2=3o)."
+ ],
+ "Setzt die Pfad-Hash-Breite (1-, 2- oder 3-Byte Hashes).": [
+  "Sets the path hash width (1-, 2- or 3-byte hashes).",
+  "Stelt de pad-hashbreedte in (1-, 2- of 3-byte hashes).",
+  "Définit la largeur de hachage de chemin (hachages de 1, 2 ou 3 octets)."
+ ],
+ "Liest die Stufe der Schleifen-Erkennung aus.": [
+  "Reads the loop detection level.",
+  "Leest het niveau van de lusdetectie.",
+  "Lit le niveau de détection de boucles."
+ ],
+ "Steuert die Schleifen-Erkennung gegen Paket-Duplikate.": [
+  "Controls loop detection against packet duplicates.",
+  "Regelt de lusdetectie tegen dubbele pakketten.",
+  "Contrôle la détection de boucles contre les paquets dupliqués."
+ ],
+ "Zeigt die aktuell aktive Flood-Region (Scope) an.": [
+  "Shows the currently active flood region (scope).",
+  "Toont de momenteel actieve flood-regio (scope).",
+  "Affiche la région flood actuellement active (scope)."
+ ],
+ "Listet alle konfigurierten Flood-Regionen auf.": [
+  "Lists all configured flood regions.",
+  "Toont alle geconfigureerde flood-regio's.",
+  "Liste toutes les régions flood configurées."
+ ],
+ "Wechselt die aktive Flood-Region für das Routing.": [
+  "Switches the active flood region for routing.",
+  "Wisselt de actieve flood-regio voor de routing.",
+  "Change la région flood active pour le routage."
+ ],
+ "Listet direkt empfangene Nachbar-Repeater mit SNR/RSSI auf.": [
+  "Lists directly received neighbour repeaters with SNR/RSSI.",
+  "Toont direct ontvangen buurrepeaters met SNR/RSSI.",
+  "Liste les répéteurs voisins reçus directement avec SNR/RSSI."
+ ],
+ "Startet eine aktive Suche nach umliegenden Repeatern.": [
+  "Starts an active search for nearby repeaters.",
+  "Start een actieve zoektocht naar repeaters in de buurt.",
+  "Lance une recherche active des répéteurs voisins."
+ ],
+ "Liest den aktuellen Betriebsmodus der Status-LEDs aus.": [
+  "Reads the current operating mode of the status LEDs.",
+  "Leest de huidige modus van de status-LEDs.",
+  "Lit le mode de fonctionnement actuel des LED d'état."
+ ],
+ "Steuert das Verhalten der Status-LEDs.": [
+  "Controls the behaviour of the status LEDs.",
+  "Regelt het gedrag van de status-LEDs.",
+  "Contrôle le comportement des LED d'état."
+ ],
+ "Zeigt den aktuellen GPS-Fix-Status und Koordinaten an.": [
+  "Shows the current GPS fix status and coordinates.",
+  "Toont de huidige GPS-fixstatus en coördinaten.",
+  "Affiche l'état du fix GPS et les coordonnées."
+ ],
+ "Schaltet das interne GPS-Modul ein.": [
+  "Switches the internal GPS module on.",
+  "Schakelt de interne GPS-module in.",
+  "Allume le module GPS interne."
+ ],
+ "Schaltet das interne GPS-Modul aus (spart Strom).": [
+  "Switches the internal GPS module off (saves power).",
+  "Schakelt de interne GPS-module uit (bespaart stroom).",
+  "Éteint le module GPS interne (économise l'énergie)."
+ ],
+ "Übernimmt die aktuelle GPS-Position als festen Standort.": [
+  "Adopts the current GPS position as fixed location.",
+  "Neemt de huidige GPS-positie over als vaste locatie.",
+  "Adopte la position GPS actuelle comme position fixe."
+ ],
+ "Teilt die Live-GPS-Position direkt in Adverts.": [
+  "Shares the live GPS position directly in adverts.",
+  "Deelt de live GPS-positie direct in adverts.",
+  "Partage la position GPS en direct dans les adverts."
+ ],
+ "Deaktiviert das Mitsenden der Live-GPS-Position in Adverts.": [
+  "Stops including the live GPS position in adverts.",
+  "Stopt met het meesturen van de live GPS-positie in adverts.",
+  "Cesse d'inclure la position GPS en direct dans les adverts."
+ ],
+ "Liest den eingestellten Bridge-Typ (ESP-NOW/Serial) aus.": [
+  "Reads the configured bridge type (ESP-NOW/serial).",
+  "Leest het ingestelde bridgetype (ESP-NOW/serieel).",
+  "Lit le type de pont défini (ESP-NOW/série)."
+ ],
+ "Setzt den Bridge-Typ für die Kopplung.": [
+  "Sets the bridge type for coupling.",
+  "Stelt het bridgetype voor de koppeling in.",
+  "Définit le type de pont pour le couplage."
+ ],
+ "Zeigt an, ob die Bridge-Kopplung aktiv ist.": [
+  "Shows whether the bridge coupling is active.",
+  "Toont of de bridgekoppeling actief is.",
+  "Indique si le couplage du pont est actif."
+ ],
+ "Aktiviert oder deaktiviert die Bridge-Kopplung.": [
+  "Enables or disables the bridge coupling.",
+  "Activeert of deactiveert de bridgekoppeling.",
+  "Active ou désactive le couplage du pont."
+ ],
+ "Liest die Baudrate für die serielle Bridge aus.": [
+  "Reads the baud rate for the serial bridge.",
+  "Leest de baudrate voor de seriële bridge.",
+  "Lit le débit en bauds du pont série."
+ ],
+ "Setzt die Baudrate für die serielle Bridge.": [
+  "Sets the baud rate for the serial bridge.",
+  "Stelt de baudrate voor de seriële bridge in.",
+  "Définit le débit en bauds du pont série."
+ ],
+ "Liest den Funkkanal für eine ESP-NOW-Bridge aus.": [
+  "Reads the radio channel for an ESP-NOW bridge.",
+  "Leest het radiokanaal voor een ESP-NOW-bridge.",
+  "Lit le canal radio d'un pont ESP-NOW."
+ ],
+ "Setzt den Funkkanal für eine ESP-NOW-Bridge.": [
+  "Sets the radio channel for an ESP-NOW bridge.",
+  "Stelt het radiokanaal voor een ESP-NOW-bridge in.",
+  "Définit le canal radio d'un pont ESP-NOW."
+ ],
+ "Zeigt Filter-Status (on/off), Modus und Block-Zähler an.": [
+  "Shows filter status (on/off), mode and block counters.",
+  "Toont filterstatus (on/off), modus en bloktellers.",
+  "Affiche l'état du filtre (on/off), le mode et les compteurs de blocage."
+ ],
+ "Zeigt detaillierte Statistiken aller blockierten Kategorien.": [
+  "Shows detailed statistics for all blocked categories.",
+  "Toont gedetailleerde statistieken van alle geblokkeerde categorieën.",
+  "Affiche des statistiques détaillées de toutes les catégories bloquées."
+ ],
+ "Gibt die Gesamtzahl aktiver Filterregeln und Treffer aus.": [
+  "Prints the total number of active filter rules and hits.",
+  "Geeft het totaal aantal actieve filterregels en treffers weer.",
+  "Indique le nombre total de règles de filtre actives et de correspondances."
+ ],
+ "Schaltet die Paket-Filterung aktiv ein.": [
+  "Switches packet filtering on.",
+  "Schakelt de pakketfiltering in.",
+  "Active le filtrage des paquets."
+ ],
+ "Schaltet die Paket-Filterung aus.": [
+  "Switches packet filtering off.",
+  "Schakelt de pakketfiltering uit.",
+  "Désactive le filtrage des paquets."
+ ],
+ "Aktiviert den klassischen DMC-Blacklist-Modus.": [
+  "Enables the classic DMC blacklist mode.",
+  "Activeert de klassieke DMC-blacklistmodus.",
+  "Active le mode liste noire DMC classique."
+ ],
+ "Simuliert Filterregeln im Log, ohne Pakete zu verwerfen.": [
+  "Simulates filter rules in the log without dropping packets.",
+  "Simuleert filterregels in het log zonder pakketten te verwerpen.",
+  "Simule les règles de filtre dans le journal sans rejeter de paquets."
+ ],
+ "Beendet den Simulationsmodus (Filter verwirft wieder aktiv).": [
+  "Ends simulation mode (filter drops actively again).",
+  "Beëindigt de simulatiemodus (filter verwerpt weer actief).",
+  "Termine le mode simulation (le filtre rejette de nouveau activement)."
+ ],
+ "Filtert gezielt nach MeshCore-Pakettypen.": [
+  "Filters specifically by MeshCore packet types.",
+  "Filtert gericht op MeshCore-pakkettypes.",
+  "Filtre spécifiquement par types de paquets MeshCore."
+ ],
+ "Listet alle geblockten Hashtag-Kanäle auf.": [
+  "Lists all blocked hashtag channels.",
+  "Toont alle geblokkeerde hashtag-kanalen.",
+  "Liste tous les canaux hashtag bloqués."
+ ],
+ "Fügt einen Kanal zur Blacklist hinzu.": [
+  "Adds a channel to the blacklist.",
+  "Voegt een kanaal toe aan de blacklist.",
+  "Ajoute un canal à la liste noire."
+ ],
+ "Entfernt einen Kanal wieder von der Blacklist.": [
+  "Removes a channel from the blacklist.",
+  "Verwijdert een kanaal van de blacklist.",
+  "Retire un canal de la liste noire."
+ ],
+ "Listet geblockte Node-ID-/Pfad-Präfixe auf.": [
+  "Lists blocked node ID/path prefixes.",
+  "Toont geblokkeerde node-ID-/padprefixen.",
+  "Liste les préfixes d'ID de nœud/chemin bloqués."
+ ],
+ "Blockiert einen Hex-Pfadpräfix auf der Blacklist.": [
+  "Blocks a hex path prefix on the blacklist.",
+  "Blokkeert een hex-padprefix op de blacklist.",
+  "Bloque un préfixe de chemin hex dans la liste noire."
+ ],
+ "Gibt einen geblockten Hex-Pfadpräfix wieder frei.": [
+  "Unblocks a blocked hex path prefix.",
+  "Geeft een geblokkeerd hex-padprefix weer vrij.",
+  "Débloque un préfixe de chemin hex bloqué."
+ ],
+ "Prüft oder blockiert Pakete mit kollidierenden Hashes.": [
+  "Checks or blocks packets with colliding hashes.",
+  "Controleert of blokkeert pakketten met botsende hashes.",
+  "Vérifie ou bloque les paquets aux hachages en collision."
+ ],
+ "Verwirft fehlerhaft aufgebaute oder beschädigte Pakete.": [
+  "Drops malformed or corrupted packets.",
+  "Verwerpt foutief opgebouwde of beschadigde pakketten.",
+  "Rejette les paquets malformés ou corrompus."
+ ],
+ "Steuert die Filterung und Ratenbegrenzung von Adverts.": [
+  "Controls filtering and rate limiting of adverts.",
+  "Regelt filtering en snelheidsbeperking van adverts.",
+  "Contrôle le filtrage et la limitation de débit des adverts."
+ ],
+ "Begrenzt die maximale Paketrate (Flood-Protection).": [
+  "Limits the maximum packet rate (flood protection).",
+  "Beperkt de maximale pakketsnelheid (flood-bescherming).",
+  "Limite le débit maximal de paquets (protection flood)."
+ ],
+ "Listet alle blockierten Absendermuster auf.": [
+  "Lists all blocked sender patterns.",
+  "Toont alle geblokkeerde afzenderpatronen.",
+  "Liste tous les motifs d'expéditeur bloqués."
+ ],
+ "Blockiert Nachrichten bestimmter Absendernamen.": [
+  "Blocks messages from certain sender names.",
+  "Blokkeert berichten van bepaalde afzendernamen.",
+  "Bloque les messages de certains noms d'expéditeur."
+ ],
+ "Entfernt ein Absendermuster von der Blacklist.": [
+  "Removes a sender pattern from the blacklist.",
+  "Verwijdert een afzenderpatroon van de blacklist.",
+  "Retire un motif d'expéditeur de la liste noire."
+ ],
+ "Listet alle blockierten Textmuster auf.": [
+  "Lists all blocked text patterns.",
+  "Toont alle geblokkeerde tekstpatronen.",
+  "Liste tous les motifs de texte bloqués."
+ ],
+ "Blockiert Nachrichten mit bestimmten Textinhalten.": [
+  "Blocks messages with certain text content.",
+  "Blokkeert berichten met bepaalde tekstinhoud.",
+  "Bloque les messages contenant certains textes."
+ ],
+ "Entfernt ein Textmuster von der Blacklist.": [
+  "Removes a text pattern from the blacklist.",
+  "Verwijdert een tekstpatroon van de blacklist.",
+  "Retire un motif de texte de la liste noire."
+ ],
+ "Listet alle aktiv beobachteten Kanäle/Absender auf.": [
+  "Lists all actively watched channels/senders.",
+  "Toont alle actief gevolgde kanalen/afzenders.",
+  "Liste tous les canaux/expéditeurs surveillés."
+ ],
+ "Beobachtet gezielt Pakete eines Absenders oder Kanals.": [
+  "Watches packets of a specific sender or channel.",
+  "Volgt gericht pakketten van een afzender of kanaal.",
+  "Surveille les paquets d'un expéditeur ou canal précis."
+ ],
+ "Beendet die Beobachtung eines Absenders/Kanals.": [
+  "Stops watching a sender/channel.",
+  "Beëindigt het volgen van een afzender/kanaal.",
+  "Arrête la surveillance d'un expéditeur/canal."
+ ],
+ "Begrenzt maximale Hops pro Pakettyp im Filter.": [
+  "Limits maximum hops per packet type in the filter.",
+  "Beperkt het maximale aantal hops per pakkettype in het filter.",
+  "Limite le nombre de sauts par type de paquet dans le filtre."
+ ],
+ "Verwirft Pakete, die älter als X Minuten sind.": [
+  "Drops packets older than X minutes.",
+  "Verwerpt pakketten ouder dan X minuten.",
+  "Rejette les paquets de plus de X minutes."
+ ],
+ "Löscht alle Filter- und Whitelist-Regeln unwiderruflich.": [
+  "Irrevocably deletes all filter and whitelist rules.",
+  "Verwijdert alle filter- en whitelistregels onherroepelijk.",
+  "Supprime définitivement toutes les règles de filtre et de liste blanche."
+ ],
+ "Aktiviert den strengen Whitelist-Modus.": [
+  "Enables strict whitelist mode.",
+  "Activeert de strenge whitelistmodus.",
+  "Active le mode liste blanche strict."
+ ],
+ "Listet alle erlaubten Kanäle in der Whitelist auf.": [
+  "Lists all allowed channels in the whitelist.",
+  "Toont alle toegestane kanalen in de whitelist.",
+  "Liste tous les canaux autorisés dans la liste blanche."
+ ],
+ "Erlaubt einen Kanal im Whitelist-Modus.": [
+  "Allows a channel in whitelist mode.",
+  "Staat een kanaal toe in de whitelistmodus.",
+  "Autorise un canal en mode liste blanche."
+ ],
+ "Entfernt einen Kanal aus der Whitelist.": [
+  "Removes a channel from the whitelist.",
+  "Verwijdert een kanaal uit de whitelist.",
+  "Retire un canal de la liste blanche."
+ ],
+ "Listet alle erlaubten Pfad-Präfixe in der Whitelist auf.": [
+  "Lists all allowed path prefixes in the whitelist.",
+  "Toont alle toegestane padprefixen in de whitelist.",
+  "Liste tous les préfixes de chemin autorisés dans la liste blanche."
+ ],
+ "Erlaubt einen Hex-Pfadpräfix in der Whitelist.": [
+  "Allows a hex path prefix in the whitelist.",
+  "Staat een hex-padprefix toe in de whitelist.",
+  "Autorise un préfixe de chemin hex dans la liste blanche."
+ ],
+ "Entfernt einen Hex-Pfadpräfix aus der Whitelist.": [
+  "Removes a hex path prefix from the whitelist.",
+  "Verwijdert een hex-padprefix uit de whitelist.",
+  "Retire un préfixe de chemin hex de la liste blanche."
+ ],
+ "Startet den Over-The-Air Firmware-Update-Modus (WiFi/BLE OTA).": [
+  "Starts over-the-air firmware update mode (WiFi/BLE OTA).",
+  "Start de over-the-air-firmware-updatemodus (WiFi/BLE OTA).",
+  "Lance le mode de mise à jour du firmware over-the-air (WiFi/BLE OTA)."
+ ],
+ "Beendet einen laufenden OTA-Update-Modus vorzeitig.": [
+  "Ends a running OTA update mode early.",
+  "Beëindigt een lopende OTA-updatemodus voortijdig.",
+  "Met fin prématurément à un mode de mise à jour OTA en cours."
+ ],
+ "Bei Wartungsarbeiten und Remote-Konfiguration über das Mesh senkt dieser Modus die Sendeleistung des Repeaters vorübergehend (set tx), um umliegende Nodes nicht durch Testsendungen zu überlasten.\n\nNach Ablauf der gewählten Zeit (5 oder 10 Min.) oder beim Beenden stellt die App die ursprüngliche Leistung wieder her. Reißt die Verbindung ab, wird das beim nächsten Verbinden mit diesem Repeater automatisch nachgeholt.": [
+  "During maintenance and remote configuration over the mesh, this mode temporarily lowers the repeater's transmit power (set tx) so that nearby nodes are not overloaded by test transmissions.\n\nWhen the selected time (5 or 10 min.) expires or you end the mode, the app restores the original power. If the connection drops, this is done automatically the next time you connect to this repeater.",
+  "Bij onderhoud en configuratie op afstand via de mesh verlaagt deze modus tijdelijk het zendvermogen van de repeater (set tx), zodat nodes in de buurt niet worden overbelast door testuitzendingen.\n\nNa afloop van de gekozen tijd (5 of 10 min.) of bij beëindigen herstelt de app het oorspronkelijke vermogen. Valt de verbinding weg, dan gebeurt dit automatisch bij de volgende verbinding met deze repeater.",
+  "Lors de la maintenance et de la configuration à distance via le mesh, ce mode réduit temporairement la puissance d'émission du répéteur (set tx) afin de ne pas surcharger les nœuds voisins avec des émissions de test.\n\nÀ l'expiration de la durée choisie (5 ou 10 min.) ou à l'arrêt du mode, l'application rétablit la puissance d'origine. Si la connexion est interrompue, cela se fait automatiquement à la prochaine connexion à ce répéteur."
+ ],
+ "So funktioniert die Rücksetzung": [
+  "How the reset works",
+  "Zo werkt het terugzetten",
+  "Fonctionnement du rétablissement"
+ ],
+ "Die Firmware kennt keinen temporären Befehl für die Sendeleistung: 'tempradio' ändert nur Frequenz, Bandbreite, SF und CR. Die App setzt die reduzierte Leistung deshalb per 'set tx' (im Flash gespeichert) und merkt sich die ursprüngliche Leistung. Läuft die Zeit ab oder beendest du den Modus, sendet die App 'set tx' mit dem alten Wert. Ist die Verbindung dann getrennt, holt die App die Rücksetzung beim nächsten Verbinden mit diesem Repeater automatisch nach.": [
+  "The firmware has no temporary command for transmit power: 'tempradio' only changes frequency, bandwidth, SF and CR. The app therefore sets the reduced power via 'set tx' (stored in flash) and remembers the original power. When the time expires or you end the mode, the app sends 'set tx' with the old value. If the connection is down at that moment, the app automatically performs the reset the next time you connect to this repeater.",
+  "De firmware kent geen tijdelijke opdracht voor het zendvermogen: 'tempradio' wijzigt alleen frequentie, bandbreedte, SF en CR. De app stelt het verlaagde vermogen daarom in via 'set tx' (opgeslagen in flash) en onthoudt het oorspronkelijke vermogen. Loopt de tijd af of beëindig je de modus, dan stuurt de app 'set tx' met de oude waarde. Is de verbinding op dat moment verbroken, dan voert de app het terugzetten automatisch uit bij de volgende verbinding met deze repeater.",
+  "Le firmware ne dispose d'aucune commande temporaire pour la puissance d'émission : 'tempradio' ne modifie que la fréquence, la bande passante, le SF et le CR. L'application règle donc la puissance réduite via 'set tx' (enregistrée en flash) et mémorise la puissance d'origine. À l'expiration du délai ou à l'arrêt du mode, l'application envoie 'set tx' avec l'ancienne valeur. Si la connexion est alors coupée, l'application effectue automatiquement le rétablissement à la prochaine connexion à ce répéteur."
+ ],
+ "Die Drosselung ({0} dBm) muss unter der aktuellen Sendeleistung ({1} dBm) liegen.": [
+  "The reduced power ({0} dBm) must be below the current transmit power ({1} dBm).",
+  "Het verlaagde vermogen ({0} dBm) moet onder het huidige zendvermogen ({1} dBm) liggen.",
+  "La puissance réduite ({0} dBm) doit être inférieure à la puissance d'émission actuelle ({1} dBm)."
+ ],
+ "Schonmodus nicht gestartet – Repeater hat \"set tx\" nicht bestätigt.": [
+  "Care mode not started – repeater did not confirm \"set tx\".",
+  "Spaarmodus niet gestart – repeater heeft \"set tx\" niet bevestigd.",
+  "Mode ménagement non démarré – le répéteur n'a pas confirmé \"set tx\"."
+ ],
+ "Schonmodus aktiv: TX {0} dBm für {1} Min. (danach zurück auf {2} dBm).": [
+  "Care mode active: TX {0} dBm for {1} min. (then back to {2} dBm).",
+  "Spaarmodus actief: TX {0} dBm gedurende {1} min. (daarna terug naar {2} dBm).",
+  "Mode ménagement actif : TX {0} dBm pendant {1} min. (puis retour à {2} dBm)."
+ ],
+ "Schonmodus um {0} Min. verlängert.": [
+  "Care mode extended by {0} min.",
+  "Spaarmodus met {0} min. verlengd.",
+  "Mode ménagement prolongé de {0} min."
+ ],
+ "Schonmodus beendet – Sendeleistung wird beim nächsten Verbinden zurückgesetzt.": [
+  "Care mode ended – transmit power will be reset on the next connection.",
+  "Spaarmodus beëindigd – zendvermogen wordt bij de volgende verbinding teruggezet.",
+  "Mode ménagement terminé – la puissance sera rétablie à la prochaine connexion."
+ ],
+ "Schonmodus beendet: TX wieder {0} dBm.": [
+  "Care mode ended: TX back to {0} dBm.",
+  "Spaarmodus beëindigd: TX weer {0} dBm.",
+  "Mode ménagement terminé : TX revenue à {0} dBm."
+ ],
+ "Rücksetzen der Sendeleistung nicht bestätigt – wird beim nächsten Verbinden erneut versucht.": [
+  "Transmit power reset not confirmed – will be retried on the next connection.",
+  "Terugzetten van het zendvermogen niet bevestigd – wordt bij de volgende verbinding opnieuw geprobeerd.",
+  "Rétablissement de la puissance non confirmé – nouvel essai à la prochaine connexion."
+ ],
+ "Schonmodus-Rücksetzung nachgeholt: TX wieder {0} dBm.": [
+  "Pending care mode reset completed: TX back to {0} dBm.",
+  "Uitgesteld terugzetten van spaarmodus uitgevoerd: TX weer {0} dBm.",
+  "Rétablissement du mode ménagement effectué : TX revenue à {0} dBm."
+ ],
+ "Login unterwegs…": [
+  "Login in transit…",
+  "Login onderweg…",
+  "Connexion en cours d'acheminement…"
+ ],
+ "BLE: Dienstsuche konnte nicht gestartet werden.": [
+  "BLE: service discovery could not be started.",
+  "BLE: zoeken naar diensten kon niet worden gestart.",
+  "BLE : la découverte des services n'a pas pu démarrer."
+ ],
+ "BLE-Frame zu lang für MTU ({0} > {1} Byte) – nicht gesendet.": [
+  "BLE frame too long for MTU ({0} > {1} bytes) – not sent.",
+  "BLE-frame te lang voor MTU ({0} > {1} bytes) – niet verzonden.",
+  "Trame BLE trop longue pour le MTU ({0} > {1} octets) – non envoyée."
+ ],
+ "Bluetooth-Berechtigung verweigert – BLE-Scan nicht möglich.": [
+  "Bluetooth permission denied – BLE scan not possible.",
+  "Bluetooth-toestemming geweigerd – BLE-scan niet mogelijk.",
+  "Autorisation Bluetooth refusée – scan BLE impossible."
+ ],
+ "Lese Hardware & Firmware…": [
+  "Reading hardware & firmware…",
+  "Hardware & firmware lezen…",
+  "Lecture du matériel & du firmware…"
+ ],
+ "Lese Funk- & Routing-Parameter…": [
+  "Reading radio & routing parameters…",
+  "Radio- & routingparameters lezen…",
+  "Lecture des paramètres radio & de routage…"
+ ],
+ "< [Mesh] Admin-Login bestätigt!": [
+  "< [Mesh] Admin login confirmed!",
+  "< [Mesh] Admin-login bevestigd!",
+  "< [Mesh] Connexion admin confirmée !"
+ ],
+ "< [Mesh] Admin-Login abgelehnt!": [
+  "< [Mesh] Admin login rejected!",
+  "< [Mesh] Admin-login geweigerd!",
+  "< [Mesh] Connexion admin refusée !"
+ ],
+ "< [Fehler 0x01] Code={0}": [
+  "< [Error 0x01] Code={0}",
+  "< [Fout 0x01] Code={0}",
+  "< [Erreur 0x01] Code={0}"
+ ],
+ "[ignoriert: passt nicht zu \"{0}\"] {1}": [
+  "[ignored: does not match \"{0}\"] {1}",
+  "[genegeerd: past niet bij \"{0}\"] {1}",
+  "[ignoré : ne correspond pas à \"{0}\"] {1}"
+ ],
+ "USB-Gerät ({0}:{1})": [
+  "USB device ({0}:{1})",
+  "USB-apparaat ({0}:{1})",
+  "Appareil USB ({0}:{1})"
+ ],
+ "Unbekannter Node ({0})": [
+  "Unknown node ({0})",
+  "Onbekende node ({0})",
+  "Nœud inconnu ({0})"
+ ],
+ "Keine gültige JSON-Datei: {0}": [
+  "Not a valid JSON file: {0}",
+  "Geen geldig JSON-bestand: {0}",
+  "Fichier JSON invalide : {0}"
+ ],
+ "Abschnitt \"vars\" fehlt – kein MeshCore-Backup?": [
+  "Section \"vars\" missing – not a MeshCore backup?",
+  "Sectie \"vars\" ontbreekt – geen MeshCore-back-up?",
+  "Section \"vars\" manquante – pas une sauvegarde MeshCore ?"
+ ],
+ "Treiber nicht gefunden.": [
+  "Driver not found.",
+  "Driver niet gevonden.",
+  "Pilote introuvable."
+ ],
+ "Konnte USB-Verbindung nicht öffnen. Berechtigung fehlt?": [
+  "Could not open USB connection. Permission missing?",
+  "Kon USB-verbinding niet openen. Toestemming ontbreekt?",
+  "Impossible d'ouvrir la connexion USB. Autorisation manquante ?"
+ ],
+ "  (Flood gesperrt)": [
+  "  (flood blocked)",
+  "  (flood geblokkeerd)",
+  "  (flood bloqué)"
+ ],
+ "Funkwerte dauerhaft im Flash gespeichert!": [
+  "Radio values permanently saved to flash!",
+  "Radiowaarden permanent in flash opgeslagen!",
+  "Valeurs radio enregistrées définitivement en flash !"
+ ],
+ "BLE · Mesh OTA": [
+  "BLE · Mesh OTA",
+  "BLE · Mesh-OTA",
+  "BLE · Mesh OTA"
+ ],
+ "USB · Seriell": [
+  "USB · Serial",
+  "USB · Serieel",
+  "USB · Série"
+ ],
+ "Hinweis: Der Repeater läuft im Blacklist-Modus – diese Freigaben wirken erst im Whitelist-Modus.": [
+  "Note: the repeater runs in blacklist mode – these allowances only take effect in whitelist mode.",
+  "Let op: de repeater draait in blacklistmodus – deze vrijgaven werken pas in whitelistmodus.",
+  "Remarque : le répéteur fonctionne en mode liste noire – ces autorisations ne s'appliquent qu'en mode liste blanche."
+ ],
+ "Hinweis: Der Repeater läuft im Whitelist-Modus – diese Sperrliste wirkt erst im Blacklist-Modus.": [
+  "Note: the repeater runs in whitelist mode – this block list only takes effect in blacklist mode.",
+  "Let op: de repeater draait in whitelistmodus – deze blokkeerlijst werkt pas in blacklistmodus.",
+  "Remarque : le répéteur fonctionne en mode liste blanche – cette liste de blocage ne s'applique qu'en mode liste noire."
+ ],
+ "Profil: {0}": [
+  "Profile: {0}",
+  "Profiel: {0}",
+  "Profil : {0}"
+ ],
+ "(automatisch erkannt)": [
+  "(detected automatically)",
+  "(automatisch herkend)",
+  "(détecté automatiquement)"
+ ],
+ "(nicht automatisch erkannt)": [
+  "(not detected automatically)",
+  "(niet automatisch herkend)",
+  "(non détecté automatiquement)"
+ ],
+ "Transceiver": [
+  "Transceiver",
+  "Transceiver",
+  "Émetteur-récepteur"
+ ],
+ "Hardware-Max-TX": [
+  "Hardware max TX",
+  "Hardware-max-TX",
+  "TX max. matériel"
+ ],
+ "Antennenanschluss": [
+  "Antenna connector",
+  "Antenneaansluiting",
+  "Connecteur d'antenne"
+ ],
+ "Pigtail {0} dB": [
+  "Pigtail {0} dB",
+  "Pigtail {0} dB",
+  "Pigtail {0} dB"
+ ],
+ "⚠ Board mit externem Leistungsverstärker (PA, bis {0} dBm): Die Ausgangsleistung kann deutlich über üblichen SX1262-Werten liegen. Prüfe, wie die Firmware \"tx\" auf die PA-Ausgangsleistung abbildet, und halte das ERP-Limit unbedingt ein!": [
+  "⚠ Board with external power amplifier (PA, up to {0} dBm): the output power can be far above typical SX1262 values. Check how the firmware maps \"tx\" to the PA output power and make sure to stay within the ERP limit!",
+  "⚠ Board met externe vermogensversterker (PA, tot {0} dBm): het uitgangsvermogen kan ver boven gangbare SX1262-waarden liggen. Controleer hoe de firmware \"tx\" op het PA-uitgangsvermogen afbeeldt en houd je beslist aan de ERP-limiet!",
+  "⚠ Carte avec amplificateur de puissance externe (PA, jusqu'à {0} dBm) : la puissance de sortie peut dépasser largement les valeurs SX1262 habituelles. Vérifiez comment le firmware associe \"tx\" à la puissance de sortie du PA et respectez impérativement la limite ERP !"
+ ],
+ "Board-Auswahl ausblenden": [
+  "Hide board selection",
+  "Boardkeuze verbergen",
+  "Masquer le choix de la carte"
+ ],
+ "Board manuell wählen…": [
+  "Choose board manually…",
+  "Board handmatig kiezen…",
+  "Choisir la carte manuellement…"
+ ],
+ "Begrenzt durch das Hardware-Maximum des Boards ({0} dBm).": [
+  "Limited by the board's hardware maximum ({0} dBm).",
+  "Begrensd door het hardwaremaximum van het board ({0} dBm).",
+  "Limitée par le maximum matériel de la carte ({0} dBm)."
+ ],
+ "Generisches SX1262-Board": [
+  "Generic SX1262 board",
+  "Generiek SX1262-board",
+  "Carte SX1262 générique"
+ ],
+ "Whitelist aktiv": [
+  "Whitelist active",
+  "Whitelist actief",
+  "Liste blanche active"
+ ],
+ "Blacklist aktiv": [
+  "Blacklist active",
+  "Blacklist actief",
+  "Liste noire active"
+ ],
+ "AN – nur freigegebene Kanäle und Pfade werden weitergeleitet.": [
+  "ON – only allowed channels and paths are forwarded.",
+  "AAN – alleen toegestane kanalen en paden worden doorgestuurd.",
+  "ACTIVÉ – seuls les canaux et chemins autorisés sont relayés."
+ ],
+ "AN – gesperrte Kanäle, Pfade und Regeln werden verworfen.": [
+  "ON – blocked channels, paths and rules are dropped.",
+  "AAN – geblokkeerde kanalen, paden en regels worden verworpen.",
+  "ACTIVÉ – les canaux, chemins et règles bloqués sont rejetés."
+ ],
+ "AUS – der Repeater leitet alle Pakete ungefiltert weiter.": [
+  "OFF – the repeater forwards all packets unfiltered.",
+  "UIT – de repeater stuurt alle pakketten ongefilterd door.",
+  "DÉSACTIVÉ – le répéteur relaie tous les paquets sans filtrage."
+ ],
+ "Filter-Umschaltung nicht vollständig bestätigt – Status wird neu gelesen.": [
+  "Filter switch not fully confirmed – reading status again.",
+  "Filteromschakeling niet volledig bevestigd – status wordt opnieuw gelezen.",
+  "Changement de filtre non entièrement confirmé – relecture de l'état."
+ ],
+ "Versorgung wird abgefragt…": [
+  "Querying power supply…",
+  "Voeding wordt opgevraagd…",
+  "Interrogation de l'alimentation…"
+ ],
+ "Akku {0} % ({1} V)": [
+  "Battery {0} % ({1} V)",
+  "Accu {0} % ({1} V)",
+  "Batterie {0} % ({1} V)"
+ ],
+ "lädt": [
+  "charging",
+  "laadt",
+  "en charge"
+ ],
+ "nicht ermittelbar": [
+  "not detectable",
+  "niet te bepalen",
+  "non détectable"
+ ],
+ "unbekannt (noch nicht abgefragt)": [
+  "unknown (not queried yet)",
+  "onbekend (nog niet opgevraagd)",
+  "inconnue (pas encore interrogée)"
+ ],
+ "Solar (lädt)": [
+  "Solar (charging)",
+  "Zonne-energie (laadt)",
+  "Solaire (en charge)"
+ ],
+ "USB-Netz": [
+  "USB/mains",
+  "USB/net",
+  "USB/secteur"
+ ],
+ "Externe Versorgung": [
+  "External power",
+  "Externe voeding",
+  "Alimentation externe"
+ ],
+ "Abfragen": [
+  "Query",
+  "Opvragen",
+  "Interroger"
+ ],
+ "Bitte gültige Koordinaten eingeben (Breite -90…90, Länge -180…180).": [
+  "Please enter valid coordinates (latitude -90…90, longitude -180…180).",
+  "Voer geldige coördinaten in (breedte -90…90, lengte -180…180).",
+  "Veuillez saisir des coordonnées valides (latitude -90…90, longitude -180…180)."
+ ],
+ "Wird geladen": [
+  "Charging",
+  "Wordt geladen",
+  "En charge"
+ ],
+ "Prüfe Gerät am USB-Port (Repeater-CLI / Companion)…": [
+  "Checking device on USB port (repeater CLI / companion)…",
+  "Apparaat op USB-poort controleren (repeater-CLI / companion)…",
+  "Vérification de l'appareil USB (CLI répéteur / companion)…"
+ ],
+ "Companion": [
+  "Companion",
+  "Companion",
+  "Companion"
+ ],
+ "Repeater": [
+  "Repeater",
+  "Repeater",
+  "Répéteur"
+ ],
+ "USB · Companion": [
+  "USB · Companion",
+  "USB · Companion",
+  "USB · Companion"
+ ],
+ "USB · Repeater": [
+  "USB · Repeater",
+  "USB · Repeater",
+  "USB · Répéteur"
+ ],
+ "IDENTITÄT & NAME": [
+  "IDENTITY & NAME",
+  "IDENTITEIT & NAAM",
+  "IDENTITÉ & NOM"
+ ],
+ "Public Key wird abgefragt…": [
+  "Querying public key…",
+  "Public key wordt opgevraagd…",
+  "Interrogation de la clé publique…"
+ ],
+ "[ignoriert: Binärdaten von direktem USB-Repeater] {0} Byte": [
+  "[ignored: binary data from direct USB repeater] {0} bytes",
+  "[genegeerd: binaire data van directe USB-repeater] {0} bytes",
+  "[ignoré : données binaires du répéteur USB direct] {0} octets"
+ ]
+}

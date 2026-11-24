@@ -1,5 +1,6 @@
 package com.meshcore.repeater.ui.components
 
+import com.meshcore.repeater.i18n.tr
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -168,26 +169,24 @@ fun DisclaimerDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp)
             ) {
-                androidx.compose.material3.OutlinedButton(
-                    onClick = { onDismiss?.invoke() },
+                androidx.compose.material3.OutlinedButton(onClick = { onDismiss?.invoke() },
                     modifier = Modifier.weight(1f),
                     shape = BauhausCornerShape
                 ) {
                     Text(
-                        text = "Abbrechen",
+                        text = tr("Abbrechen"),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Button(
-                    onClick = onAccept,
+                Button(onClick = onAccept,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = bColors.signalRed),
                     shape = BauhausCornerShape
                 ) {
                     Text(
-                        text = "Bestätigen",
+                        text = tr("Bestätigen"),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         fontWeight = FontWeight.Bold,

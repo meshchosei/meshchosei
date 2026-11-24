@@ -1,5 +1,6 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.i18n.tr
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -77,19 +78,14 @@ import com.meshcore.repeater.viewmodel.RepeaterViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun FilterScreen(viewModel: RepeaterViewModel) {
+fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLACKLIST) {
     val bColors = LocalBauhausColors.current
     val stats by viewModel.filterStats.collectAsState()
-    androidx.compose.runtime.LaunchedEffect(Unit) {
-        viewModel.refreshAllFiltersFromNode()
-    }
-    androidx.compose.runtime.LaunchedEffect(Unit) {
-        viewModel.refreshAllFiltersFromNode()
-    }
+    // Filterlisten kommen aus dem einmaligen Start-Scan; erneut nur über den Aktualisieren-Button
     val cap by viewModel.deviceCapabilities.collectAsState()
-    val preview by viewModel.offlinePreviewEnabled.collectAsState()
-    val canBlacklist = cap.hasFilterBlacklist || preview
-    val canWhitelist = cap.hasFilterWhitelistMode || preview
+    val canWhitelist = cap.supportsWhitelist
+    val isWlView = view == FilterMode.WHITELIST
+    val filterSwitchPending by viewModel.filterSwitchPending.collectAsState()
     val scrollState = rememberScrollState()
 
     // Whitelist State
@@ -131,8 +127,8 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
         // SECTION 1: MASTER FILTER ENGINE & DRY-RUN
         // =====================================================================
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(stringResource(R.string.filter_header), style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            androidx.compose.material3.OutlinedButton(onClick = { viewModel.refreshAllFiltersFromNode() }) { Text("Status laden", fontSize = 11.sp) }
+            Text(stringResource(if (isWlView) R.string.menu_whitelist else R.string.menu_blacklist).uppercase(), style = MaterialTheme.typography.titleMedium, color = if (isWlView) bColors.cobalt else bColors.signalRed, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+            androidx.compose.material3.OutlinedButton(shape = BauhausCornerShape, onClick = { viewModel.refreshAllFiltersFromNode() }) { Text(tr("Status laden"), fontSize = 11.sp) }
         }
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -143,7 +139,11 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Master Filter Switch
+                // Ein/Aus NUR für die Liste dieses Screens (kein Umschalten zwischen Blacklist und Whitelist)
+                // activeMode = null bei ausgeschaltetem Filter ("off"); sonst exakt BLACKLIST oder WHITELIST
+                val isBlacklistActive = stats.activeMode == FilterMode.BLACKLIST
+                val isWhitelistActive = stats.activeMode == FilterMode.WHITELIST
+                val listActive = if (isWlView) isWhitelistActive else isBlacklistActive
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -151,22 +151,23 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = stringResource(R.string.filter_master_switch),
+                            text = if (isWlView) tr("Whitelist aktiv") else tr("Blacklist aktiv"),
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = if (stats.filterEnabled)
-                                stringResource(R.string.filter_master_on_desc)
-                            else
-                                stringResource(R.string.filter_master_off_desc),
+                            text = when {
+                                listActive -> if (isWlView) tr("AN – nur freigegebene Kanäle und Pfade werden weitergeleitet.") else tr("AN – gesperrte Kanäle, Pfade und Regeln werden verworfen.")
+                                else -> tr("AUS – der Repeater leitet alle Pakete ungefiltert weiter.")
+                            },
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Switch(
-                        checked = stats.filterEnabled,
-                        onCheckedChange = { viewModel.setFilterEnabled(it) },
+                        checked = listActive,
+                        enabled = !filterSwitchPending,
+                        onCheckedChange = { on -> viewModel.setFilterActive(if (on) view else null) },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = bColors.signalRed,
                             checkedTrackColor = bColors.signalRed.copy(alpha = 0.35f)
@@ -210,52 +211,6 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
                     )
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // Mode Selector Segmented Tabs
-                Text(
-                    text = stringResource(R.string.filter_mode_select),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                TabRow(
-                    selectedTabIndex = if (stats.mode == FilterMode.BLACKLIST) 0 else 1,
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = bColors.signalRed,
-                    indicator = { tabPositions ->
-                        TabRowDefaults.SecondaryIndicator(
-                            Modifier.tabIndicatorOffset(tabPositions[if (stats.mode == FilterMode.BLACKLIST) 0 else 1]),
-                            color = bColors.signalRed
-                        )
-                    },
-                    modifier = Modifier
-                        .clip(BauhausCornerShape)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, BauhausCornerShape)
-                ) {
-                    Tab(
-                        selected = stats.mode == FilterMode.BLACKLIST,
-                        onClick = { viewModel.setFilterMode(FilterMode.BLACKLIST) },
-                        text = {
-                            Text(
-                                stringResource(R.string.filter_mode_blacklist),
-                                fontWeight = if (stats.mode == FilterMode.BLACKLIST) FontWeight.Bold else FontWeight.Normal
-                            )
-                        }
-                    )
-                    Tab(
-                        selected = stats.mode == FilterMode.WHITELIST,
-                        onClick = { viewModel.setFilterMode(FilterMode.WHITELIST) },
-                        text = {
-                            Text(
-                                stringResource(R.string.filter_mode_whitelist),
-                                fontWeight = if (stats.mode == FilterMode.WHITELIST) FontWeight.Bold else FontWeight.Normal
-                            )
-                        }
-                    )
-                }
             }
         }
 
@@ -264,7 +219,7 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
         // =====================================================================
         // SECTION 2: DYNAMIC MODE NOTICE BANNER
         // =====================================================================
-        val (bannerBg, bannerBorder, bannerIcon, bannerText) = if (stats.mode == FilterMode.WHITELIST) {
+        val (bannerBg, bannerBorder, bannerIcon, bannerText) = if (isWlView) {
             listOf(
                 bColors.cobalt.copy(alpha = 0.12f),
                 bColors.cobalt,
@@ -297,12 +252,14 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = bannerText as String,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 13.sp
-                )
+                Column {
+                    Text(
+                        text = bannerText as String,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 13.sp
+                    )
+                }
             }
         }
 
@@ -311,9 +268,9 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
         // =====================================================================
         // SECTION 3: DYNAMIC MODE CONTROLS
         // =====================================================================
-        if (stats.mode == FilterMode.WHITELIST) {
+        if (isWlView) {
             // =================================================================
-            // WHITELIST MODE ONLY: Kanäle & Pfad-Präfixe (filter wl ...)
+            // WHITELIST-ANSICHT: Kanäle & Pfad-Präfixe (filter wl ...)
             // =================================================================
             Text(
                 text = stringResource(R.string.filter_wl_channel_header),
@@ -372,8 +329,7 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
+                        Button(onClick = {
                                 viewModel.addWhitelistChannel(newWlChannelInput)
                                 newWlChannelInput = ""
                             },
@@ -409,7 +365,7 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
                             Column {
                                 Text(ch.name, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                 if (ch.hashHex.isNotEmpty()) {
-                                    Text("Hash: ${ch.hashHex}", fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(tr("Hash: {0}", ch.hashHex), fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                             IconButton(onClick = { viewModel.removeWhitelistChannel(ch) }) {
@@ -452,8 +408,7 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
+                        Button(onClick = {
                                 viewModel.addWhitelistPath(newWlPathInput, newWlPathComment)
                                 newWlPathInput = ""
                                 newWlPathComment = ""
@@ -568,8 +523,7 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
+                        Button(onClick = {
                                 viewModel.addBlockedChannel(newBlChannelInput)
                                 newBlChannelInput = ""
                             },
@@ -643,8 +597,7 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
+                        Button(onClick = {
                                 viewModel.addBlockedPath(newBlPathInput, newBlPathComment)
                                 newBlPathInput = ""
                                 newBlPathComment = ""
@@ -778,8 +731,7 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
                             singleLine = true,
                             shape = BauhausCornerShape
                         )
-                        Button(
-                            onClick = {
+                        Button(onClick = {
                                 val s = newRuleTimeout.toIntOrNull() ?: 0
                                 val p = (newRuleProb.toIntOrNull() ?: 100).coerceIn(1, 100)
                                 if (ruleTypeTab == 0) {
@@ -869,8 +821,7 @@ fun FilterScreen(viewModel: RepeaterViewModel) {
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
+                        Button(onClick = {
                                 viewModel.addWatchChannel(newWatchInput)
                                 newWatchInput = ""
                             },

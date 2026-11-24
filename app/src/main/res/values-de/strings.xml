@@ -1,9 +1,9 @@
 <resources>
     <!-- App & General -->
-    <string name="app_name">Repeater Configurator</string>
-    <string name="app_title_repeater">REPEATER</string>
-    <string name="app_title_configurator">CONFIGURATOR</string>
-    <string name="app_edition_subtitle">ZephCore &amp; DDMC (Dutch MeshCore) BW2 Edition</string>
+    <string name="app_name">meshchōsei</string>
+    <string name="app_title_repeater">meshchōsei</string>
+    <string name="app_title_configurator">FÜR MESHCORE</string>
+    <string name="app_edition_subtitle">ZephCore, DMC, Dutch MeshCore BW2 Edition</string>
     <string name="app_version_tag">v1.18.2 • Dutch-MeshCore Filter</string>
     <string name="action_ok">OK</string>
     <string name="action_cancel">Abbrechen</string>
@@ -30,12 +30,14 @@
     <!-- Navigation Menu -->
     <string name="menu_connection">Verbindung</string>
     <string name="menu_connection_sub">USB-Serial OTG &amp; BLE-Companion</string>
+    <string name="menu_basic_setup">Grundsetup</string>
+    <string name="menu_basic_setup_sub">Identität, GPS, Zugriff &amp; Routing</string>
     <string name="menu_radio">Funk, Land &amp; Antenne</string>
     <string name="menu_radio_sub">EU868 Presets, EIRP &amp; Compliance</string>
     <string name="menu_filter">Filter &amp; Whitelist</string>
     <string name="menu_filter_sub">Paket-Filter &amp; Regeln</string>
     <string name="menu_mesh_care">Mesh-Schonmodus</string>
-    <string name="menu_mesh_care_sub">Auto-Revert Watchdog (5/10 min)</string>
+    <string name="menu_mesh_care_sub">Auto-Revert-Watchdog (5/10 min)</string>
     <string name="menu_hardware">Hardware &amp; Status</string>
     <string name="menu_hardware_sub">LEDs, GPS &amp; Solar/Batterie</string>
 
@@ -93,7 +95,7 @@
     <string name="radio_compliance_unlocked">ACHTUNG: Gesetzliche Sendeleistungs-Sperre aufgehoben!</string>
     <string name="radio_compliance_switch">Gesetzliche Begrenzung aufheben</string>
 
-    <!-- Filter Screen (ZephCore &amp; DDMC (Dutch MeshCore) BW2) -->
+    <!-- Filter Screen (ZephCore, DMC, Dutch MeshCore BW2) -->
     <string name="filter_header">PAKET-FILTER &amp; REGELN</string>
     <string name="filter_master_switch">Paketfilter aktiv (filter on/off)</string>
     <string name="filter_master_on_desc">Filter-Engine läuft</string>
@@ -175,7 +177,7 @@
     <string name="caps_unsupported">Von dieser Firmware nicht unterstützt</string>
     <string name="caps_detecting">Erkenne Firmware-Fähigkeiten…</string>
     <string name="caps_no_gps">GPS auf dieser Hardware nicht verfügbar</string>
-    <string name="caps_no_filter_wl">Whitelist-Modus erfordert ZephCore &amp; DDMC (Dutch MeshCore) BW2 Firmware</string>
+    <string name="caps_no_filter_wl">Whitelist-Modus erfordert ZephCore, DMC, Dutch MeshCore BW2 Firmware</string>
     <string name="offline_preview_label">Offline-Vorschau-Modus</string>
 
     <!-- Verbindungs-Gate -->
@@ -199,16 +201,36 @@
 
     <string name="menu_cli">CLI-Konsole</string>
     <string name="menu_cli_sub">Direktes Befehls-Terminal &amp; Log</string>
+    <string name="menu_backup">Backup &amp; Wiederherstellung</string>
+    <string name="menu_backup_sub">MeshCore-JSON sichern &amp; einspielen</string>
     <string name="menu_about">Über &amp; Lizenz</string>
     <string name="menu_about_sub">GNU GPLv3, Open Source &amp; Info</string>
-    <string name="about_title">Repeater Konfigurator</string>
+    <string name="about_title">meshchōsei</string>
     <string name="about_license_title">Lizenz: GNU GPLv3 (Freie Software)</string>
-    <string name="about_license_body">Freie Open-Source-Software unter GNU GPLv3. Jeder darf sie kostenlos nutzen, einsehen, anpassen und unter denselben freien Bedingungen weitergeben. Bereitstellung OHNE GEWÄHRLEISTUNG ("AS IS").</string>
+    <string name="about_license_body">Freie Open-Source-Software unter GNU GPLv3. Jeder darf sie kostenlos nutzen, einsehen, anpassen und unter denselben freien Bedingungen weitergeben. Bereitstellung OHNE GEWÄHRLEISTUNG (\"AS IS\").</string>
     <string name="about_ai_title">KI-gestützte Entwicklung</string>
-    <string name="about_ai_body">Entwickelt mit KI-Unterstützung für die MeshCore- und ZephCore &amp; DDMC (Dutch MeshCore)-Community. Der Betreiber bleibt selbst für die Einhaltung der gesetzlichen Funkvorgaben verantwortlich.</string>
+    <string name="about_ai_body">Entwickelt mit KI-Unterstützung auf Basis der offenen Quelltexte von MeshCore, ZephCore und Dutch MeshCore. Der Betreiber bleibt selbst für die Einhaltung der gesetzlichen Funkvorgaben verantwortlich.</string>
     <string name="about_credits_title">Verwendete Open-Source-Komponenten</string>
-    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT-Lizenz)\n• MeshCore / ZephCore &amp; DDMC (Dutch MeshCore) CLI-Protokoll</string>
-    <string name="about_show_disclaimer">Erststart-Disclaimer erneut anzeigen</string>
+    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT-Lizenz)\n• OpenStreetMap-Kartenkacheln (© OpenStreetMap-Mitwirkende, ODbL)</string>
+    <string name="about_show_disclaimer">Haftungsausschluss erneut anzeigen</string>
     <string name="lang_nl">NL</string>
     <string name="lang_fr">FR</string>
+    <string name="menu_hardware_antenna">Hardware &amp; Antenne</string>
+    <string name="menu_hardware_antenna_sub">Board, Akku &amp; Antennen-Gewinn</string>
+    <string name="menu_radio_config">Funk &amp; Region</string>
+    <string name="menu_radio_config_sub">Frequenz, LoRa-Profil &amp; Sendeleistung</string>
+    <string name="menu_identity_location">Identität &amp; Standort</string>
+    <string name="menu_identity_location_sub">Name, Koordinaten &amp; Passwörter</string>
+    <string name="menu_routing_adverts">Routing &amp; Adverts</string>
+    <string name="menu_routing_adverts_sub">Weiterleitung, Timing &amp; Baken</string>
+    <string name="about_privacy_title">Datenschutzerklärung</string>
+    <string name="about_privacy_body">1) Keine eigenen Server, kein Tracking: Alle Einstellungen, Filterlisten und JSON-Backups bleiben ausschließlich lokal auf deinem Gerät. Die App erhebt keine Nutzungsdaten.\n\n2) Bluetooth &amp; Standort: Android verlangt für BLE-Scans die Standortberechtigung (bis Android 11) und eingeschaltete Standortdienste. GPS-Daten werden nur für den Repeater-Standort verwendet und nicht an Dritte übertragen.\n\n3) Kartenkacheln (OpenStreetMap): Beim Öffnen der Standortkarte werden Kartenkacheln von tile.openstreetmap.org (OpenStreetMap Foundation) geladen. Dabei wird technisch bedingt deine IP-Adresse an diesen Server übermittelt.</string>
+    <string name="conn_admin_password_label">Admin-Passwort (max. 15)</string>
+    <string name="menu_blacklist">Blacklist</string>
+    <string name="menu_blacklist_sub">Kanäle &amp; Pfade sperren</string>
+    <string name="menu_whitelist">Whitelist</string>
+    <string name="menu_whitelist_sub">Erlaubte Kanäle &amp; Pfade</string>
+    <string name="menu_blocked_not_connected">Bitte zuerst mit einem Repeater verbinden.</string>
+    <string name="menu_blocked_unsupported">Diese Funktion wird von der verbundenen Firmware bzw. Verbindung nicht unterstützt.</string>
+    <string name="menu_blocked_filter_active">Bitte zuerst den aktiven Paketfilter ausschalten.</string>
 </resources>

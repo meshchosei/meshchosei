@@ -1,36 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- meshchōsei-Emblem: Ring "o" + Makron-Balken "ō" + 3 Funk-Blitze (identische Koordinaten wie MeshchoseiLogo.kt) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Repeater Radio Tower and Waves Symbol -->
-    <path
-        android:fillColor="#00E676"
-        android:pathData="M54,32L38,76h8l3,-9h10l3,9h8L54,32z M51.5,59L54,48l2.5,11h-5z" />
-    <!-- Radio Waves -->
-    <path
-        android:strokeColor="#00E5FF"
-        android:strokeWidth="3"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:pathData="M34,44 A24,24 0 0,0 34,64" />
-    <path
-        android:strokeColor="#00E5FF"
-        android:strokeWidth="3"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:pathData="M74,44 A24,24 0 0,1 74,64" />
-    <path
-        android:strokeColor="#00E676"
-        android:strokeWidth="3"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:pathData="M24,36 A36,36 0 0,0 24,72" />
-    <path
-        android:strokeColor="#00E676"
-        android:strokeWidth="3"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:pathData="M84,36 A36,36 0 0,1 84,72" />
+    <!-- leicht verkleinert: Blitz-Spitzen liegen in der 66dp-Safe-Zone aller Icon-Masken -->
+    <group android:pivotX="54" android:pivotY="54" android:scaleX="0.9" android:scaleY="0.9">
+        <path android:fillColor="#1E88E5" android:pathData="M34.12,23.33 L43.35,31.14 L40.16,32.31 L44.38,39.82 L34.98,31.53 L38.17,30.37 Z" />
+        <path android:fillColor="#E53935" android:pathData="M56.0,21.5 L50.0,32.0 L53.4,32.0 L52.0,40.5 L58.0,29.5 L54.6,29.5 Z" />
+        <path android:fillColor="#FFB300" android:pathData="M73.88,23.33 L64.65,31.14 L67.84,32.31 L63.62,39.82 L73.02,31.53 L69.83,30.37 Z" />
+        <!-- Makron-Balken -->
+        <path android:fillColor="#F4F1EA" android:pathData="M39,40.5h30v5h-30z" />
+        <!-- Ring (Kreisfläche mit Loch, evenOdd) -->
+        <path android:fillColor="#F4F1EA" android:fillType="evenOdd"
+            android:pathData="M54,48 A16,16 0 1,1 53.99,48 Z M54,54 A10,10 0 1,0 54.01,54 Z" />
+    </group>
 </vector>
