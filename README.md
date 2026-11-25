@@ -1,12 +1,64 @@
-<p align="center"><img src="docs/logo.svg" width="140" alt="meshchōsei Logo"></p>
+<p align="center"><img src="docs/logo.svg" width="140" alt="meshchōsei logo – MeshCore & ZephCore repeater configurator"></p>
 
-# meshchōsei
+# meshchōsei – MeshCore & ZephCore LoRa Repeater Configurator for Android
+
+<p align="center">
+  <a href="https://github.com/meshchosei/meshchosei/releases/latest"><b>⬇ Download the latest APK</b></a> ·
+  <a href="https://meshchosei.github.io/meshchosei/">Project page</a> ·
+  <a href="#deutsch">Deutsch</a>
+</p>
+
+**meshchōsei** (調整, Japanese for “tuning, fine adjustment”) is a free, open-source native Android app (Kotlin, Jetpack Compose) for configuring and maintaining **MeshCore** and **ZephCore** LoRa mesh repeaters – directly via **USB-OTG** serial, or remotely over **LoRa** through a **companion node** (BLE/USB) using remote admin. Built for off-grid mesh networks, ham radio and community LoRa operators. UI in English, German, Dutch and French, switchable without restart.
+
+## Features
+
+- **USB serial (OTG) and Bluetooth LE** connection: CH340, CP210x, FTDI, nRF52 CDC, ESP32, RP2040 and more; remote admin login to any repeater in the mesh via a companion node.
+- **Auto-detection** of role (repeater/companion), firmware and feature set.
+- **Startup scan:** strictly sequential read of hardware, radio, identity, routing, filters and regions, with every reply validated and matched to its command (tagged replies over LoRa).
+- **Mesh-care mode:** temporarily lowers TX power during maintenance (`tempradio`); the firmware restores it on its own, even if the app disconnects.
+- **Radio & region:** LoRa frequency, bandwidth, spreading factor, coding rate, TX power and duty cycle with country presets and compliance limits (EU ETSI EN 300 220).
+- **Hardware & antenna:** board detection, antenna and cable-loss presets, ERP/EIRP calculator, power source (battery/USB/solar), status LEDs.
+- **Identity & location:** node name, owner info, coordinates on an OpenStreetMap map, admin/guest passwords, keys.
+- **Routing & adverts:** forwarding, path hash mode, loop detection, advert intervals, multi-ACKs and full **region management** (`region home/default/put/remove/allowf/denyf`).
+- **Packet filters:** blacklist (Dutch MeshCore filter) and whitelist for channels, path prefixes, senders, text, hops and packet age, with dry-run.
+- **CLI console** with a complete, translated command reference and automatic retry over LoRa.
+- **Backup & restore** of all settings, regions and filter lists as JSON; restore only sends what differs.
+- **Confirmed saves:** a change counts as saved only once the repeater acknowledges it.
+- **Bauhaus UI** with light and dark mode.
+
+## Supported Firmwares & Hardware Profiles
+
+| Firmware | Support |
+|---|---|
+| **MeshCore** (repeater, companion) | full: CLI variables, regions, remote admin via companion |
+| **ZephCore** (repeater, companion) | full, plus packet filters (blacklist/whitelist) and LED control |
+| **Dutch MeshCore** (filter) | blacklist filter commands (DMC) |
+
+Built-in hardware profiles (transceiver, max TX power, typical pigtail loss): Heltec WiFi LoRa 32 V3/V3.2, RAK4631 WisBlock, Seeed XIAO nRF52840 / ESP32-S3 + Wio-SX1262, Seeed SenseCAP Solar Node P1/P1-Pro, Seeed Wio Tracker L1, LilyGO T-Beam / T-Beam Supreme, LilyGO LoRa32 T3-S3, Elecrow ThinkNode M1/M2, B&Q Station G2, plus a generic profile for any SX1262 board. Physically tested so far on the Seeed Wio Tracker L1; other boards are auto-detected or can be selected manually.
+
+## Download & Installation
+
+1. Download the APK from the **[latest release](https://github.com/meshchosei/meshchosei/releases/latest)**.
+2. On your Android phone (Android 8.0 / API 26 or newer), allow installing apps from this source and open the APK.
+3. Connect your repeater with a USB-OTG cable, or pair a MeshCore/ZephCore companion node via Bluetooth, and start the scan.
+
+Build from source: JDK 17, Android SDK 34 – `./gradlew assembleDebug`.
+
+## License
+
+Free software under the **GNU General Public License v3.0**. Provided without any warranty, developed with AI assistance. You are responsible for complying with your local radio regulations.
+
+---
+
+<a id="deutsch"></a>
+
+# meshchōsei – Konfigurator für MeshCore- und ZephCore-LoRa-Repeater (Deutsch)
 
 **meshchōsei** (調整, jap. „Abstimmung, Feineinstellung“) ist eine native Android-App zur Konfiguration und Wartung von **MeshCore**- und **ZephCore**-LoRa-Repeatern, direkt per **USB-OTG** oder drahtlos über einen **Companion-Node** (BLE/USB) mit **Remote-Admin über LoRa**.
 
-> *English summary:* meshchōsei is a native Android app (Kotlin, Jetpack Compose) for configuring and maintaining MeshCore and ZephCore LoRa repeaters via USB-OTG or remotely over LoRa through a companion node. UI in German, English, Dutch and French. Licensed under GNU GPLv3.
-
 Oberfläche in **Deutsch, Englisch, Niederländisch und Französisch**, umschaltbar ohne Neustart.
+
+**Download:** die aktuelle APK gibt es unter **[Releases → neueste Version](https://github.com/meshchosei/meshchosei/releases/latest)** (Android 8.0 oder neuer).
 
 ---
 
