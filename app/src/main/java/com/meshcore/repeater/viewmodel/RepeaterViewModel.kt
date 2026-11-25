@@ -87,6 +87,10 @@ object BusyKey {
     const val FILTER_REFRESH = "filter_refresh"
     const val POWER = "power"
     const val LEDS = "leds"
+    const val FILTER_DRYRUN = "filter_dryrun"
+    const val FILTER_HOPS = "filter_hops"
+    const val FILTER_AGE = "filter_age"
+    const val FILTER_RESET = "filter_reset"
 }
 
 class RepeaterViewModel(application: Application) : AndroidViewModel(application) {
@@ -127,6 +131,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     // Ein einziger Mutex für ALLE CLI-Befehle (Abfragen, Set-Befehle, Konsole, Pings): es läuft immer
     // genau ein Befehl, und erst nach dessen (validierter) Antwort oder Timeout wird der nächste gesendet.
     private val sequentialQueryMutex = Mutex()
+    /** Job, der GERADE unter dem Mutex läuft (nicht nur eingereiht) – Ziel von "Abbrechen" im Overlay. */
+    @Volatile private var activeJob: Job? = null
     private var readJob: Job? = null                       // aktueller Auslese-Job (Basis-Setup, Capability, Filter, Telemetrie)
     private class QueryReply(val value: String?, val error: String? = null)   // value == null -> Fehler/"unknown"-Antwort (Text in error)
     @Volatile private var activeQueryCommand: String? = null
@@ -208,12 +214,6 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
 
     private val _meshCareState = MutableStateFlow(MeshCareState())
     val meshCareState: StateFlow<MeshCareState> = _meshCareState
-
-    private val _ledMode = MutableStateFlow(LedMode.NORMAL)
-    val ledMode: StateFlow<LedMode> = _ledMode
-
-    private val _gpsMode = MutableStateFlow(GpsMode.OFF)
-    val gpsMode: StateFlow<GpsMode> = _gpsMode
 
     private val _telemetry = MutableStateFlow(BatterySolarTelemetry())
     val telemetry: StateFlow<BatterySolarTelemetry> = _telemetry
@@ -616,7 +616,12 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         val job = viewModelScope.launch {
             if (cancelPrevious) previous?.cancelAndJoin() else previous?.join()
             sequentialQueryMutex.withLock {
-                try { block() } finally { _activeReadStatusText.value = null; _readProgress.value = null }
+                val self = coroutineContext[Job]
+                activeJob = self
+                try { block() } finally {
+                    if (activeJob === self) activeJob = null
+                    _activeReadStatusText.value = null; _readProgress.value = null
+                }
             }
         }
         readJob = job
@@ -670,10 +675,12 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             // 1) Regionen
             _activeReadStatusText.value = "Backup: Regionen werden gelesen…"
             _readProgress.value = null
-            _regionState.value = RegionState()
-            if (!readRegions()) { notifyUser("Backup abgebrochen – Repeater antwortet nicht."); return@startRead }
-            val rs = _regionState.value
-            if (rs.supported == null) { notifyUser("Backup abgebrochen – Regionen konnten nicht gelesen werden."); return@startRead }
+            // Anzeige NICHT vorab leeren: erst bei erfolgreichem Auslesen ersetzen, bei Fehler bleibt der alte Stand
+            val (linkOk, fresh) = fetchRegions()
+            if (!linkOk) { notifyUser("Backup abgebrochen – Repeater antwortet nicht."); return@startRead }
+            if (fresh == null) { notifyUser("Backup abgebrochen – Regionen konnten nicht gelesen werden."); return@startRead }
+            _regionState.value = fresh
+            val rs = fresh
 
             // 2) Paketfilter (nur wenn die Firmware Filter kann)
             var filter: MeshCoreBackup.FilterBackup? = null
@@ -739,7 +746,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         }.invokeOnCompletion { clearBusy(BusyKey.BACKUP_INSTALL) }
     }
 
-    fun cancelActiveRead() { readJob?.cancel(); notifyUser("Auslesen abgebrochen.") }
+    /** Bricht den tatsächlich laufenden Vorgang ab; eingereihte Vorgänge starten danach regulär. */
+    fun cancelActiveRead() { (activeJob ?: readJob)?.cancel(); notifyUser("Auslesen abgebrochen.") }
 
     private suspend fun pingRemoteIfIdle() {
         if (!sequentialQueryMutex.tryLock()) return
@@ -782,10 +790,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             "get leds" -> {
                 val mode = v.lowercase().substringBefore(' ')
                 _basicSetup.value = s.copy(ledsMode = mode)
-                _ledMode.value = if (mode == "off") LedMode.STEALTH else LedMode.NORMAL
             }
             "get gps" -> {
-                if (v.startsWith("on", true)) _gpsMode.value = GpsMode.ALWAYS_ON else if (v.startsWith("off", true)) _gpsMode.value = GpsMode.OFF
                 Regex("lat=([-0-9.]+)").find(v)?.groupValues?.getOrNull(1)?.let { _basicSetup.value = _basicSetup.value.copy(latitude = it) }
                 Regex("lon=([-0-9.]+)").find(v)?.groupValues?.getOrNull(1)?.let { _basicSetup.value = _basicSetup.value.copy(longitude = it) }
             }
@@ -1036,8 +1042,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         val supported = if (isWl) caps.supportsWhitelist else caps.supportsBlacklist
         val empty = if (isWl) _whitelistChannels.value.isEmpty() else _blockedChannels.value.isEmpty()
         if (!supported || _filterStats.value.activeMode != view || !empty) return
-        filterAutoLoadDone += view
+        // Erst als "erledigt" markieren, wenn der Ladevorgang wirklich startet (sonst beim nächsten Öffnen erneut versuchen)
         if (!tryMarkBusy(BusyKey.FILTER_LOAD)) return
+        filterAutoLoadDone += view
         startRead(cancelPrevious = false) {
             runFilterListQueries(listOf(if (isWl) RepeaterProtocol.CMD_FILTER_WL_CHANNEL_LIST else RepeaterProtocol.CMD_FILTER_CHANNEL_LIST))
             _activeReadStatusText.value = null
@@ -1049,6 +1056,16 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     // ---------------------------------------------------------------------------------------
     /** "region", "region home", "region default" lesen. false = Remote-Link verloren. Muss unter dem Mutex laufen. */
     private suspend fun readRegions(progressOffset: Int? = null, progressTotal: Int = 0): Boolean {
+        val (linkOk, state) = fetchRegions(progressOffset, progressTotal)
+        state?.let { _regionState.value = it }   // nur bei erfolgreichem Auslesen ersetzen
+        return linkOk
+    }
+
+    /**
+     * Liest den Regionen-Stand, OHNE den State zu verändern. first = false: Remote-Link verloren;
+     * second = null: kein vollständiges Ergebnis (Timeout) – der bisherige Stand bleibt erhalten.
+     */
+    private suspend fun fetchRegions(progressOffset: Int? = null, progressTotal: Int = 0): Pair<Boolean, RegionState?> {
         val wireless = _remoteAdminSession.value.targetRepeater != null
         if (progressOffset != null) { _activeReadStatusText.value = QuerySpec.statusTextFor("region"); _readProgress.value = (progressOffset + 1) to progressTotal }
         val lines = mutableListOf<String>()
@@ -1059,19 +1076,18 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 trailingMs = if (wireless) REGION_TRAILING_LORA_MS else REGION_TRAILING_USB_MS)   // alle Baumzeilen abwarten
             if (tree != null) break
         }
-        if (tree == null) return !(wireless && noteRemoteTimeout())   // keine Antwort: Zustand bleibt "unbekannt"
-        if (tree.value == null) { _regionState.value = RegionState(supported = false); return true }   // Firmware ohne Regionen
+        if (tree == null) return !(wireless && noteRemoteTimeout()) to null   // keine Antwort: bisheriger Zustand bleibt
+        if (tree.value == null) return true to RegionState(supported = false)   // Firmware ohne Regionen
         val (list, wildcardFlood, homeMark) = RegionParser.parseTree(lines)
         if (progressOffset != null) _readProgress.value = (progressOffset + 2) to progressTotal
-        val h = queryWithRetries("region home"); if (!h.first) return false
+        val h = queryWithRetries("region home"); if (!h.first) return false to null
         if (progressOffset != null) _readProgress.value = (progressOffset + 3) to progressTotal
-        val d = queryWithRetries("region default"); if (!d.first) return false
+        val d = queryWithRetries("region default"); if (!d.first) return false to null
         val home = if (RegionParser.isHomeReply(h.second?.value)) RegionParser.parseHome(h.second?.value) else homeMark
-        _regionState.value = RegionState(
+        return true to RegionState(
             supported = true, regions = list, wildcardFlood = wildcardFlood,
             home = home, default = RegionParser.parseDefault(d.second?.value)
         )
-        return true
     }
 
     /** "Aktualisieren" in der Regionen-Sektion. */
@@ -1253,12 +1269,6 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             cableLossDb = if (rc.cableLossUserSet) rc.cableLossDb else profile.defaultPigtailLossDb
         )
     }
-    /** Freie TX-Eingabe (keine Zwangsbegrenzung mehr – Hinweise zur ERP-Grenze zeigt "Hardware & Antenne"). */
-    fun setTxPower(power: Double) {
-        _radioConfig.value = _radioConfig.value.copy(txPowerDbm = power)
-        _basicSetup.value = _basicSetup.value.copy(txPowerDbm = power.toInt().toString())
-    }
-    fun setComplianceUnlocked(unlocked: Boolean) { _radioConfig.value = _radioConfig.value.copy(complianceUnlocked = unlocked) }
 
     /** Mit aktueller Antenne/Kabel/Region empfohlener (max. legaler) Transceiver-TX-Wert, begrenzt auf den Hardwarebereich. */
     fun recommendedTxDbm(rc: RadioAntennaConfig = _radioConfig.value): Int =
@@ -1410,8 +1420,6 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             }
         }
     }
-    fun setLedMode(mode: LedMode) { _ledMode.value = mode; sendCommand(RepeaterProtocol.buildSetLed(mode)) }
-    fun setGpsMode(mode: GpsMode) { _gpsMode.value = mode; sendCommand(RepeaterProtocol.buildSetGps(mode)) }
     /** "Versorgung abfragen" (Nutzeraktion): genau ein "power"-Befehl, kein Polling. */
     fun refreshPowerStatus() {
         if (!isLinkUp()) return
@@ -1421,8 +1429,6 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             runQuery(RepeaterProtocol.CMD_POWER)
         }.invokeOnCompletion { clearBusy(BusyKey.POWER) }
     }
-    fun requestTelemetry() { startRead(cancelPrevious = false) { runReadSequence(listOf(RepeaterProtocol.CMD_POWER, RepeaterProtocol.CMD_CLOCK, RepeaterProtocol.CMD_VER), retriesWireless = 1) } }
-    fun rebootNode() { sendCommand(RepeaterProtocol.CMD_REBOOT) }
     fun saveConfigToFlash() { notifyUser("Alle Parameter werden sofort im Flash gespeichert.") }
     private val _filterSwitchPending = MutableStateFlow(false)
     /** true, solange ein Blacklist/Whitelist-Ein/Aus-Befehl auf die Bestätigung des Repeaters wartet. */
@@ -1455,11 +1461,21 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         }
     }
     fun setFilterEnabled(enabled: Boolean) { _filterStats.value = _filterStats.value.copy(filterEnabled = enabled); sendCommand(if (enabled) RepeaterProtocol.CMD_FILTER_ON else RepeaterProtocol.CMD_FILTER_OFF) }
-    fun setFilterDryRun(dryRun: Boolean) { _filterStats.value = _filterStats.value.copy(dryRun = dryRun); sendCommand(if (dryRun) RepeaterProtocol.CMD_FILTER_DRYRUN_ON else RepeaterProtocol.CMD_FILTER_DRYRUN_OFF) }
+    // Dry-Run / Max-Hops / Alter: Anzeige erst nach Bestätigung durch den Repeater ändern (STYLE_GUIDE §2.2)
+    fun setFilterDryRun(dryRun: Boolean) {
+        val cmd = if (dryRun) RepeaterProtocol.CMD_FILTER_DRYRUN_ON else RepeaterProtocol.CMD_FILTER_DRYRUN_OFF
+        sendBusy(BusyKey.FILTER_DRYRUN, cmd) { ok -> if (ok) _filterStats.value = _filterStats.value.copy(dryRun = dryRun) else notConfirmed(cmd) }
+    }
     /** Optimistisch sofort umschalten; Status-Antworten der nächsten 1,5 s überschreiben den Modus nicht. */
     fun setFilterMode(mode: FilterMode) { _filterStats.value = _filterStats.value.copy(mode = mode); sendCommand(if (mode == FilterMode.WHITELIST) RepeaterProtocol.CMD_FILTER_MODE_WHITELIST else RepeaterProtocol.CMD_FILTER_MODE_BLACKLIST) }
-    fun setFilterMaxHops(hops: Int) { _filterStats.value = _filterStats.value.copy(maxHops = hops); sendCommand(RepeaterProtocol.buildFilterHops(0, hops)) }
-    fun setFilterAge(mins: Int) { sendCommand(RepeaterProtocol.buildFilterAge(mins)) }
+    fun setFilterMaxHops(hops: Int) {
+        val cmd = RepeaterProtocol.buildFilterHops(0, hops)
+        sendBusy(BusyKey.FILTER_HOPS, cmd) { ok -> if (ok) _filterStats.value = _filterStats.value.copy(maxHops = hops) else notConfirmed(cmd) }
+    }
+    fun setFilterAge(mins: Int) {
+        val cmd = RepeaterProtocol.buildFilterAge(mins)
+        sendBusy(BusyKey.FILTER_AGE, cmd) { ok -> if (ok) _filterStats.value = _filterStats.value.copy(ageMinutes = mins.coerceAtLeast(0)) else notConfirmed(cmd) }
+    }
     private var lastFilterQuery = ""
     fun updateBasicSetupDraft(updated: BasicSetupState) { _basicSetup.value = updated }
     /** Expliziter Klick auf "Neu einlesen": kompletten Start-Scan erneut ausführen. */
@@ -1496,6 +1512,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         _nodeBaseline.value = b
     }
     fun refreshAllFiltersFromNode() {
+        if (!isLinkUp()) { notifyUser("Nicht verbunden."); return }
         if (!tryMarkBusy(BusyKey.FILTER_REFRESH)) return
         startRead(cancelPrevious = false) {
             _activeReadStatusText.value = "Filter-Status wird abgefragt…"
@@ -1503,7 +1520,14 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             runFilterListQueries(filterQueriesFor(c.supportsBlacklist, c.supportsWhitelist))
         }.invokeOnCompletion { clearBusy(BusyKey.FILTER_REFRESH) }
     }
-    fun executeFilterReset() { sendCommand(RepeaterProtocol.CMD_FILTER_RESET); _blockedChannels.value = emptyList(); _blockedPaths.value = emptyList(); _whitelistChannels.value = emptyList(); _whitelistPaths.value = emptyList(); _senderRules.value = emptyList(); _textRules.value = emptyList(); _watchChannels.value = emptyList() }
+    /** "filter RESET" (Großschreibung beabsichtigt); Listen werden erst nach Bestätigung geleert. */
+    fun executeFilterReset() {
+        sendBusy(BusyKey.FILTER_RESET, RepeaterProtocol.CMD_FILTER_RESET) { ok ->
+            if (!ok) return@sendBusy notConfirmed(RepeaterProtocol.CMD_FILTER_RESET)
+            _blockedChannels.value = emptyList(); _blockedPaths.value = emptyList(); _whitelistChannels.value = emptyList(); _whitelistPaths.value = emptyList()
+            _senderRules.value = emptyList(); _textRules.value = emptyList(); _watchChannels.value = emptyList()
+        }
+    }
     // Hinzufügen/Löschen: Button arbeitet (Spinner), bis der Repeater bestätigt; erst dann wird die Liste geändert.
     // Rückgabe false = nicht gesendet (z. B. Doppelklick während der Übertragung).
     private fun notConfirmed(what: String) = notifyUser(tr("\"{0}\" vom Repeater nicht bestätigt.", what))
@@ -1573,28 +1597,6 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     fun removeWatchChannel(name: String): Boolean = sendBusy(BusyKey.WATCH, RepeaterProtocol.buildWatchRemove(name)) { ok ->
         if (ok) _watchChannels.value = _watchChannels.value.filterNot { it.name == name } else notConfirmed(name)
     }
-    fun buildBackupScript(): String {
-        val rc = _radioConfig.value; val fs = _filterStats.value
-        val cr = rc.codingRate.substringAfter('/').toIntOrNull() ?: 5
-        val lines = mutableListOf(
-            "# RepeaterConfigurator Voll-Backup",
-            RepeaterProtocol.buildSetRadio(rc.frequencyMhz, rc.bandwidthKhz, rc.spreadingFactor, cr),
-            RepeaterProtocol.buildSetTx(rc.txPowerDbm.toInt()),
-            RepeaterProtocol.buildSetFloodMax(rc.floodMax),
-            RepeaterProtocol.buildSetFloodAdvertInterval(rc.floodAdvertIntervalHours),
-            RepeaterProtocol.buildSetLed(_ledMode.value),
-            RepeaterProtocol.buildSetGps(_gpsMode.value),
-            if (fs.filterEnabled) RepeaterProtocol.CMD_FILTER_ON else RepeaterProtocol.CMD_FILTER_OFF,
-            if (fs.dryRun) RepeaterProtocol.CMD_FILTER_DRYRUN_ON else RepeaterProtocol.CMD_FILTER_DRYRUN_OFF,
-            if (fs.mode == FilterMode.WHITELIST) RepeaterProtocol.CMD_FILTER_MODE_WHITELIST else RepeaterProtocol.CMD_FILTER_MODE_BLACKLIST
-        )
-        _blockedChannels.value.forEach { lines.add(RepeaterProtocol.buildChannelAdd(it.name)) }
-        _blockedPaths.value.forEach { lines.add(RepeaterProtocol.buildPathAdd(it.prefixHex)) }
-        _whitelistChannels.value.forEach { lines.add(RepeaterProtocol.buildWlChannelAdd(it.name)) }
-        _whitelistPaths.value.forEach { lines.add(RepeaterProtocol.buildWlPathAdd(it.prefixHex)) }
-        return lines.joinToString("\n")
-    }
-    fun restoreBackupScript(script: String) { val cmds = script.lines().map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("#") }; enqueueCommands(cmds) { notifyUser("Profil eingespielt!") } }
     override fun onCleared() {
         connectProbeJob?.cancel(); loginTimeoutJob?.cancel(); meshCareJob?.cancel(); stopLinkWatch()
         // destroy(): trennt UND meldet den USB-BroadcastReceiver ab bzw. stoppt BLE-Scan/Schreib-Queue (kein Leak)

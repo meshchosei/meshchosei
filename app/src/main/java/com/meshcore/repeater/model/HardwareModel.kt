@@ -1,18 +1,5 @@
 package com.meshcore.repeater.model
 
-enum class LedMode(val cliCommand: String, val label: String) {
-    NORMAL("set leds on", "Normal (Aktivität & Status)"),
-    STEALTH("set leds off", "Stealth (Alle LEDs Aus)"),
-    BOOT_ONLY("set leds boot", "Nur Boot-Blinken (2x 150ms)")
-}
-
-enum class GpsMode(val cliCommand: String, val label: String) {
-    OFF("set gps off", "GPS Deaktiviert"),
-    INTERVAL_15M("set gps 900", "Intervall (Alle 15 Min)"),
-    INTERVAL_60M("set gps 3600", "Intervall (Jede Stunde)"),
-    ALWAYS_ON("set gps on", "Dauerhaft Aktiv (Always-On)")
-}
-
 enum class BatteryChargingState(val label: String) {
     SOLAR_CHARGING("Solar-Ladung aktiv"),
     DISCHARGING("Batteriebetrieb (Entladen)"),

@@ -30,8 +30,6 @@
     <!-- Navigation Menu -->
     <string name="menu_connection">Verbinding</string>
     <string name="menu_connection_sub">USB-serieel &amp; Bluetooth</string>
-    <string name="menu_basic_setup">Basisinstellingen</string>
-    <string name="menu_basic_setup_sub">Identiteit, GPS, Toegang &amp; Routing</string>
     <string name="menu_radio">Radio, Country &amp; Antenna</string>
     <string name="menu_radio_sub">EU868 Presets, EIRP &amp; Compliance</string>
     <string name="menu_filter">Filter &amp; whitelist</string>

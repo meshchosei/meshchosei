@@ -2,8 +2,6 @@ package com.meshcore.repeater.service
 
 import com.meshcore.repeater.model.FilterMode
 import com.meshcore.repeater.model.FilterStats
-import com.meshcore.repeater.model.GpsMode
-import com.meshcore.repeater.model.LedMode
 import com.meshcore.repeater.model.MeshContact
 import java.nio.charset.StandardCharsets
 import java.util.Locale
@@ -107,9 +105,6 @@ object RepeaterProtocol {
     fun buildSetFloodAdvertInterval(hours: Int): String = "set flood.advert.interval $hours"
     fun buildSetPassword(newPass: String): String = "password $newPass"
 
-    // === Hardware-Befehle ===
-    fun buildSetLed(mode: LedMode): String = mode.cliCommand
-    fun buildSetGps(mode: GpsMode): String = mode.cliCommand
 
     // =========================================================================
     // MeshCore Companion BLE Protocol Framing (CompanionProtocol.h)

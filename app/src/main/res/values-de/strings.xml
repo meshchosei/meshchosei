@@ -30,8 +30,6 @@
     <!-- Navigation Menu -->
     <string name="menu_connection">Verbindung</string>
     <string name="menu_connection_sub">USB-Serial OTG &amp; BLE-Companion</string>
-    <string name="menu_basic_setup">Grundsetup</string>
-    <string name="menu_basic_setup_sub">Identität, GPS, Zugriff &amp; Routing</string>
     <string name="menu_radio">Funk, Land &amp; Antenne</string>
     <string name="menu_radio_sub">EU868 Presets, EIRP &amp; Compliance</string>
     <string name="menu_filter">Filter &amp; Whitelist</string>

@@ -2703,5 +2703,30 @@
   "STATUS LEDS",
   "STATUS-LEDS",
   "LED D'ÉTAT"
+ ],
+ "Stop": [
+  "Stop",
+  "Stoppen",
+  "Arrêter"
+ ],
+ "Scan": [
+  "Scan",
+  "Zoeken",
+  "Rechercher"
+ ],
+ "Login": [
+  "Login",
+  "Inloggen",
+  "Connexion"
+ ],
+ "AUS": [
+  "OFF",
+  "UIT",
+  "DÉSACTIVÉ"
+ ],
+ "{0} Min.": [
+  "{0} min",
+  "{0} min",
+  "{0} min"
  ]
 }

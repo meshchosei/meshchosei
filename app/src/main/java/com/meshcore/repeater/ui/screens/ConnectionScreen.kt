@@ -395,7 +395,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
 
                             if (isScanningBle) {
                                 Text(
-                                    text = "Stop",
+                                    text = tr("Stop"),
                                     color = bColors.signalRed,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
@@ -405,7 +405,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 )
                             } else {
                                 Text(
-                                    text = "Scan",
+                                    text = tr("Scan"),
                                     color = bColors.cobalt,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
@@ -609,7 +609,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                             } else {
                                                 Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
                                                 Spacer(modifier = Modifier.width(4.dp))
-                                                Text("Login", color = Color.Black, fontSize = 12.sp)
+                                                Text(tr("Login"), color = Color.Black, fontSize = 12.sp)
                                             }
                                         }
                                     }

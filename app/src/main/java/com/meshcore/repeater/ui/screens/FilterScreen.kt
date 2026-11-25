@@ -209,6 +209,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                     // Dry-Run bleibt Ocker (Warnzustand "nur protokollieren", vgl. STYLE_GUIDE §2.3)
                     BauhausSwitch(
                         checked = stats.dryRun,
+                        enabled = BusyKey.FILTER_DRYRUN !in busy,   // Anzeige wechselt erst nach Bestätigung
                         onCheckedChange = { viewModel.setFilterDryRun(it) },
                         activeColor = bColors.ochre
                     )
@@ -875,14 +876,17 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "${stringResource(R.string.filter_age_label)} ${if (stats.ageMinutes == 0) "OFF" else "${stats.ageMinutes} min"}",
+                        text = "${stringResource(R.string.filter_age_label)} ${if (stats.ageMinutes == 0) tr("AUS") else tr("{0} Min.", stats.ageMinutes)}",
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 13.sp
                     )
-                    var ageSliderVal by remember(stats.ageMinutes) { mutableFloatStateOf(stats.ageMinutes.toFloat()) }
+                    // Nach der Antwort (busy endet) springt der Slider auf den bestätigten Wert zurück
+                    val ageBusy = BusyKey.FILTER_AGE in busy
+                    var ageSliderVal by remember(stats.ageMinutes, ageBusy) { mutableFloatStateOf(stats.ageMinutes.toFloat()) }
                     Slider(
                         value = ageSliderVal,
+                        enabled = !ageBusy,
                         onValueChange = { ageSliderVal = it },
                         onValueChangeFinished = { viewModel.setFilterAge(ageSliderVal.toInt()) },
                         valueRange = 0f..120f,
@@ -901,9 +905,11 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 13.sp
                     )
-                    var hopsSliderVal by remember(stats.maxHops) { mutableFloatStateOf(stats.maxHops.toFloat()) }
+                    val hopsBusy = BusyKey.FILTER_HOPS in busy
+                    var hopsSliderVal by remember(stats.maxHops, hopsBusy) { mutableFloatStateOf(stats.maxHops.toFloat()) }
                     Slider(
                         value = hopsSliderVal,
+                        enabled = !hopsBusy,
                         onValueChange = { hopsSliderVal = it },
                         onValueChangeFinished = { viewModel.setFilterMaxHops(hopsSliderVal.toInt()) },
                         valueRange = 1f..15f,
