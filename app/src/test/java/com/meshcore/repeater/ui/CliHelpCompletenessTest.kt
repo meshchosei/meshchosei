@@ -27,6 +27,27 @@ class CliHelpCompletenessTest {
         assertTrue(syntaxes.contains("filter RESET"))
     }
 
+    /** v1.18: Befehle aus MeshCore/ZephCore CommonCLI.cpp, die in v1.17 fehlten (Power-Management, Diagnose, GPS, LEDs, Uplink …). */
+    @Test fun firmwareCommandsFromCommonCliDocumented() {
+        val getOnly = listOf("pwrmgt.support", "pwrmgt.source", "pwrmgt.bootreason", "pwrmgt.bootmv", "bootloader.ver", "role",
+            "freq", "freqerr", "pm", "pwr", "mem", "loop.wakes", "dc.restarts", "cad.stats", "dc.gate.status", "acl", "uplink.status")
+        for (v in getOnly) assertTrue("get $v fehlt", syntaxes.contains("get $v"))
+        val getSet = listOf("adc.multiplier", "rxduty", "dc.gate", "dc.gate.thresh", "dc.gate.hyst", "radio.fem.rxgain", "cad.auto", "cad.offset",
+            "cad.busycap", "probe.interval", "backoff.multiplier", "extra.sf", "meshtimesync", "advert.loc", "leds.radio", "leds.hb",
+            "leds.brightness", "display.rotate", "input.rotate", "tz.offset", "bridge.delay", "bridge.source", "bridge.secret",
+            "gps diag", "gps standby", "gps duty", "uplink.enable", "uplink.wifi.ssid", "uplink.mqtt.host", "uplink.mqtt.port",
+            "uplink.mqtt.tls", "uplink.mqtt.user", "uplink.mqtt.iata")
+        for (v in getSet) {
+            assertTrue("get $v fehlt", syntaxes.contains("get $v"))
+            assertTrue("set $v fehlt", syntaxes.any { it == "set $v" || it.startsWith("set $v ") })
+        }
+        for (c in listOf("shutdown", "clkreboot", "time ", "powersaving", "log", "log start", "log stop", "log erase", "stats-core",
+                "stats-radio", "stats-packets", "sensor list", "sensor get ", "sensor set ", "neighbor.remove ", "setperm ", "region def ",
+                "region load", "gps", "gps sync", "gps diag", "gps advert", "set radio default", "set freq ", "set cad.reset",
+                "set adc.multiplier target ", "set adc.multiplier full", "set uplink.wifi.psk ", "set uplink.mqtt.password "))
+            assertTrue("$c fehlt", syntaxes.any { it == c.trim() || it.startsWith(c) })
+    }
+
     @Test fun onlyFirmwareRegionCommands() {
         // CommonCLI::handleRegionCmd kennt kein "region set"; "region list" braucht allowed|denied
         assertFalse(syntaxes.any { it.startsWith("region set") })

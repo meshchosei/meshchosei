@@ -1,6 +1,6 @@
 # ROADMAP – meshchōsei
 
-Stand: 2026-11-25 · aktuelle Version: 1.17
+Stand: 2026-11-25 · aktuelle Version: 1.18
 
 | Version | Status | Inhalt |
 |---|---|---|
@@ -22,7 +22,8 @@ Stand: 2026-11-25 · aktuelle Version: 1.17
 | **1.15** | ✅ veröffentlicht (Tag `v1.15`) | Bei geöffnetem Seitenmenü nur dessen Scroll-Hinweis; Hinweis des Hauptfensters dahinter ausgeblendet (`LocalSuppressScrollHint`) |
 | **1.16** | ✅ veröffentlicht (Tag `v1.16`) | Zuverlässige Filterstatus-Erkennung über LoRa: Retries mit gleichem Tag, langes Antwortfenster, Hilfetexte nicht mehr als Status gewertet, `filterStatusKnown` + Nachfragen bei Menü/Filter-Screen |
 | **1.17** | ✅ veröffentlicht (Tag `v1.17`) | Markenname „meshchōsei“ unübersetzbar in allen Sprachen; alter Arbeitstitel „Repeater Configurator“ aus Seitenmenü, App-Name und Über-Dialog entfernt; persönlicher Build-Zusatz „BW2“ entfernt |
-| **1.1** | 📋 geplant | CLI-Autocomplete (F1), BLE-OTA-Firmware-Update (F2), Live-Repeater-Suche (F3), Präfix-Filter Repeater-Auswahl (F4) |
+| **1.18** | 🧪 in Test (Tag `v1.18`, lokal) | CLI-Autocomplete als vertikales Klappmenü über dem Eingabefeld (öffnet erst ab dem 1. Zeichen, Treffer alphabetisch, Befehl fett + übersetzte Kurzbeschreibung, `✕` oben rechts bzw. Zurück schließt), Capability-Filter (Filter/Whitelist, Seriell-only-Befehle nur bei USB); CLI-Hilfe um 122 Firmware-Befehle ergänzt (`get pwrmgt.*`, Diagnose, CAD, GPS, LEDs, Bridge, Uplink …) in DE/EN/NL/FR; Bootloader-Version (`get bootloader.ver`) im Start-Scan und Hardware-Screen mit OTA-Bootloop-Warnung unter `0.9.2-OTAFIX2.2-BP1.3`; Hardware-Screen: Versorgung per rahmenlosem ↻ direkt hinter dem Wert statt „Abfragen“-Button |
+| **1.1** | 📋 geplant | BLE-OTA-Firmware-Update (F2), Live-Repeater-Suche (F3), Präfix-Filter Repeater-Auswahl (F4) |
 
 Beide Features folgen den Regeln aus [`STYLE_GUIDE.md`](STYLE_GUIDE.md):
 - Bauhaus-Design;
@@ -33,6 +34,8 @@ Beide Features folgen den Regeln aus [`STYLE_GUIDE.md`](STYLE_GUIDE.md):
 ---
 
 ## F1 – CLI-Befehls-Autocomplete (`CliConsoleScreen`)
+
+> **Stand v1.18:** umgesetzt als vertikales Klappmenü (`Card`, max. ~5 Zeilen, `hintedVerticalScroll`) mit Befehl und übersetzter Kurzbeschreibung. Öffnet erst ab dem 1. Zeichen, Treffer alphabetisch, schließt per `✕` oben rechts, Zurück-Taste oder nach dem Senden. Logik `CliAutocomplete` in `service/RepeaterProtocol.kt`, Muster in [`STYLE_GUIDE.md`](STYLE_GUIDE.md) §2.10.
 
 ### Ziel
 Beim Tippen im CLI-Eingabefeld erscheinen live passende MeshCore-/ZephCore-Befehle. Ein Antippen übernimmt den Befehl ins Feld.

@@ -15,9 +15,11 @@ object ManualCliRetry {
 
     private val NEVER_RETRY_EXACT = setOf(
         "reboot", "poweroff", "shutdown", "erase", "start ota", "stop ota", "start dfu",
-        "advert", "advert.zerohop", "discover.neighbors", "clear stats", "filter reset", "region load"
+        "advert", "advert.zerohop", "discover.neighbors", "clear stats", "filter reset", "region load",
+        "clkreboot", "log erase", "set adc.multiplier full", "gps guard accept", "set cad.reset"
     )
-    private val NEVER_RETRY_PREFIX = listOf("password ", "set prv.key ", "region remove ", "filter reset ")
+    private val NEVER_RETRY_PREFIX = listOf("password ", "set prv.key ", "region remove ", "filter reset ", "time ",
+        "set adc.multiplier target ", "region def ")
 
     fun isRetrySafe(cmd: String): Boolean {
         val c = cmd.trim().lowercase().replace(Regex("\\s+"), " ")

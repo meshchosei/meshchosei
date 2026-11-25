@@ -2,11 +2,12 @@ package com.meshcore.repeater.ui.screens
 
 import com.meshcore.repeater.ui.components.hintedVerticalScroll
 
+import com.meshcore.repeater.model.BootloaderCheck
 import com.meshcore.repeater.model.BoardDatabase
 import com.meshcore.repeater.i18n.tr
 import com.meshcore.repeater.ui.components.BusyButton
 import com.meshcore.repeater.ui.components.LocalTourMode
-import com.meshcore.repeater.ui.components.RefreshButton
+import com.meshcore.repeater.ui.components.InlineRefreshIcon
 import com.meshcore.repeater.ui.components.RegisterTourSave
 import com.meshcore.repeater.viewmodel.BusyKey
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -77,14 +78,27 @@ fun HardwareAntennaScreen(viewModel: RepeaterViewModel) {
                 val fwLabel = hardwareInfo.firmwareVersion.ifBlank { capabilities.firmwareVersion.ifBlank { "—" } }
                 Text(tr("Board: {0}", boardLabel), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                 Text(tr("Firmware: {0}", fwLabel), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                // Bootloader (get bootloader.ver, nur nRF52) direkt unter der Firmware; alte Bootloader → OTA-Bootloop-Warnung
+                if (hardwareInfo.bootloaderVersion.isNotBlank()) {
+                    Text(tr("Bootloader: {0}", hardwareInfo.bootloaderVersion), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (BootloaderCheck.needsOtaWarning(hardwareInfo.bootloaderVersion)) {
+                        Text(
+                            tr("⚠ Für BLE-OTA-Updates ist mindestens Bootloader {0} erforderlich. Ältere Bootloader können beim OTA-Update in eine Bootschleife geraten – Bootloader zuerst per USB aktualisieren.", BootloaderCheck.MIN_OTA_BOOTLOADER),
+                            fontSize = 12.sp, fontWeight = FontWeight.Bold, color = bColors.ochre,
+                            modifier = Modifier.fillMaxWidth().background(bColors.ochre.copy(alpha = 0.10f), BauhausCornerShape).padding(8.dp)
+                        )
+                    }
+                }
                 // Versorgung aus der "power"-Antwort (Start-Scan bzw. Button) – nie mehr pauschal "Netz / USB"
+                // ↻ rahmenlos direkt hinter dem Wert (STYLE_GUIDE §2.4): fragt "power" neu ab, Spinner + Statusmeldung während der Abfrage
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         tr("Versorgung: {0}", powerLabel(telemetry)), fontSize = 12.sp,
                         color = if (telemetry.powerSource == PowerSource.BATTERY && telemetry.batteryPercent < 20) bColors.ochre else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f, fill = false)
                     )
-                    RefreshButton(onClick = { viewModel.refreshPowerStatus() }, label = tr("Abfragen"), busy = BusyKey.POWER in busy)
+                    Spacer(Modifier.width(4.dp))   // + 2 dp Innenabstand der 28-dp-Fläche ≈ 6 dp bis zum Icon
+                    InlineRefreshIcon(onClick = { viewModel.refreshPowerStatus() }, busy = BusyKey.POWER in busy, contentDescription = tr("Versorgung abfragen"))
                 }
 
                 // Board-Profil aus der BoardDatabase

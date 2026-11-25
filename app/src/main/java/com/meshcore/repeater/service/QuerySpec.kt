@@ -87,6 +87,8 @@ object QuerySpec {
         "get leds" -> { v -> v.lowercase().substringBefore(' ') in setOf("on", "off", "boot") }
         // MeshCore/ZephCore CommonCLI: "batt:4073 mV usb:no solar_chg:n/a ext:no charger:no"
         "power" -> { v -> Regex("""\bbatt:\s*\d+\s*mV\b""", RegexOption.IGNORE_CASE).containsMatchIn(v) }
+        // CommonCLI: "> 0.9.2-OTAFIX2.2-BP1.3" (nRF52, UF2 info.txt) bzw. "> unknown"; ohne nRF52 (MeshCore) "Error: unsupported"
+        "get bootloader.ver" -> { v -> Regex("""^v?\d+\.\d+""").containsMatchIn(v) || v.equals("unknown", true) || v.startsWith("unsupported", true) }
         "get gps" -> { v -> v.startsWith("on", true) || v.startsWith("off", true) || v.contains("lat=", true) }
         // Backup-Variablen
         "get af" -> { v -> DECIMAL.matches(v) }

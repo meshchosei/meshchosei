@@ -866,6 +866,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         when (cmd) {
             "board" -> { _hardwareInfo.value = _hardwareInfo.value.copy(boardModel = v); applyDetectedBoard(v) }
             "ver" -> { _hardwareInfo.value = _hardwareInfo.value.copy(firmwareVersion = v); _deviceCapabilities.value = _deviceCapabilities.value.copy(firmwareVersion = v) }
+            "get bootloader.ver" -> _hardwareInfo.value = _hardwareInfo.value.copy(bootloaderVersion = BootloaderCheck.normalize(v).orEmpty())
             "get public.key" -> _basicSetup.value = s.copy(publicKeyHex = v.uppercase(java.util.Locale.ROOT))
             "power" -> BatterySolarTelemetry.parsePowerReply(v)?.let { _telemetry.value = it }
             "get radio" -> {
@@ -962,6 +963,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 // 1) Hardware & Firmware ZUERST (board/ver = schnelles Lebenszeichen, u. a. für den USB-Timeout)
                 val detectSteps = 2 // "filter help" + "filter wl help"
                 val maxScanSteps = HARDWARE_QUERIES.size + detectSteps + BL_STATUS_QUERIES.size + BL_LIST_QUERIES.size + WL_STATUS_QUERIES.size + WL_LIST_QUERIES.size + BASIC_SETUP_QUERIES.size + REGION_STEPS
+                // Bootloader-Version gehört zum aktuellen Gerät: alten Wert verwerfen, falls die Firmware sie nicht liefert
+                _hardwareInfo.value = _hardwareInfo.value.copy(bootloaderVersion = "")
                 var ok = runReadSequence(HARDWARE_QUERIES, phaseText = "Lese Hardware & Firmware…", progressTotal = maxScanSteps)
                 var done = HARDWARE_QUERIES.size
                 // 2) Blacklist / Whitelist getrennt und strikt anhand der Firmware-Antworten erkennen
@@ -1751,7 +1754,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         val BL_LIST_QUERIES = listOf("filter channel list", "filter path list")
         val WL_STATUS_QUERIES = listOf("filter mode")
         val WL_LIST_QUERIES = listOf("filter wl channel list", "filter wl path list")
-        val HARDWARE_QUERIES = listOf("board", "ver", "get gps", "power")
+        val HARDWARE_QUERIES = listOf("board", "ver", "get bootloader.ver", "get gps", "power")
         /** Reihenfolge der Basis-Abfragen – jeweils genau ein Befehl, dann Antwort abwarten. */
         val BASIC_SETUP_QUERIES = listOf(
             "get radio", "get tx", "get dutycycle",

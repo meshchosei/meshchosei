@@ -26,6 +26,11 @@ class QuerySpecTest {
         assertTrue(ok("ver", "v1.18.2-zephcore (Build: 2026-11-01)"))
         assertFalse(ok("ver", "869.618,62.5,8,8"))
         assertFalse(ok("ver", "51.881000"))
+        // v1.18: get bootloader.ver (UF2 info.txt) bzw. "unknown"; fremde Antworten verwerfen
+        assertTrue(ok("get bootloader.ver", "0.9.2-OTAFIX2.2-BP1.3"))
+        assertTrue(ok("get bootloader.ver", "unknown"))
+        assertFalse(ok("get bootloader.ver", "on"))
+        assertFalse(ok("get bootloader.ver", "MyRepeater"))
     }
     @Test fun nameAndOwner() {
         assertTrue(ok("get name", "RAK-Harz Repeater"))

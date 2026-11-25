@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -99,5 +100,29 @@ fun RefreshButton(
         else Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
         Spacer(Modifier.width(6.dp))
         Text(label, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+    }
+}
+
+/**
+ * Rahmenloses Aktualisieren-Icon direkt hinter einem angezeigten Wert (v1.18, z. B. „Versorgung: …  ↻“).
+ * Ausnahme zu §2.4 für einzelne Messwerte, die man an Ort und Stelle neu abfragt: kein Rahmen, kein Text.
+ * Während der Abfrage ersetzt der Braille-Spinner das Icon, die Fläche ist dann gesperrt.
+ * Touch-Fläche 28 dp (eckig), Icon 16 dp.
+ */
+@Composable
+fun InlineRefreshIcon(
+    onClick: () -> Unit,
+    busy: Boolean = false,
+    enabled: Boolean = true,
+    contentDescription: String = tr("Aktualisieren"),
+    color: Color = LocalBauhausColors.current.cobalt
+) {
+    Box(
+        Modifier.size(28.dp).clip(BauhausCornerShape)
+            .clickable(enabled = enabled && !busy, role = Role.Button, onClickLabel = contentDescription) { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        if (busy) BrailleSpinner(color, fontSize = 14.sp)
+        else Icon(Icons.Default.Refresh, contentDescription = contentDescription, tint = if (enabled) color else color.copy(alpha = 0.4f), modifier = Modifier.size(16.dp))
     }
 }

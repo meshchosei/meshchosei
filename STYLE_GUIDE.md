@@ -198,7 +198,7 @@ BauhausSwitch(
 
 ### 2.4 „Aktualisieren“ / „Neu einlesen“: `RefreshButton`
 
-Jede Aktion, die Werte vom Repeater oder von Geräten neu lädt, ist **ein** einheitlicher `RefreshButton` (`ui/components/BauhausControls.kt`). Kleine blaue Klicktexte („Sync“), rahmenlose `TextButton`s oder reine Icon-Buttons gibt es dafür nicht mehr.
+Jede Aktion, die Werte vom Repeater oder von Geräten neu lädt, ist **ein** einheitlicher `RefreshButton` (`ui/components/BauhausControls.kt`). Kleine blaue Klicktexte („Sync“), rahmenlose `TextButton`s oder reine Icon-Buttons gibt es dafür nicht mehr (einzige Ausnahme: `InlineRefreshIcon` für einen einzelnen Messwert, siehe unten).
 
 ```kotlin
 RefreshButton(
@@ -216,8 +216,14 @@ RefreshButton(
   - **Verbindung:** USB-Geräte, Companion-Kontakte und „Neu einlesen“;
   - **Routing & Adverts:** Regionen;
   - **Filter:** Status und Listen;
-  - **Hardware & Antenne:** Versorgung („Abfragen“).
 - Nicht gemeint ist „Auffrischen“ im Schonmodus. Dieser Button verlängert den Timer und lädt nichts neu, er bleibt die Primäraktion des Screens.
+
+**Ausnahme: `InlineRefreshIcon` für einen einzelnen Messwert (seit v1.18).** Wenn genau **ein** angezeigter Wert an Ort und Stelle neu abgefragt wird, steht statt des `RefreshButton` ein rahmenloses `Icons.Default.Refresh` (↻) direkt hinter dem Wert.
+- Abstand etwa 6 dp: 4 dp Spacer plus Innenabstand der Touch-Fläche.
+- Touch-Fläche 28 dp, eckig (`BauhausCornerShape`), Icon 16 dp in Kobalt.
+- Während der Abfrage ersetzt der Braille-Spinner das Icon, die Fläche ist gesperrt. Das Status-Overlay zeigt die Meldung (z. B. „Versorgung wird abgefragt…“).
+- Der Wert-Text nutzt `Modifier.weight(1f, fill = false)`, damit das Icon direkt am Wert klebt und bei langen Texten nicht aus der Zeile rutscht.
+- Einsatzort: **Hardware & Antenne → „Versorgung: …“** (`refreshPowerStatus`, `BusyKey.POWER`). Ganze Listen oder Karten laden weiterhin per `RefreshButton`.
 
 ### 2.5 Tastatur-Verhalten
 
@@ -277,6 +283,23 @@ RefreshButton(
 - Nacktes `verticalScroll(…)` ist nicht erlaubt. `ScrollHintRuleTest` prüft das.
 
 ---
+
+### 2.10 CLI-Autocomplete: vertikales Klappmenü (seit v1.18)
+
+- **Ort:** ein vertikales Klappmenü direkt **über** der CLI-Eingabezeile (`CliConsoleScreen`). Es klappt nach oben auf und verkleinert dabei das Log darüber. Keine horizontalen Chip-Scroller.
+- **Form:** `Card` mit `BauhausCornerShape` (2 dp), `BorderStroke(1.dp, outline)`, Grund `surfaceVariant`. Höchstens ca. 5 Zeilen sichtbar (`heightIn(max = 200.dp)`), darüber vertikal scrollbar mit `hintedVerticalScroll(always = true)`.
+- **Zeile:** mindestens 40 dp hoch, ganze Zeile antippbar, Trennlinie zwischen den Zeilen.
+  - links der Befehl in **Monospace-Fett** 12 sp (Firmware-Syntax mit Platzhaltern, unübersetzt, höchstens ca. 210 dp breit);
+  - rechts die Kurzbeschreibung aus der CLI-Hilfe über `tr()`, 11 sp, `onSurfaceVariant`;
+  - beide einzeilig: `maxLines = 1, softWrap = false, overflow = Ellipsis`.
+  - Kritische Befehle (`reboot`, `poweroff`, `shutdown`, `clkreboot`, `erase`, `start ota`, `start dfu`, `filter RESET`, `set prv.key`) in Signalrot mit „⚠“.
+- **Öffnen:** ausschließlich, wenn mindestens **1 Zeichen** getippt ist und passende Befehle existieren. Bei leerem Feld öffnet es **nie**, auch nicht beim Fokussieren. Es gibt keinen eigenen Öffnen-Button neben dem Senden-Button.
+- **Sortierung (zweistufig alphabetisch):** zuerst alle Befehle, die mit der Eingabe **beginnen**, danach alle übrigen, die sie als Teilwort enthalten. Beide Gruppen sind jeweils alphabetisch nach Befehlsname sortiert. Beispiel `ver`: `ver`, dann `advert`, `advert.zerohop`, `get advert.interval`, `get bootloader.ver` …
+- **Schließen:** kleines `✕` (Box 22 dp, Icon 14 dp, eckig, `Icons.Filled.Close`, 2 dp Abstand) bündig oben rechts in der Ecke des Containers. Die Zeilen halten rechts 26 dp frei, damit das `✕` nichts verdeckt. Außerdem schließen System-Zurück (`BackHandler`) und Senden. Ohne weitere Treffer bleibt das Menü zu, z. B. wenn der einzige Treffer die Eingabe selbst ist (`get name`) oder sobald ein Wert eingetippt ist. Jede weitere Eingabe öffnet es wieder.
+- **Datenbasis:** ausschließlich die firmware-geprüfte CLI-Hilfe (`cliHelpCategories` → `cliAutocompleteEntries`), seit v1.18 vollständig abgeglichen mit MeshCore/ZephCore `CommonCLI.cpp` (inkl. `get pwrmgt.*`, Diagnose, CAD, GPS, LEDs, Uplink). Neue Befehle kommen nur dort hinein, immer mit Übersetzung in EN/NL/FR (`CliHelpCompletenessTest`).
+- **Logik:** `CliAutocomplete` in `service/RepeaterProtocol.kt`, rein und unit-getestet (`CliAutocompleteTest`). Treffer = Befehl enthält die Eingabe; erst Präfix-Treffer, dann Teilwort-Treffer, je Gruppe alphabetisch (`partition { startsWith(query) }` + `sortedWith(compareBy { befehl.lowercase() })`), ohne Groß-/Kleinschreibung, ohne Duplikate.
+- **Capabilities:** `filter …` nur bei `supportsBlacklist`, `filter wl …`/`filter mode …` nur bei `supportsWhitelist`. Seriell-only-Befehle (`get prv.key`, `erase`, `log`, `stats-*`, `set freq`, `get acl`) nur bei direkter USB-Verbindung (`isDirectRepeater`).
+- **Antippen übernimmt nur:** Der Befehl kommt ohne Platzhalter ins Feld, der Cursor steht am Ende. Erwartet er einen Parameter (`<…>`/`[…]`), folgt ein Leerzeichen (`set dutycycle `, `region home `, `tempradio `). Gesendet wird **nie** automatisch, nur über den roten Senden-Button. `start ota` läuft weiterhin über den Bestätigungsdialog.
 
 ## 3. Kommunikations- & Protokoll-Architektur
 

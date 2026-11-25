@@ -359,3 +359,76 @@ object RepeaterProtocol {
         return updated
     }
 }
+
+/**
+ * CLI-Autocomplete (v1.18): reine, unit-getestete Vorschlagslogik für die Chip-Leiste über dem CLI-Eingabefeld.
+ * Datenbasis ist ausschließlich die firmware-geprüfte CLI-Hilfe (`cliHelpCategories`), hier nur als [Entry] gespiegelt.
+ */
+object CliAutocomplete {
+
+    /**
+     * Ein Vorschlag: [syntax] wird angezeigt, [insertText] beim Antippen ins Feld übernommen (nie gesendet).
+     * [description] ist der deutsche Schlüssel der Kurzbeschreibung (Anzeige über `tr()`).
+     */
+    data class Entry(val syntax: String, val insertText: String, val dangerous: Boolean = false, val description: String = "")
+
+    private val DANGEROUS = setOf("reboot", "poweroff", "shutdown", "clkreboot", "erase", "start ota", "start dfu", "filter reset", "set prv.key")
+
+    /**
+     * Befehle, die die Firmware nur von der seriellen Konsole annimmt (`sender_timestamp == 0` in
+     * MeshCore/ZephCore `CommonCLI.cpp` bzw. `get acl` in `simple_repeater`/`RepeaterMesh`).
+     */
+    private val USB_ONLY = setOf("get prv.key", "erase", "log", "stats-core", "stats-radio", "stats-packets", "set freq", "get acl")
+
+    /**
+     * Text, der beim Antippen übernommen wird: der Befehl ohne Platzhalter. Erwartet er einen Parameter
+     * (`<…>` oder `[…]` in der Syntax), folgt ein Leerzeichen, damit der Wert direkt weitergetippt werden kann.
+     */
+    fun insertTextFor(syntax: String): String {
+        val cut = syntax.indexOfFirst { it == '<' || it == '[' }
+        return if (cut < 0) syntax.trim() else syntax.substring(0, cut).trimEnd() + " "
+    }
+
+    fun entryFor(syntax: String, dangerousOta: Boolean = false, description: String = ""): Entry {
+        val ins = insertTextFor(syntax)
+        val key = ins.trim().lowercase(Locale.ROOT)
+        return Entry(syntax, ins, dangerousOta || key in DANGEROUS, description)
+    }
+
+    /**
+     * Ist der Befehl auf diesem Gerät sinnvoll?
+     * - `filter …` nur bei Filter-Unterstützung (Blacklist), `filter wl …`/`filter mode …` nur bei Whitelist-Unterstützung;
+     * - serielle Befehle ([USB_ONLY], z. B. `get prv.key`, `log`, `stats-*`, `set freq`) nur bei direkter
+     *   USB-Verbindung zum Repeater; remote ignoriert die Firmware sie.
+     */
+    fun isAvailable(e: Entry, supportsBlacklist: Boolean, supportsWhitelist: Boolean, usbDirect: Boolean): Boolean {
+        val cmd = e.insertText.trim().lowercase(Locale.ROOT)
+        if (cmd == "filter" || cmd.startsWith("filter ")) {
+            val needsWl = cmd.startsWith("filter wl") || cmd.startsWith("filter mode")
+            return if (needsWl) supportsWhitelist else supportsBlacklist
+        }
+        if (cmd in USB_ONLY) return usbDirect
+        return true
+    }
+
+    /**
+     * Vorschläge zur Eingabe [input] (v1.18): alle Befehle, die die Eingabe enthalten, zweistufig alphabetisch:
+     * 1. Befehle, die mit der Eingabe **beginnen** (`ver` → `ver`), untereinander alphabetisch;
+     * 2. danach alle übrigen Teilwort-Treffer (`ver` → `advert`, `advert.interval`, `get bootloader.ver` …), ebenfalls alphabetisch.
+     * Groß-/Kleinschreibung egal, keine Duplikate. Leer bei leerer Eingabe, wenn der einzige Treffer die Eingabe selbst
+     * ist (z. B. `get name`), oder wenn schon Parameter eingetippt sind (`set dutycycle 10`).
+     */
+    fun suggest(input: String, entries: List<Entry>, limit: Int = Int.MAX_VALUE): List<Entry> {
+        val unique = entries.distinctBy { it.insertText.lowercase(Locale.ROOT) }
+        val q = input.trimStart().lowercase(Locale.ROOT).replace(Regex("\\s+"), " ")
+        if (q.isEmpty()) return emptyList()
+        val qt = q.trimEnd()
+        fun key(e: Entry) = e.insertText.trim().lowercase(Locale.ROOT)
+        // Bereits vollständig übernommener Text (z. B. "set dutycycle ") wird nicht erneut vorgeschlagen.
+        val matches = unique.filter { key(it).contains(q) && !(it.insertText.endsWith(" ") && it.insertText.lowercase(Locale.ROOT) == q) }
+        if (matches.all { key(it) == qt }) return emptyList()   // nur die Eingabe selbst → nichts mehr anzubieten
+        val alpha = compareBy<Entry> { key(it) }.thenBy { it.syntax.lowercase(Locale.ROOT) }
+        val (prefix, rest) = matches.partition { key(it).startsWith(q) }
+        return (prefix.sortedWith(alpha) + rest.sortedWith(alpha)).take(limit)
+    }
+}

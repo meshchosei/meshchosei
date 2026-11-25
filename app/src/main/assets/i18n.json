@@ -1404,11 +1404,6 @@
   "5. Filter – whitelist (custom)",
   "5. Filtre – liste blanche (custom)"
  ],
- "6. Wartung & OTA-Update": [
-  "6. Maintenance & OTA update",
-  "6. Onderhoud & OTA-update",
-  "6. Maintenance & mise à jour OTA"
- ],
  "Zeigt Firmware-Version und Build-Datum des Repeaters an.": [
   "Shows the repeater's firmware version and build date.",
   "Toont firmwareversie en builddatum van de repeater.",
@@ -2928,5 +2923,655 @@
   "✕ Manual CLI command cancelled (menu/screen change).",
   "✕ Handmatige CLI-opdracht geannuleerd (menu/schermwissel).",
   "✕ Commande CLI manuelle annulée (menu/changement d'écran)."
+ ],
+ "6. System, Protokoll & Zugriff": [
+  "6. System, log & access",
+  "6. Systeem, log & toegang",
+  "6. Système, journal & accès"
+ ],
+ "Schaltet den Repeater aus (gleichwertig zu poweroff).": [
+  "Powers the repeater off (same as poweroff).",
+  "Schakelt de repeater uit (gelijk aan poweroff).",
+  "Éteint le répéteur (identique à poweroff)."
+ ],
+ "Setzt die Uhr auf Mai 2024 zurück und startet neu.": [
+  "Resets the clock to May 2024 and reboots.",
+  "Zet de klok terug naar mei 2024 en herstart.",
+  "Remet l'horloge à mai 2024 et redémarre."
+ ],
+ "Stellt die Uhr auf Unix-Zeit in Sekunden (nur vorwärts).": [
+  "Sets the clock to Unix time in seconds (forward only).",
+  "Zet de klok op Unix-tijd in seconden (alleen vooruit).",
+  "Règle l'horloge en temps Unix (secondes, seulement en avant)."
+ ],
+ "Zeigt die Firmware-Rolle des Nodes (z. B. repeater) an.": [
+  "Shows the node's firmware role (e.g. repeater).",
+  "Toont de firmwarerol van de node (bijv. repeater).",
+  "Affiche le rôle firmware du nœud (p. ex. repeater)."
+ ],
+ "Zeigt an, ob der Stromsparmodus aktiv ist.": [
+  "Shows whether power saving is enabled.",
+  "Toont of energiebesparing actief is.",
+  "Indique si l'économie d'énergie est active."
+ ],
+ "Startet die Paket-Protokollierung im Flash.": [
+  "Starts packet logging to flash.",
+  "Start het pakketlogboek in flash.",
+  "Démarre la journalisation des paquets en flash."
+ ],
+ "Beendet die Paket-Protokollierung.": [
+  "Stops packet logging.",
+  "Stopt het pakketlogboek.",
+  "Arrête la journalisation des paquets."
+ ],
+ "Löscht das gespeicherte Paket-Protokoll.": [
+  "Erases the stored packet log.",
+  "Wist het opgeslagen pakketlogboek.",
+  "Efface le journal des paquets enregistré."
+ ],
+ "Gibt das Paket-Protokoll aus (nur USB).": [
+  "Prints the packet log (USB only).",
+  "Toont het pakketlogboek (alleen USB).",
+  "Affiche le journal des paquets (USB uniquement)."
+ ],
+ "Zeigt Akku, Laufzeit, Warteschlange und Debug-Flags (nur USB).": [
+  "Shows battery, uptime, queue and debug flags (USB only).",
+  "Toont accu, uptime, wachtrij en debugvlaggen (alleen USB).",
+  "Affiche batterie, uptime, file d'attente et flags (USB uniquement)."
+ ],
+ "Zeigt Rauschpegel, RSSI/SNR, Airtime und Empfangsfehler (nur USB).": [
+  "Shows noise floor, RSSI/SNR, airtime and RX errors (USB only).",
+  "Toont ruisvloer, RSSI/SNR, airtime en ontvangstfouten (alleen USB).",
+  "Affiche bruit, RSSI/SNR, temps d'antenne et erreurs RX (USB uniquement)."
+ ],
+ "Zeigt die Zähler empfangener und gesendeter Pakete (nur USB).": [
+  "Shows received and sent packet counters (USB only).",
+  "Toont tellers van ontvangen en verzonden pakketten (alleen USB).",
+  "Affiche les compteurs de paquets reçus et envoyés (USB uniquement)."
+ ],
+ "Listet die benutzerdefinierten Sensor-Variablen auf.": [
+  "Lists the custom sensor variables.",
+  "Toont de aangepaste sensorvariabelen.",
+  "Liste les variables de capteur personnalisées."
+ ],
+ "Liest eine Sensor-Variable aus.": [
+  "Reads a sensor variable.",
+  "Leest een sensorvariabele uit.",
+  "Lit une variable de capteur."
+ ],
+ "Setzt eine Sensor-Variable.": [
+  "Sets a sensor variable.",
+  "Stelt een sensorvariabele in.",
+  "Définit une variable de capteur."
+ ],
+ "Entfernt passende Nachbarn aus der Nachbarliste.": [
+  "Removes matching nodes from the neighbor list.",
+  "Verwijdert overeenkomende buren uit de burenlijst.",
+  "Retire les voisins correspondants de la liste."
+ ],
+ "Setzt die Zugriffsrechte eines Clients (0 = Gast).": [
+  "Sets a client's permissions (0 = guest).",
+  "Stelt de rechten van een client in (0 = gast).",
+  "Définit les droits d'un client (0 = invité)."
+ ],
+ "Listet die Zugriffsliste (ACL) auf (nur USB).": [
+  "Lists the access control list (USB only).",
+  "Toont de toegangslijst (ACL) (alleen USB).",
+  "Liste la liste de contrôle d'accès (USB uniquement)."
+ ],
+ "Legt einen Regionen-Baum in einer Zeile an (name, name|sprung).": [
+  "Defines a region tree in one line (name, name|jump).",
+  "Legt een regioboom in één regel aan (naam, naam|sprong).",
+  "Définit un arbre de régions en une ligne (nom, nom|saut)."
+ ],
+ "Startet das Einlesen einer Regionenliste (Folgezeilen).": [
+  "Starts bulk-loading a region list (following lines).",
+  "Start het inlezen van een regiolijst (volgende regels).",
+  "Démarre le chargement d'une liste de régions (lignes suivantes)."
+ ],
+ "Zeigt die Filter-Hilfe der Firmware an.": [
+  "Shows the firmware's filter help.",
+  "Toont de filterhulp van de firmware.",
+  "Affiche l'aide des filtres du firmware."
+ ],
+ "Zeigt Statistiken einer Filter-Kategorie (z. B. channel, path).": [
+  "Shows statistics of one filter category (e.g. channel, path).",
+  "Toont statistieken van één filtercategorie (bijv. channel, path).",
+  "Affiche les statistiques d'une catégorie (p. ex. channel, path)."
+ ],
+ "7. Power-Management & Diagnose": [
+  "7. Power management & diagnostics",
+  "7. Energiebeheer & diagnose",
+  "7. Gestion d'énergie & diagnostic"
+ ],
+ "Zeigt an, ob Power-Management unterstützt wird (nRF52).": [
+  "Shows whether power management is supported (nRF52).",
+  "Toont of energiebeheer ondersteund wordt (nRF52).",
+  "Indique si la gestion d'énergie est prise en charge (nRF52)."
+ ],
+ "Zeigt die aktuelle Stromquelle an (extern oder Akku).": [
+  "Shows the current power source (external or battery).",
+  "Toont de huidige stroombron (extern of accu).",
+  "Affiche la source d'alimentation (externe ou batterie)."
+ ],
+ "Zeigt Reset- und Abschaltgrund des letzten Starts an.": [
+  "Shows the reset and shutdown reason of the last boot.",
+  "Toont reset- en uitschakelreden van de laatste start.",
+  "Affiche la cause de reset et d'arrêt du dernier démarrage."
+ ],
+ "Zeigt die Akkuspannung beim Start in mV an.": [
+  "Shows the battery voltage at boot in mV.",
+  "Toont de accuspanning bij het starten in mV.",
+  "Affiche la tension batterie au démarrage en mV."
+ ],
+ "Zeigt die Bootloader-Version an (nur nRF52).": [
+  "Shows the bootloader version (nRF52 only).",
+  "Toont de bootloaderversie (alleen nRF52).",
+  "Affiche la version du bootloader (nRF52 uniquement)."
+ ],
+ "Zeigt den Kalibrierfaktor der Akku-Messung an.": [
+  "Shows the battery measurement calibration factor.",
+  "Toont de kalibratiefactor van de accumeting.",
+  "Affiche le facteur de calibration de la mesure batterie."
+ ],
+ "Kalibriert die Akku-Messung auf eine gemessene Spannung (nur ZephCore).": [
+  "Calibrates battery measurement to a measured voltage (ZephCore only).",
+  "Kalibreert de accumeting op een gemeten spanning (alleen ZephCore).",
+  "Calibre la mesure batterie sur une tension mesurée (ZephCore uniquement)."
+ ],
+ "Kalibriert die Akku-Messung bei voll geladenem Akku (nur ZephCore).": [
+  "Calibrates battery measurement on a full charge (ZephCore only).",
+  "Kalibreert de accumeting bij volle accu (alleen ZephCore).",
+  "Calibre la mesure batterie à pleine charge (ZephCore uniquement)."
+ ],
+ "Zeigt Light-Sleep-Statistiken an (nur ZephCore).": [
+  "Shows light-sleep statistics (ZephCore only).",
+  "Toont light-sleepstatistieken (alleen ZephCore).",
+  "Affiche les statistiques de veille légère (ZephCore uniquement)."
+ ],
+ "Zeigt Strom-Diagnosedaten an (ZephCore-Diagnose-Build).": [
+  "Shows power diagnostics (ZephCore diagnostic build).",
+  "Toont stroomdiagnose (ZephCore-diagnosebuild).",
+  "Affiche le diagnostic d'alimentation (build diagnostic ZephCore)."
+ ],
+ "Zeigt die Speicher- und Stack-Auslastung an (ZephCore-Diagnose-Build).": [
+  "Shows memory and stack usage (ZephCore diagnostic build).",
+  "Toont geheugen- en stackgebruik (ZephCore-diagnosebuild).",
+  "Affiche l'usage mémoire et pile (build diagnostic ZephCore)."
+ ],
+ "Zeigt die Weckstatistik der Hauptschleife an (ZephCore-Diagnose-Build).": [
+  "Shows main-loop wake statistics (ZephCore diagnostic build).",
+  "Toont wekstatistieken van de hoofdlus (ZephCore-diagnosebuild).",
+  "Affiche les réveils de la boucle principale (build diagnostic ZephCore)."
+ ],
+ "Zählt Neustarts durch Duty-Cycle-Timeout (nur ZephCore).": [
+  "Counts restarts caused by duty-cycle timeouts (ZephCore only).",
+  "Telt herstarts door duty-cycle-timeouts (alleen ZephCore).",
+  "Compte les redémarrages dus au duty cycle (ZephCore uniquement)."
+ ],
+ "Zeigt an, ob der stromsparende RX-Duty-Cycle aktiv ist (nur ZephCore).": [
+  "Shows whether the power-saving RX duty cycle is on (ZephCore only).",
+  "Toont of de zuinige RX-duty-cycle actief is (alleen ZephCore).",
+  "Indique si le cycle RX économe est actif (ZephCore uniquement)."
+ ],
+ "Schaltet den RX-Duty-Cycle ein oder aus (Neustart nötig, nur ZephCore).": [
+  "Turns the RX duty cycle on or off (reboot required, ZephCore only).",
+  "Schakelt de RX-duty-cycle in of uit (herstart nodig, alleen ZephCore).",
+  "Active ou désactive le cycle RX (redémarrage requis, ZephCore uniquement)."
+ ],
+ "Zeigt an, ob die Duty-Cycle-Sperre aktiv ist (nur MeshCore).": [
+  "Shows whether the duty-cycle gate is enabled (MeshCore only).",
+  "Toont of de duty-cycle-poort actief is (alleen MeshCore).",
+  "Indique si la limite de duty cycle est active (MeshCore uniquement)."
+ ],
+ "Drosselt die Weiterleitung bei hoher Sendelast (nur MeshCore).": [
+  "Throttles forwarding under high TX load (MeshCore only).",
+  "Beperkt doorsturen bij hoge zendbelasting (alleen MeshCore).",
+  "Limite le relais en cas de forte charge TX (MeshCore uniquement)."
+ ],
+ "Liest die Sendelast-Schwelle der Duty-Cycle-Sperre (%) aus.": [
+  "Reads the duty-cycle gate TX load threshold (%).",
+  "Leest de drempel van de duty-cycle-poort (%) uit.",
+  "Lit le seuil de charge TX de la limite (%)."
+ ],
+ "Setzt die Sendelast-Schwelle der Duty-Cycle-Sperre (%).": [
+  "Sets the duty-cycle gate TX load threshold (%).",
+  "Stelt de drempel van de duty-cycle-poort (%) in.",
+  "Définit le seuil de charge TX de la limite (%)."
+ ],
+ "Liest die Hysterese der Duty-Cycle-Sperre (%) aus.": [
+  "Reads the duty-cycle gate hysteresis (%).",
+  "Leest de hysterese van de duty-cycle-poort (%) uit.",
+  "Lit l'hystérésis de la limite de duty cycle (%)."
+ ],
+ "Setzt die Hysterese der Duty-Cycle-Sperre (%).": [
+  "Sets the duty-cycle gate hysteresis (%).",
+  "Stelt de hysterese van de duty-cycle-poort (%) in.",
+  "Définit l'hystérésis de la limite de duty cycle (%)."
+ ],
+ "Zeigt den aktuellen Zustand der Duty-Cycle-Sperre an (nur MeshCore).": [
+  "Shows the current duty-cycle gate state (MeshCore only).",
+  "Toont de huidige toestand van de duty-cycle-poort (alleen MeshCore).",
+  "Affiche l'état actuel de la limite de duty cycle (MeshCore uniquement)."
+ ],
+ "8. Funk – erweitert": [
+  "8. Radio – advanced",
+  "8. Radio – geavanceerd",
+  "8. Radio – avancé"
+ ],
+ "Zeigt die eingestellte Frequenz in MHz an.": [
+  "Shows the configured frequency in MHz.",
+  "Toont de ingestelde frequentie in MHz.",
+  "Affiche la fréquence configurée en MHz."
+ ],
+ "Setzt nur die Frequenz (nur USB, wirkt nach Neustart).": [
+  "Sets only the frequency (USB only, applies after reboot).",
+  "Stelt alleen de frequentie in (alleen USB, na herstart).",
+  "Règle seulement la fréquence (USB uniquement, après redémarrage)."
+ ],
+ "Zeigt den gemessenen Frequenzfehler des Funkchips an (nur ZephCore).": [
+  "Shows the radio's measured frequency error (ZephCore only).",
+  "Toont de gemeten frequentiefout van de radio (alleen ZephCore).",
+  "Affiche l'erreur de fréquence mesurée (ZephCore uniquement)."
+ ],
+ "Setzt Frequenz, BW, SF und CR auf Werkseinstellung (nur ZephCore).": [
+  "Resets frequency, BW, SF and CR to defaults (ZephCore only).",
+  "Zet frequentie, BW, SF en CR terug naar standaard (alleen ZephCore).",
+  "Rétablit fréquence, BW, SF et CR par défaut (ZephCore uniquement)."
+ ],
+ "Zeigt an, ob der LNA des Front-End-Moduls aktiv ist (Boards mit FEM).": [
+  "Shows whether the front-end module LNA is on (boards with FEM).",
+  "Toont of de LNA van de front-end module actief is (borden met FEM).",
+  "Indique si le LNA du module front-end est actif (cartes avec FEM)."
+ ],
+ "Schaltet den LNA des Front-End-Moduls ein oder aus (Boards mit FEM).": [
+  "Turns the front-end module LNA on or off (boards with FEM).",
+  "Schakelt de LNA van de front-end module in of uit (borden met FEM).",
+  "Active ou coupe le LNA du module front-end (cartes avec FEM)."
+ ],
+ "Zeigt Zustand und Messwerte des adaptiven CAD an (nur ZephCore).": [
+  "Shows adaptive CAD state and probe stats (ZephCore only).",
+  "Toont toestand en metingen van adaptieve CAD (alleen ZephCore).",
+  "Affiche l'état et les mesures du CAD adaptatif (ZephCore uniquement)."
+ ],
+ "Zeigt an, ob das adaptive CAD aktiv ist (nur ZephCore).": [
+  "Shows whether adaptive CAD is on (ZephCore only).",
+  "Toont of adaptieve CAD actief is (alleen ZephCore).",
+  "Indique si le CAD adaptatif est actif (ZephCore uniquement)."
+ ],
+ "Schaltet das adaptive CAD ein oder aus (nur ZephCore).": [
+  "Turns adaptive CAD on or off (ZephCore only).",
+  "Schakelt adaptieve CAD in of uit (alleen ZephCore).",
+  "Active ou désactive le CAD adaptatif (ZephCore uniquement)."
+ ],
+ "Liest den CAD-Empfindlichkeits-Offset aus (nur ZephCore).": [
+  "Reads the CAD sensitivity offset (ZephCore only).",
+  "Leest de CAD-gevoeligheidsoffset uit (alleen ZephCore).",
+  "Lit le décalage de sensibilité CAD (ZephCore uniquement)."
+ ],
+ "Setzt den CAD-Empfindlichkeits-Offset (nur ZephCore).": [
+  "Sets the CAD sensitivity offset (ZephCore only).",
+  "Stelt de CAD-gevoeligheidsoffset in (alleen ZephCore).",
+  "Définit le décalage de sensibilité CAD (ZephCore uniquement)."
+ ],
+ "Liest die CAD-Belegt-Obergrenze in % aus (nur ZephCore).": [
+  "Reads the CAD busy cap in % (ZephCore only).",
+  "Leest de CAD-bezetgrens in % uit (alleen ZephCore).",
+  "Lit le plafond d'occupation CAD en % (ZephCore uniquement)."
+ ],
+ "Setzt die CAD-Belegt-Obergrenze in % (0 = aus, nur ZephCore).": [
+  "Sets the CAD busy cap in % (0 = off, ZephCore only).",
+  "Stelt de CAD-bezetgrens in % in (0 = uit, alleen ZephCore).",
+  "Définit le plafond d'occupation CAD en % (0 = off, ZephCore uniquement)."
+ ],
+ "Setzt CAD-Offset und -Statistik zurück (nur ZephCore).": [
+  "Resets the CAD offset and statistics (ZephCore only).",
+  "Zet CAD-offset en -statistieken terug (alleen ZephCore).",
+  "Réinitialise le décalage et les statistiques CAD (ZephCore uniquement)."
+ ],
+ "Liest das Intervall der Funk-Messungen in Sekunden aus (nur ZephCore).": [
+  "Reads the radio probe interval in seconds (ZephCore only).",
+  "Leest het interval van radiometingen in seconden uit (alleen ZephCore).",
+  "Lit l'intervalle des mesures radio en secondes (ZephCore uniquement)."
+ ],
+ "Setzt das Intervall der Funk-Messungen (0 = aus, nur ZephCore).": [
+  "Sets the radio probe interval (0 = off, ZephCore only).",
+  "Stelt het interval van radiometingen in (0 = uit, alleen ZephCore).",
+  "Définit l'intervalle des mesures radio (0 = off, ZephCore uniquement)."
+ ],
+ "Liest den Backoff-Faktor bei Duplikaten aus (nur ZephCore).": [
+  "Reads the per-duplicate backoff multiplier (ZephCore only).",
+  "Leest de backofffactor bij duplicaten uit (alleen ZephCore).",
+  "Lit le multiplicateur de backoff par doublon (ZephCore uniquement)."
+ ],
+ "Setzt den Backoff-Faktor bei Duplikaten (0 = aus, nur ZephCore).": [
+  "Sets the per-duplicate backoff multiplier (0 = off, ZephCore only).",
+  "Stelt de backofffactor bij duplicaten in (0 = uit, alleen ZephCore).",
+  "Définit le multiplicateur de backoff (0 = off, ZephCore uniquement)."
+ ],
+ "Zeigt zusätzliche Empfangs-SFs an (nur LR2021-Boards).": [
+  "Shows extra receive SFs (LR2021 boards only).",
+  "Toont extra ontvangst-SF's (alleen LR2021-borden).",
+  "Affiche les SF de réception supplémentaires (cartes LR2021)."
+ ],
+ "Setzt bis zu drei zusätzliche Empfangs-SFs (nur LR2021-Boards).": [
+  "Sets up to three extra receive SFs (LR2021 boards only).",
+  "Stelt tot drie extra ontvangst-SF's in (alleen LR2021-borden).",
+  "Définit jusqu'à trois SF de réception supplémentaires (LR2021)."
+ ],
+ "Zeigt den Status des Uhrzeit-Abgleichs über das Mesh an (nur ZephCore).": [
+  "Shows the mesh time sync status (ZephCore only).",
+  "Toont de status van tijdsynchronisatie via het mesh (alleen ZephCore).",
+  "Affiche l'état de la synchro horaire par le mesh (ZephCore uniquement)."
+ ],
+ "Korrigiert die Uhr anhand der Adverts anderer Nodes (nur ZephCore).": [
+  "Corrects the clock from other nodes' adverts (ZephCore only).",
+  "Corrigeert de klok via adverts van andere nodes (alleen ZephCore).",
+  "Corrige l'horloge via les adverts des autres nœuds (ZephCore uniquement)."
+ ],
+ "9. GPS, LEDs, Anzeige, Bridge & Uplink": [
+  "9. GPS, LEDs, display, bridge & uplink",
+  "9. GPS, leds, scherm, bridge & uplink",
+  "9. GPS, LED, écran, bridge & uplink"
+ ],
+ "Zeigt den GPS-Status (an/aus, Fix, Modus) an.": [
+  "Shows GPS status (on/off, fix, mode).",
+  "Toont de GPS-status (aan/uit, fix, modus).",
+  "Affiche l'état du GPS (on/off, fix, mode)."
+ ],
+ "Stellt die Uhr nach der GPS-Zeit.": [
+  "Sets the clock from GPS time.",
+  "Zet de klok op de GPS-tijd.",
+  "Règle l'horloge sur l'heure GPS."
+ ],
+ "Zeigt GPS-Diagnosedaten an.": [
+  "Shows GPS diagnostics.",
+  "Toont GPS-diagnose.",
+  "Affiche le diagnostic GPS."
+ ],
+ "Zeigt, ob die Position in Adverts mitgesendet wird.": [
+  "Shows whether the position is shared in adverts.",
+  "Toont of de positie in adverts meegestuurd wordt.",
+  "Indique si la position est partagée dans les adverts."
+ ],
+ "Sendet die gespeicherte Position (lat/lon) in Adverts mit.": [
+  "Shares the stored position (lat/lon) in adverts.",
+  "Stuurt de opgeslagen positie (lat/lon) mee in adverts.",
+  "Partage la position enregistrée (lat/lon) dans les adverts."
+ ],
+ "Zeigt den letzten GPS-Fix mit Satellitenzahl an (nur MeshCore).": [
+  "Shows the last GPS fix with satellite count (MeshCore only).",
+  "Toont de laatste GPS-fix met aantal satellieten (alleen MeshCore).",
+  "Affiche le dernier fix GPS et les satellites (MeshCore uniquement)."
+ ],
+ "Zeigt Statistiken zur Zeit bis zum ersten Fix an (nur MeshCore).": [
+  "Shows time-to-first-fix statistics (MeshCore only).",
+  "Toont statistieken tot de eerste fix (alleen MeshCore).",
+  "Affiche les statistiques du premier fix (MeshCore uniquement)."
+ ],
+ "Sucht einmalig einen GPS-Fix (nur MeshCore).": [
+  "Acquires one GPS fix on demand (MeshCore only).",
+  "Zoekt eenmalig een GPS-fix (alleen MeshCore).",
+  "Acquiert un fix GPS à la demande (MeshCore uniquement)."
+ ],
+ "Zeigt oder setzt das GPS-Messintervall (0 = dauerhaft, nur MeshCore).": [
+  "Shows or sets the GPS acquisition period (0 = continuous, MeshCore only).",
+  "Toont of stelt de GPS-meetperiode in (0 = continu, alleen MeshCore).",
+  "Affiche ou règle la période GPS (0 = continu, MeshCore uniquement)."
+ ],
+ "Zeigt oder setzt das Timeout für den ersten Fix (nur MeshCore).": [
+  "Shows or sets the first-fix timeout (MeshCore only).",
+  "Toont of stelt de timeout voor de eerste fix in (alleen MeshCore).",
+  "Affiche ou règle le délai du premier fix (MeshCore uniquement)."
+ ],
+ "Plausibilitätsprüfung für GPS-Position und -Zeit (nur MeshCore).": [
+  "Plausibility guard for GPS position and time (MeshCore only).",
+  "Plausibiliteitscontrole voor GPS-positie en -tijd (alleen MeshCore).",
+  "Contrôle de plausibilité de la position et de l'heure GPS (MeshCore)."
+ ],
+ "Zeigt oder setzt den Zaun-Radius um lat/lon (0 = aus, nur MeshCore).": [
+  "Shows or sets the fence radius around lat/lon (0 = off, MeshCore only).",
+  "Toont of stelt de straal rond lat/lon in (0 = uit, alleen MeshCore).",
+  "Affiche ou règle le rayon autour de lat/lon (0 = off, MeshCore)."
+ ],
+ "Zeigt die Referenzposition des GPS-Wächters an (nur MeshCore).": [
+  "Shows the GPS guard reference position (MeshCore only).",
+  "Toont de referentiepositie van de GPS-bewaking (alleen MeshCore).",
+  "Affiche la position de référence du contrôle GPS (MeshCore)."
+ ],
+ "Zeigt das Ergebnis der letzten GPS-Modul-Konfiguration an (nur ZephCore).": [
+  "Shows the last GPS module configuration result (ZephCore only).",
+  "Toont het resultaat van de laatste GPS-configuratie (alleen ZephCore).",
+  "Affiche le résultat de la dernière config GPS (ZephCore uniquement)."
+ ],
+ "Schaltet die GPS-Konfigurations-Diagnose ein (bis Neustart, nur ZephCore).": [
+  "Enables GPS configuration diagnostics (until reboot, ZephCore only).",
+  "Schakelt GPS-configuratiediagnose in (tot herstart, alleen ZephCore).",
+  "Active le diagnostic de config GPS (jusqu'au redémarrage, ZephCore)."
+ ],
+ "Liest die maximale GPS-Standby-Zeit in Sekunden aus (nur ZephCore).": [
+  "Reads the max GPS standby time in seconds (ZephCore only).",
+  "Leest de max. GPS-standbytijd in seconden uit (alleen ZephCore).",
+  "Lit la durée max de veille GPS en secondes (ZephCore uniquement)."
+ ],
+ "Setzt die maximale GPS-Standby-Zeit (0 = immer ausschalten, nur ZephCore).": [
+  "Sets the max GPS standby time (0 = always power off, ZephCore only).",
+  "Stelt de max. GPS-standbytijd in (0 = altijd uit, alleen ZephCore).",
+  "Règle la veille GPS max (0 = toujours éteindre, ZephCore uniquement)."
+ ],
+ "Liest das GPS-Abfrageintervall in Sekunden aus (nur ZephCore).": [
+  "Reads the GPS poll interval in seconds (ZephCore only).",
+  "Leest het GPS-pollinterval in seconden uit (alleen ZephCore).",
+  "Lit l'intervalle d'interrogation GPS en secondes (ZephCore)."
+ ],
+ "Setzt das GPS-Abfrageintervall (0 = immer an, nur ZephCore).": [
+  "Sets the GPS poll interval (0 = always on, ZephCore only).",
+  "Stelt het GPS-pollinterval in (0 = altijd aan, alleen ZephCore).",
+  "Règle l'intervalle GPS (0 = toujours actif, ZephCore uniquement)."
+ ],
+ "Zeigt, welche Position in Adverts gesendet wird (nur MeshCore).": [
+  "Shows which position is sent in adverts (MeshCore only).",
+  "Toont welke positie in adverts verstuurd wordt (alleen MeshCore).",
+  "Indique quelle position est envoyée dans les adverts (MeshCore)."
+ ],
+ "Legt fest, welche Position Adverts enthalten (nur MeshCore).": [
+  "Sets which position adverts carry (MeshCore only).",
+  "Bepaalt welke positie adverts bevatten (alleen MeshCore).",
+  "Définit la position incluse dans les adverts (MeshCore uniquement)."
+ ],
+ "Liest, worauf die Funk-LED reagiert (nur ZephCore).": [
+  "Reads what the radio LED shows (ZephCore only).",
+  "Leest waarop de radio-led reageert (alleen ZephCore).",
+  "Lit ce qu'indique la LED radio (ZephCore uniquement)."
+ ],
+ "Legt fest, worauf die Funk-LED reagiert (nur ZephCore).": [
+  "Sets what the radio LED shows (ZephCore only).",
+  "Bepaalt waarop de radio-led reageert (alleen ZephCore).",
+  "Définit ce qu'indique la LED radio (ZephCore uniquement)."
+ ],
+ "Liest den Modus der Heartbeat-LED aus (nur ZephCore).": [
+  "Reads the heartbeat LED mode (ZephCore only).",
+  "Leest de modus van de heartbeat-led uit (alleen ZephCore).",
+  "Lit le mode de la LED heartbeat (ZephCore uniquement)."
+ ],
+ "Setzt den Modus der Heartbeat-LED (nur ZephCore).": [
+  "Sets the heartbeat LED mode (ZephCore only).",
+  "Stelt de modus van de heartbeat-led in (alleen ZephCore).",
+  "Définit le mode de la LED heartbeat (ZephCore uniquement)."
+ ],
+ "Liest die LED-Helligkeit in % aus (nur ZephCore).": [
+  "Reads the LED brightness in % (ZephCore only).",
+  "Leest de led-helderheid in % uit (alleen ZephCore).",
+  "Lit la luminosité des LED en % (ZephCore uniquement)."
+ ],
+ "Setzt die LED-Helligkeit in % (nur ZephCore).": [
+  "Sets the LED brightness in % (ZephCore only).",
+  "Stelt de led-helderheid in % in (alleen ZephCore).",
+  "Définit la luminosité des LED en % (ZephCore uniquement)."
+ ],
+ "Zeigt an, ob das Display um 180° gedreht ist (nur ZephCore).": [
+  "Shows whether the display is rotated 180° (ZephCore only).",
+  "Toont of het scherm 180° gedraaid is (alleen ZephCore).",
+  "Indique si l'écran est tourné de 180° (ZephCore uniquement)."
+ ],
+ "Dreht das Display um 180° (nur ZephCore).": [
+  "Rotates the display by 180° (ZephCore only).",
+  "Draait het scherm 180° (alleen ZephCore).",
+  "Fait pivoter l'écran de 180° (ZephCore uniquement)."
+ ],
+ "Zeigt an, ob die Joystick-Achsen gedreht sind (nur ZephCore).": [
+  "Shows whether the joystick axes are flipped (ZephCore only).",
+  "Toont of de joystickassen gedraaid zijn (alleen ZephCore).",
+  "Indique si les axes du joystick sont inversés (ZephCore uniquement)."
+ ],
+ "Dreht die Joystick-Achsen passend zum Einbau (nur ZephCore).": [
+  "Flips the joystick axes to match the mount (ZephCore only).",
+  "Draait de joystickassen passend bij de montage (alleen ZephCore).",
+  "Inverse les axes du joystick selon le montage (ZephCore uniquement)."
+ ],
+ "Liest die Zeitzone der Uhranzeige in Stunden aus (nur ZephCore).": [
+  "Reads the clock display time zone in hours (ZephCore only).",
+  "Leest de tijdzone van de klokweergave in uren uit (alleen ZephCore).",
+  "Lit le fuseau de l'affichage de l'heure (ZephCore uniquement)."
+ ],
+ "Setzt die Zeitzone nur für die Uhranzeige (UTC bleibt, nur ZephCore).": [
+  "Sets the time zone for the clock display only (ZephCore only).",
+  "Stelt de tijdzone alleen voor de klokweergave in (alleen ZephCore).",
+  "Règle le fuseau pour l'affichage seulement (ZephCore uniquement)."
+ ],
+ "Liest die Bridge-Verzögerung in ms aus.": [
+  "Reads the bridge delay in ms.",
+  "Leest de bridgevertraging in ms uit.",
+  "Lit le délai du bridge en ms."
+ ],
+ "Setzt die Bridge-Verzögerung (0–10000 ms).": [
+  "Sets the bridge delay (0–10000 ms).",
+  "Stelt de bridgevertraging in (0–10000 ms).",
+  "Définit le délai du bridge (0–10000 ms)."
+ ],
+ "Liest, ob empfangene oder gesendete Pakete gebridged werden.": [
+  "Reads whether received or sent packets are bridged.",
+  "Leest of ontvangen of verzonden pakketten gebridged worden.",
+  "Indique si les paquets reçus ou émis sont relayés."
+ ],
+ "Wählt empfangene (rx) oder gesendete (tx) Pakete für die Bridge.": [
+  "Selects received (rx) or sent (tx) packets for the bridge.",
+  "Kiest ontvangen (rx) of verzonden (tx) pakketten voor de bridge.",
+  "Choisit les paquets reçus (rx) ou émis (tx) pour le bridge."
+ ],
+ "Liest das Bridge-Geheimnis (ESP-NOW) aus.": [
+  "Reads the bridge secret (ESP-NOW).",
+  "Leest het bridgegeheim (ESP-NOW) uit.",
+  "Lit le secret du bridge (ESP-NOW)."
+ ],
+ "Setzt das Bridge-Geheimnis (ESP-NOW).": [
+  "Sets the bridge secret (ESP-NOW).",
+  "Stelt het bridgegeheim (ESP-NOW) in.",
+  "Définit le secret du bridge (ESP-NOW)."
+ ],
+ "Zeigt den Uplink-Status (WiFi, MQTT) an (nur ZephCore ESP32).": [
+  "Shows uplink status (WiFi, MQTT) (ZephCore ESP32 only).",
+  "Toont de uplinkstatus (wifi, MQTT) (alleen ZephCore ESP32).",
+  "Affiche l'état de l'uplink (WiFi, MQTT) (ZephCore ESP32)."
+ ],
+ "Zeigt an, ob der Uplink aktiviert ist (nur ZephCore ESP32).": [
+  "Shows whether the uplink is enabled (ZephCore ESP32 only).",
+  "Toont of de uplink ingeschakeld is (alleen ZephCore ESP32).",
+  "Indique si l'uplink est activé (ZephCore ESP32)."
+ ],
+ "Schaltet den MQTT-Uplink ein oder aus (Neustart nötig).": [
+  "Turns the MQTT uplink on or off (reboot required).",
+  "Schakelt de MQTT-uplink in of uit (herstart nodig).",
+  "Active ou coupe l'uplink MQTT (redémarrage requis)."
+ ],
+ "Liest die WLAN-SSID des Uplinks aus.": [
+  "Reads the uplink WiFi SSID.",
+  "Leest de wifi-SSID van de uplink uit.",
+  "Lit le SSID WiFi de l'uplink."
+ ],
+ "Setzt die WLAN-SSID des Uplinks (Neustart nötig).": [
+  "Sets the uplink WiFi SSID (reboot required).",
+  "Stelt de wifi-SSID van de uplink in (herstart nodig).",
+  "Définit le SSID WiFi de l'uplink (redémarrage requis)."
+ ],
+ "Setzt das WLAN-Passwort des Uplinks (Neustart nötig).": [
+  "Sets the uplink WiFi password (reboot required).",
+  "Stelt het wifi-wachtwoord van de uplink in (herstart nodig).",
+  "Définit le mot de passe WiFi de l'uplink (redémarrage requis)."
+ ],
+ "Liest den MQTT-Broker des Uplinks aus.": [
+  "Reads the uplink MQTT broker host.",
+  "Leest de MQTT-broker van de uplink uit.",
+  "Lit l'hôte du broker MQTT de l'uplink."
+ ],
+ "Setzt den MQTT-Broker des Uplinks (Neustart nötig).": [
+  "Sets the uplink MQTT broker host (reboot required).",
+  "Stelt de MQTT-broker van de uplink in (herstart nodig).",
+  "Définit l'hôte du broker MQTT (redémarrage requis)."
+ ],
+ "Liest den MQTT-Port des Uplinks aus.": [
+  "Reads the uplink MQTT port.",
+  "Leest de MQTT-poort van de uplink uit.",
+  "Lit le port MQTT de l'uplink."
+ ],
+ "Setzt den MQTT-Port des Uplinks (Neustart nötig).": [
+  "Sets the uplink MQTT port (reboot required).",
+  "Stelt de MQTT-poort van de uplink in (herstart nodig).",
+  "Définit le port MQTT de l'uplink (redémarrage requis)."
+ ],
+ "Zeigt an, ob der Uplink MQTT über TLS nutzt.": [
+  "Shows whether the uplink uses MQTT over TLS.",
+  "Toont of de uplink MQTT via TLS gebruikt.",
+  "Indique si l'uplink utilise MQTT via TLS."
+ ],
+ "Schaltet TLS für den MQTT-Uplink ein oder aus (Neustart nötig).": [
+  "Turns TLS for the MQTT uplink on or off (reboot required).",
+  "Schakelt TLS voor de MQTT-uplink in of uit (herstart nodig).",
+  "Active ou coupe TLS pour l'uplink MQTT (redémarrage requis)."
+ ],
+ "Liest den MQTT-Benutzernamen des Uplinks aus.": [
+  "Reads the uplink MQTT username.",
+  "Leest de MQTT-gebruikersnaam van de uplink uit.",
+  "Lit le nom d'utilisateur MQTT de l'uplink."
+ ],
+ "Setzt den MQTT-Benutzernamen des Uplinks (Neustart nötig).": [
+  "Sets the uplink MQTT username (reboot required).",
+  "Stelt de MQTT-gebruikersnaam van de uplink in (herstart nodig).",
+  "Définit l'utilisateur MQTT de l'uplink (redémarrage requis)."
+ ],
+ "Setzt das MQTT-Passwort des Uplinks (Neustart nötig).": [
+  "Sets the uplink MQTT password (reboot required).",
+  "Stelt het MQTT-wachtwoord van de uplink in (herstart nodig).",
+  "Définit le mot de passe MQTT de l'uplink (redémarrage requis)."
+ ],
+ "Liest den Standort-Code (IATA) für das MQTT-Topic aus.": [
+  "Reads the site code (IATA) used in the MQTT topic.",
+  "Leest de locatiecode (IATA) voor het MQTT-topic uit.",
+  "Lit le code de site (IATA) du topic MQTT."
+ ],
+ "Setzt den Standort-Code (IATA) für das MQTT-Topic (Neustart nötig).": [
+  "Sets the site code (IATA) for the MQTT topic (reboot required).",
+  "Stelt de locatiecode (IATA) voor het MQTT-topic in (herstart nodig).",
+  "Définit le code de site (IATA) du topic MQTT (redémarrage requis)."
+ ],
+ "10. Wartung & OTA-Update": [
+  "10. Maintenance & OTA update",
+  "10. Onderhoud & OTA-update",
+  "10. Maintenance & mise à jour OTA"
+ ],
+ "Bootloader: {0}": [
+  "Bootloader: {0}",
+  "Bootloader: {0}",
+  "Bootloader : {0}"
+ ],
+ "⚠ Für BLE-OTA-Updates ist mindestens Bootloader {0} erforderlich. Ältere Bootloader können beim OTA-Update in eine Bootschleife geraten – Bootloader zuerst per USB aktualisieren.": [
+  "⚠ BLE OTA updates require bootloader {0} or newer. Older bootloaders can end up in a boot loop during an OTA update – update the bootloader via USB first.",
+  "⚠ Voor BLE-OTA-updates is minimaal bootloader {0} vereist. Oudere bootloaders kunnen bij een OTA-update in een bootlus terechtkomen – werk de bootloader eerst bij via USB.",
+  "⚠ Les mises à jour OTA BLE nécessitent au moins le bootloader {0}. Les bootloaders plus anciens peuvent entrer dans une boucle de démarrage pendant la mise à jour OTA – mettez d'abord le bootloader à jour via USB."
+ ],
+ "Versorgung abfragen": [
+  "Query power supply",
+  "Voeding opvragen",
+  "Interroger l'alimentation"
  ]
 }

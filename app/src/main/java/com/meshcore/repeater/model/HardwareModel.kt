@@ -77,8 +77,55 @@ data class BatterySolarTelemetry(
 
 data class NodeHardwareInfo(
     val firmwareVersion: String = "—",
+    /** UF2-Bootloader-Version aus `get bootloader.ver` (nur nRF52), leer = nicht geliefert. */
+    val bootloaderVersion: String = "",
     val boardModel: String = "—",
     val radioChip: String = "—",
     val uptimeSeconds: Long = 0L,
     val freeHeapBytes: Int = 0
 )
+
+/**
+ * Prüfung der UF2-Bootloader-Version (`get bootloader.ver`, nRF52) auf BLE-OTA-Tauglichkeit (v1.18).
+ *
+ * Firmware: MeshCore `NRF52Board::getBootloaderVersion` / ZephCore `ZephyrBoard::getBootloaderVersion` lesen den
+ * Text hinter "UF2 Bootloader " aus info.txt im Flash, z. B. "0.9.2-OTAFIX2.2-BP1.3". Ohne nRF52 bzw. ohne
+ * Fundstelle antwortet die Firmware "unknown" bzw. "Error: unsupported" – dann gibt es keine Bewertung.
+ *
+ * Mindestens erforderlich: 0.9.2-OTAFIX2.2-BP1.3. Ältere Bootloader (ohne OTAFIX oder OTAFIX < 2.2) können beim
+ * BLE-OTA-Update in einer Bootschleife hängen bleiben.
+ */
+object BootloaderCheck {
+    const val MIN_OTA_BOOTLOADER = "0.9.2-OTAFIX2.2-BP1.3"
+
+    private val BASE = Regex("""^v?(\d+)\.(\d+)\.(\d+)""", RegexOption.IGNORE_CASE)
+    private val OTAFIX = Regex("""OTAFIX(\d+)\.(\d+)""", RegexOption.IGNORE_CASE)
+    private val BP = Regex("""BP(\d+)\.(\d+)""", RegexOption.IGNORE_CASE)
+
+    /** Nur echte Versionsangaben (beginnen mit einer Zahl); "unknown"/"unsupported"/Fehler → null. */
+    fun normalize(reply: String?): String? {
+        val v = reply?.trim()?.removePrefix(">")?.trim().orEmpty()
+        return v.takeIf { BASE.containsMatchIn(it) }
+    }
+
+    private fun ints(m: MatchResult) = m.groupValues.drop(1).map { it.toInt() }
+    private fun cmp(a: List<Int>, b: List<Int>): Int {
+        for (i in 0 until minOf(a.size, b.size)) if (a[i] != b[i]) return a[i].compareTo(b[i])
+        return a.size.compareTo(b.size)
+    }
+
+    /**
+     * true = Bootloader ist älter als [MIN_OTA_BOOTLOADER] → OTA-Bootloop-Warnung anzeigen.
+     * false = ausreichend oder keine bewertbare Versionsangabe (dann keine Warnung).
+     */
+    fun needsOtaWarning(version: String?): Boolean {
+        val v = normalize(version) ?: return false
+        val base = BASE.find(v)?.let(::ints) ?: return false
+        if (cmp(base, listOf(0, 9, 2)) < 0) return true
+        val otafix = OTAFIX.find(v)?.let(::ints) ?: return true   // nRF52 ohne OTAFIX-Patch
+        val c = cmp(otafix, listOf(2, 2))
+        if (c != 0) return c < 0
+        val bp = BP.find(v)?.let(::ints) ?: return false          // OTAFIX2.2 ohne BP-Angabe gilt als ausreichend
+        return cmp(bp, listOf(1, 3)) < 0
+    }
+}
