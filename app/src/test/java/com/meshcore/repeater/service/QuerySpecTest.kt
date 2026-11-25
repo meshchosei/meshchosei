@@ -124,4 +124,14 @@ class QuerySpecTest {
         assertTrue(QuerySpec.regionActionValidator("region home") == null)
         assertTrue(QuerySpec.regionActionValidator("region default") == null)
     }
+
+    /** ZephCore "> 10.0%" und MeshCore CommonRadioPrefs "> 10.0% (auto)" / "(manual)". */
+    @Test fun dutyCycleAcceptsBothFirmwareFormats() {
+        assertTrue(ok("get dutycycle", "10.0%"))
+        assertTrue(ok("get dutycycle", "10.0% (auto)"))
+        assertTrue(ok("get dutycycle", "100.0% (manual)"))
+        assertFalse(ok("get dutycycle", "OK - auto, 10.0%"))
+        assertFalse(ok("get dutycycle", "22"))
+        org.junit.Assert.assertEquals("10.0", QuerySpec.parseDutyCyclePercent("10.0% (auto)"))
+    }
 }

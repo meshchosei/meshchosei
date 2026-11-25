@@ -60,12 +60,18 @@ object QuerySpec {
         }
     }
 
+    private val DUTY_CYCLE = Regex("""^(\d{1,3}(?:\.\d+)?)\s*%(?:\s*\((?:auto|manual)\))?$""", RegexOption.IGNORE_CASE)
+
+    /** Prozentwert aus "10.0%" (ZephCore) oder "10.0% (auto)" (MeshCore), sonst null. */
+    fun parseDutyCyclePercent(v: String): String? = DUTY_CYCLE.matchEntire(v.trim())?.groupValues?.get(1)
+
     fun validatorFor(cmd: String): (String) -> Boolean = regionActionValidator(cmd) ?: when (cmd.trim().lowercase()) {
         "board" -> { v -> v.length in 2..64 && v.any { it.isLetter() } && !isForeignFormat(v) && !v.startsWith("filter", true) }
         "ver" -> { v -> VERSION_ANY.containsMatchIn(v) && v.any { it.isLetter() } && !RADIO.matches(v) && !COORD.matches(v) }
         "get radio" -> { v -> RADIO.matches(v) }
         "get tx" -> { v -> INT.matches(v) && (v.toIntOrNull() ?: 99) in -9..37 }
-        "get dutycycle" -> { v -> v.endsWith("%") && DECIMAL.matches(v.removeSuffix("%").trim()) }
+        // ZephCore: "> 10.0%"; MeshCore (CommonRadioPrefs): "> 10.0% (auto)" bzw. "(manual)"
+        "get dutycycle" -> { v -> parseDutyCyclePercent(v) != null }
         // MeshCore/ZephCore CommonCLI: "> " + toHex(pub_key, PUB_KEY_SIZE = 32) -> genau 64 Hex-Zeichen
         "get public.key" -> { v -> PUBLIC_KEY.matches(v) }
         "get name" -> { v -> v.length in 1..32 && !isForeignFormat(v) && !PUBLIC_KEY.matches(v) }

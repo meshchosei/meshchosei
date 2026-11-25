@@ -277,6 +277,8 @@ RefreshButton(
 - Jede Abfrage ist eine `QuerySpec` mit Befehl, **Validator** und lokalisiertem Statustext.
   - Antworten, die der Validator nicht akzeptiert, sind Fremdzeilen und werden ignoriert.
   - `null` bedeutet Fehler oder „unknown command“.
+- **Antwort-Tags über LoRa (seit v1.12):** Jeder Remote-Befehl wird als `XX|befehl` gesendet (`CliReplyTag`, zwei Zeichen `0-9a-z`, laufend). MeshCore (`simple_repeater/MyMesh.cpp`) und ZephCore (`RepeaterMesh::handleCommand`) spiegeln das Präfix an den Antwortanfang. Nur eine Antwort mit genau dem Tag des laufenden Befehls zählt. Antworten mit fremdem Tag (verspätet nach Timeout) oder ohne Tag werden verworfen und im System-Log vermerkt. So landet z. B. eine späte `get name`-Antwort nie in `owner.info`. Der Inhalts-Validator gilt zusätzlich. USB-Direkt und lokale Companion-CLI bleiben ohne Tag.
+- Bei Timeout hebt `runQuery` die Zuordnung (`activeQueryCommand`, Validator, Waiter, Tag, Sammelpuffer) **sofort** auf. Der Sammelpuffer wird vor jedem Befehl geleert.
 - `activeQueryCommand` legt fest, welcher Parser zuständig ist. Beispiel: Filter-Status wird nur aus Antworten auf `filter…`-Befehle übernommen, Listen nur aus `… list`.
 - Die Timeouts hängen vom Transport ab: lokales USB/Companion ist kurz, Remote über LoRa länger.
   - Den Login-Timeout liefert das Gerät (`est_timeout` aus `RESP_CODE_SENT`) plus 4 s Puffer, begrenzt auf 8–60 s.

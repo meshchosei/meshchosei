@@ -11,6 +11,7 @@ import com.meshcore.repeater.service.ChannelHash
 import com.meshcore.repeater.service.FilterListParser
 import com.meshcore.repeater.service.InputValidator
 import com.meshcore.repeater.service.MeshCoreBackup
+import com.meshcore.repeater.service.CliReplyTag
 import com.meshcore.repeater.service.QuerySpec
 import com.meshcore.repeater.service.RepeaterProtocol
 import com.meshcore.repeater.service.SerialConnectionManager
@@ -140,6 +141,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     private var readJob: Job? = null                       // aktueller Auslese-Job (Basis-Setup, Capability, Filter, Telemetrie)
     private class QueryReply(val value: String?, val error: String? = null)   // value == null -> Fehler/"unknown"-Antwort (Text in error)
     @Volatile private var activeQueryCommand: String? = null
+    /** LoRa-Remote: Tag ("XX|", [CliReplyTag]) des laufenden Befehls – nur Antworten mit genau diesem Tag zählen. */
+    @Volatile private var activeQueryTag: String? = null
+    private var cliTagSeq = 0
     private var activeQueryValidator: ((String) -> Boolean)? = null
     private var activeQueryWaiter: CompletableDeferred<QueryReply>? = null
     private val _activeReadStatusText = MutableStateFlow<String?>(null)
@@ -462,7 +466,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     private fun handleRemoteMessage(prefix: ByteArray, txt: String, meta: String) {
         val target = _remoteAdminSession.value.targetRepeater
         val fromTarget = target == null || target.pubKey.size < 6 || target.pubKey.copyOfRange(0, 6).contentEquals(prefix)
-        logTerminal("< [OTA ${RepeaterProtocol.bytesToHex(prefix, 4)}$meta] $txt", false, systemOnly = (lastCommandWasAuto || System.currentTimeMillis() < activeAutoUntilMs))
+        val (tag, body) = CliReplyTag.split(txt)
+        logTerminal("< [OTA ${RepeaterProtocol.bytesToHex(prefix, 4)}${tag?.let { " #$it" } ?: ""}$meta] $body", false, systemOnly = (lastCommandWasAuto || System.currentTimeMillis() < activeAutoUntilMs))
         if (fromTarget) { onRemoteTrafficReceived(); onRemoteReply(txt) }
     }
     private fun sendCompanionBytes(frame: ByteArray) {
@@ -560,7 +565,12 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         if (cmd.isBlank() || !isLinkUp()) return null
         val c = cmd.trim()
         val key = c.lowercase()
+        // Sauberer Start: kein Rest eines früheren Befehls im Sammelpuffer
+        capture?.clear()
+        // LoRa-Remote: eindeutiges Tag, das die Firmware an den Antwortanfang spiegelt (verspätete Antworten erkennbar)
+        val tag = if (_remoteAdminSession.value.targetRepeater != null) CliReplyTag.tagFor(cliTagSeq++).takeIf { CliReplyTag.wrap(it, c) != null } else null
         val waiter = CompletableDeferred<QueryReply>()
+        activeQueryTag = tag
         activeQueryValidator = QuerySpec.validatorFor(key)
         activeQueryWaiter = waiter
         activeQueryCommand = key
@@ -568,13 +578,18 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         lastFilterQuery = if (key.startsWith("filter")) key else ""
         activeCapture = capture
         try {
-            sendCommandInternal(c, isAuto)
+            sendCommandInternal(c, isAuto, tag)
             val reply = withTimeoutOrNull(timeoutMs) { waiter.await() }
-            if (reply != null && QuerySpec.isMultiLine(key)) delay(trailingMs ?: if (_remoteAdminSession.value.targetRepeater != null) 1200L else 350L) // Folgezeilen einsammeln
-            reply?.value?.let { applyQueryResult(key, it) }
+            if (reply == null) {
+                // Timeout: Zuordnung SOFORT aufheben – eine später eintreffende Antwort gehört zu keinem Befehl mehr
+                activeQueryCommand = null; activeQueryValidator = null; activeQueryWaiter = null; activeCapture = null; activeQueryTag = null
+                return null
+            }
+            if (QuerySpec.isMultiLine(key)) delay(trailingMs ?: if (_remoteAdminSession.value.targetRepeater != null) 1200L else 350L) // Folgezeilen einsammeln
+            reply.value?.let { applyQueryResult(key, it) }
             return reply
         } finally {
-            activeQueryCommand = null; activeQueryValidator = null; activeQueryWaiter = null; activeCapture = null
+            activeQueryCommand = null; activeQueryValidator = null; activeQueryWaiter = null; activeCapture = null; activeQueryTag = null
         }
     }
 
@@ -776,7 +791,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 }
             }
             "get tx" -> { _radioConfig.value = _radioConfig.value.copy(txPowerDbm = v.toDouble()); _basicSetup.value = s.copy(txPowerDbm = v) }
-            "get dutycycle" -> _basicSetup.value = s.copy(dutyCyclePercent = v.removeSuffix("%").trim().let { if (it.endsWith(".0")) it.dropLast(2) else it })
+            "get dutycycle" -> QuerySpec.parseDutyCyclePercent(v)?.let { p -> _basicSetup.value = s.copy(dutyCyclePercent = if (p.endsWith(".0")) p.dropLast(2) else p) }
             "get name" -> _basicSetup.value = s.copy(nodeName = v)
             "get owner.info" -> _basicSetup.value = s.copy(ownerInfo = v)
             "get lat" -> _basicSetup.value = s.copy(latitude = v)
@@ -801,7 +816,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             }
         }
     }
-    private fun sendCommandInternal(cmd: String, isAuto: Boolean) {
+    private fun sendCommandInternal(cmd: String, isAuto: Boolean, tag: String? = null) {
         if (cmd.isBlank()) return
         lastCommandWasAuto = isAuto
         if (isAuto) autoReplyUntilMs = System.currentTimeMillis() + 6500L else autoReplyUntilMs = 0L
@@ -811,7 +826,12 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         if (_selectedConnectionType.value == ConnectionType.USB_SERIAL && (_deviceCapabilities.value.isCompanion != true)) { logTerminal("> $cmd", true); serialManager.send(cmd) }
         else {
             val t = _remoteAdminSession.value.targetRepeater
-            if (t != null) { lastRemoteTxMs = System.currentTimeMillis(); logTerminal("> [OTA -> ${t.name}] $cmd", true); sendCompanionBytes(RepeaterProtocol.buildRemoteCliFrame(t.pubKey.copyOfRange(0, minOf(6, t.pubKey.size)), cmd)) }
+            if (t != null) {
+                lastRemoteTxMs = System.currentTimeMillis()
+                val wire = tag?.let { CliReplyTag.wrap(it, cmd) } ?: cmd
+                logTerminal("> [OTA -> ${t.name}${tag?.let { " #$it" } ?: ""}] $cmd", true)
+                sendCompanionBytes(RepeaterProtocol.buildRemoteCliFrame(t.pubKey.copyOfRange(0, minOf(6, t.pubKey.size)), wire))
+            }
             else { logTerminal("> [Companion] $cmd", true); sendCompanionBytes(RepeaterProtocol.buildLocalCliFrame(cmd)) }
         }
     }
@@ -1197,7 +1217,22 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             RepeaterProtocol.PACKET_ERROR -> { val code = if (data.size > 1) data[1].toInt() and 0xFF else -1; logTerminal(tr("< [Fehler 0x01] Code={0}", code), false, systemOnly = true); if (_remoteAdminSession.value.isLoggingIn) { loginTimeoutJob?.cancel(); loginAttemptPending = false; _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggingIn = false, sessionStatus = tr("Fehler ({0})", code)) } }
         }
     }
-    private fun onRemoteReply(txt: String) { parseIncomingLine(txt) } // Login wird ausschließlich über PUSH_LOGIN_SUCCESS bestätigt
+    /**
+     * Remote-CLI-Antwort (LoRa). Login wird ausschließlich über PUSH_LOGIN_SUCCESS bestätigt.
+     * Läuft ein getaggter Befehl, zählt nur eine Antwort mit genau diesem Tag; Antworten mit fremdem Tag
+     * (verspätet, z. B. "get name" nach Timeout) oder ohne Tag werden verworfen und landen nie im Folgebefehl.
+     */
+    private fun onRemoteReply(txt: String) {
+        val expected = activeQueryTag
+        val (tag, body) = CliReplyTag.split(txt)
+        when (CliReplyTag.classify(txt, expected)) {
+            CliReplyTag.Match.CURRENT -> parseIncomingLine(body)
+            CliReplyTag.Match.STALE -> logTerminal(tr("[verspätet verworfen: #{0} gehört nicht zu \"{1}\"] {2}", tag, activeQueryCommand ?: "-", body.trim()), false, systemOnly = true)
+            CliReplyTag.Match.UNTAGGED ->
+                if (expected == null) parseIncomingLine(txt)
+                else logTerminal(tr("[ignoriert: ohne Tag #{0} für \"{1}\"] {2}", expected, activeQueryCommand ?: "-", txt.trim()), false, systemOnly = true)
+        }
+    }
     private fun parseIncomingLine(line: String) {
         activeCapture?.let { cap ->
             for (sub in line.split('\n')) {

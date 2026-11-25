@@ -1679,21 +1679,6 @@
   "Regelt de lusdetectie tegen dubbele pakketten.",
   "Contrôle la détection de boucles contre les paquets dupliqués."
  ],
- "Zeigt die aktuell aktive Flood-Region (Scope) an.": [
-  "Shows the currently active flood region (scope).",
-  "Toont de momenteel actieve flood-regio (scope).",
-  "Affiche la région flood actuellement active (scope)."
- ],
- "Listet alle konfigurierten Flood-Regionen auf.": [
-  "Lists all configured flood regions.",
-  "Toont alle geconfigureerde flood-regio's.",
-  "Liste toutes les régions flood configurées."
- ],
- "Wechselt die aktive Flood-Region für das Routing.": [
-  "Switches the active flood region for routing.",
-  "Wisselt de actieve flood-regio voor de routing.",
-  "Change la région flood active pour le routage."
- ],
  "Listet direkt empfangene Nachbar-Repeater mit SNR/RSSI auf.": [
   "Lists directly received neighbour repeaters with SNR/RSSI.",
   "Toont direct ontvangen buurrepeaters met SNR/RSSI.",
@@ -1708,11 +1693,6 @@
   "Reads the current operating mode of the status LEDs.",
   "Leest de huidige modus van de status-LEDs.",
   "Lit le mode de fonctionnement actuel des LED d'état."
- ],
- "Steuert das Verhalten der Status-LEDs.": [
-  "Controls the behaviour of the status LEDs.",
-  "Regelt het gedrag van de status-LEDs.",
-  "Contrôle le comportement des LED d'état."
  ],
  "Zeigt den aktuellen GPS-Fix-Status und Koordinaten an.": [
   "Shows the current GPS fix status and coordinates.",
@@ -2773,5 +2753,155 @@
   "Show disclaimer again",
   "Disclaimer opnieuw tonen",
   "Afficher à nouveau l'avertissement"
+ ],
+ "Zeigt den maximalen Sende-Duty-Cycle in Prozent an.": [
+  "Shows the maximum transmit duty cycle in percent.",
+  "Toont de maximale zend-duty-cycle in procent.",
+  "Affiche le rapport cyclique d'émission maximal en pourcentage."
+ ],
+ "Liest die Besitzer-Info (Kontakt/Notiz) des Repeaters aus.": [
+  "Reads the repeater's owner info (contact/note).",
+  "Leest de eigenaarsinfo (contact/notitie) van de repeater.",
+  "Lit les infos propriétaire (contact/note) du répéteur."
+ ],
+ "Setzt die Besitzer-Info; „|“ wird zum Zeilenumbruch.": [
+  "Sets the owner info; “|” becomes a line break.",
+  "Stelt de eigenaarsinfo in; „|” wordt een regeleinde.",
+  "Définit les infos propriétaire ; « | » devient un saut de ligne."
+ ],
+ "Zeigt den öffentlichen Schlüssel (64 Hex-Zeichen) an.": [
+  "Shows the public key (64 hex characters).",
+  "Toont de publieke sleutel (64 hex-tekens).",
+  "Affiche la clé publique (64 caractères hex)."
+ ],
+ "Liest den privaten Schlüssel aus (nur über USB-Seriell).": [
+  "Reads the private key (USB serial only).",
+  "Leest de privésleutel uit (alleen via USB-serieel).",
+  "Lit la clé privée (uniquement via USB série)."
+ ],
+ "Liest die Interferenz-Schwelle (Kanal belegt) aus.": [
+  "Reads the interference threshold (channel busy).",
+  "Leest de interferentiedrempel (kanaal bezet) uit.",
+  "Lit le seuil d'interférence (canal occupé)."
+ ],
+ "Setzt die Interferenz-Schwelle (0 = aus).": [
+  "Sets the interference threshold (0 = off).",
+  "Stelt de interferentiedrempel in (0 = uit).",
+  "Définit le seuil d'interférence (0 = désactivé)."
+ ],
+ "Liest das AGC-Reset-Intervall des Funkchips aus.": [
+  "Reads the radio's AGC reset interval.",
+  "Leest het AGC-resetinterval van de radio uit.",
+  "Lit l'intervalle de réinitialisation AGC de la radio."
+ ],
+ "Setzt das AGC-Reset-Intervall (0 = aus).": [
+  "Sets the AGC reset interval (0 = off).",
+  "Stelt het AGC-resetinterval in (0 = uit).",
+  "Définit l'intervalle de réinitialisation AGC (0 = désactivé)."
+ ],
+ "Zeigt an, ob die erhöhte RX-Verstärkung aktiv ist.": [
+  "Shows whether boosted RX gain is active.",
+  "Toont of de verhoogde RX-versterking actief is.",
+  "Indique si le gain RX renforcé est actif."
+ ],
+ "Schaltet die erhöhte RX-Verstärkung ein oder aus.": [
+  "Turns boosted RX gain on or off.",
+  "Zet de verhoogde RX-versterking aan of uit.",
+  "Active ou désactive le gain RX renforcé."
+ ],
+ "Zeigt an, ob Kanalprüfung vor dem Senden (CAD) aktiv ist.": [
+  "Shows whether channel activity detection (CAD) is active.",
+  "Toont of kanaalcontrole vóór het zenden (CAD) actief is.",
+  "Indique si la détection d'activité du canal (CAD) est active."
+ ],
+ "Schaltet CAD ein oder aus (ZephCore: immer an).": [
+  "Turns CAD on or off (ZephCore: always on).",
+  "Zet CAD aan of uit (ZephCore: altijd aan).",
+  "Active ou désactive le CAD (ZephCore : toujours actif)."
+ ],
+ "Liest das Hop-Limit für Flood-Pakete ohne Region aus.": [
+  "Reads the hop limit for flood packets without region.",
+  "Leest de hoplimiet voor floodpakketten zonder regio.",
+  "Lit la limite de sauts pour les paquets flood sans région."
+ ],
+ "Setzt das Hop-Limit für Flood-Pakete ohne Region.": [
+  "Sets the hop limit for flood packets without region.",
+  "Stelt de hoplimiet voor floodpakketten zonder regio in.",
+  "Définit la limite de sauts pour les paquets flood sans région."
+ ],
+ "Liest das Hop-Limit für weitergeleitete Adverts aus.": [
+  "Reads the hop limit for forwarded adverts.",
+  "Leest de hoplimiet voor doorgestuurde adverts.",
+  "Lit la limite de sauts pour les adverts relayés."
+ ],
+ "Setzt das Hop-Limit für weitergeleitete Adverts.": [
+  "Sets the hop limit for forwarded adverts.",
+  "Stelt de hoplimiet voor doorgestuurde adverts in.",
+  "Définit la limite de sauts pour les adverts relayés."
+ ],
+ "Zeigt den Regionen-Baum mit Flood-Freigabe (F) an.": [
+  "Shows the region tree with flood permission (F).",
+  "Toont de regioboom met floodtoestemming (F).",
+  "Affiche l'arbre des régions avec autorisation flood (F)."
+ ],
+ "Zeigt oder setzt die Home-Region des Repeaters.": [
+  "Shows or sets the repeater's home region.",
+  "Toont of stelt de thuisregio van de repeater in.",
+  "Affiche ou définit la région d'origine du répéteur."
+ ],
+ "Zeigt oder setzt den Default-Scope (speichert sofort).": [
+  "Shows or sets the default scope (saves immediately).",
+  "Toont of stelt de standaardscope in (slaat direct op).",
+  "Affiche ou définit la portée par défaut (enregistre aussitôt)."
+ ],
+ "Legt eine Region an (Flood standardmäßig erlaubt).": [
+  "Creates a region (flood allowed by default).",
+  "Maakt een regio aan (flood standaard toegestaan).",
+  "Crée une région (flood autorisé par défaut)."
+ ],
+ "Löscht eine Region ohne Unterregionen.": [
+  "Deletes a region without sub-regions.",
+  "Verwijdert een regio zonder subregio's.",
+  "Supprime une région sans sous-régions."
+ ],
+ "Erlaubt Flood-Weiterleitung für eine Region.": [
+  "Allows flood forwarding for a region.",
+  "Staat floodverkeer toe voor een regio.",
+  "Autorise le relais flood pour une région."
+ ],
+ "Sperrt Flood-Weiterleitung für eine Region.": [
+  "Blocks flood forwarding for a region.",
+  "Blokkeert floodverkeer voor een regio.",
+  "Bloque le relais flood pour une région."
+ ],
+ "Zeigt Parent und Flood-Status einer Region an.": [
+  "Shows parent and flood status of a region.",
+  "Toont ouder en floodstatus van een regio.",
+  "Affiche le parent et le statut flood d'une région."
+ ],
+ "Listet Regionen mit erlaubtem bzw. gesperrtem Flood.": [
+  "Lists regions with allowed or blocked flood.",
+  "Toont regio's met toegestane of geblokkeerde flood.",
+  "Liste les régions avec flood autorisé ou bloqué."
+ ],
+ "Speichert die Regionen dauerhaft im Flash.": [
+  "Saves the regions permanently to flash.",
+  "Slaat de regio's permanent op in flash.",
+  "Enregistre les régions de façon permanente en flash."
+ ],
+ "Steuert die Status-LEDs (nur ZephCore).": [
+  "Controls the status LEDs (ZephCore only).",
+  "Regelt de status-LED's (alleen ZephCore).",
+  "Contrôle les LED d'état (ZephCore uniquement)."
+ ],
+ "[verspätet verworfen: #{0} gehört nicht zu \"{1}\"] {2}": [
+  "[late reply dropped: #{0} does not belong to \"{1}\"] {2}",
+  "[late antwoord verworpen: #{0} hoort niet bij \"{1}\"] {2}",
+  "[réponse tardive rejetée : #{0} n'appartient pas à \"{1}\"] {2}"
+ ],
+ "[ignoriert: ohne Tag #{0} für \"{1}\"] {2}": [
+  "[ignored: no tag #{0} for \"{1}\"] {2}",
+  "[genegeerd: geen tag #{0} voor \"{1}\"] {2}",
+  "[ignoré : sans tag #{0} pour \"{1}\"] {2}"
  ]
 }
