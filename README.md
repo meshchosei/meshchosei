@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo.svg" width="140" alt="meshchōsei Logo"></p>
+
 # meshchōsei
 
 **meshchōsei** (調整, jap. „Abstimmung, Feineinstellung“) ist eine native Android-App zur Konfiguration und Wartung von **MeshCore**- und **ZephCore**-LoRa-Repeatern, direkt per **USB-OTG** oder drahtlos über einen **Companion-Node** (BLE/USB) mit **Remote-Admin über LoRa**.
