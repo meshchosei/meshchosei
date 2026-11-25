@@ -45,4 +45,14 @@ class DisclaimerTranslationTest {
     @Test fun noResourceStringsLeftInDialog() {
         assertFalse(dialog.contains("stringResource("))
     }
+
+    /** STYLE_GUIDE §4.3: Button-Beschriftungen höchstens 1–2 Wörter, in allen Sprachen. */
+    @Test fun dialogButtonLabelsAreShort() {
+        for (k in listOf("Abbrechen", "Akzeptieren", "Schließen")) {
+            assertTrue("Schlüssel fehlt im Dialog: $k", k in keys)
+            for (text in listOf(k) + translations(k).orEmpty()) assertTrue("Zu lang: $text", text.trim().split(Regex("\\s+")).size <= 2)
+        }
+        assertEquals(listOf("Accept", "Accepteren", "Accepter"), translations("Akzeptieren"))
+        assertFalse(json.contains("Verstanden & Akzeptieren"))
+    }
 }

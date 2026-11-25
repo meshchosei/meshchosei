@@ -157,7 +157,7 @@ fun DisclaimerDialog(
                 if (isInitialAcceptance) {
                     Spacer(modifier = Modifier.height(14.dp))
                     Text(
-                        text = tr("Mit Tippen auf „Verstanden & Akzeptieren“ bestätigst du, dass du alle obigen Bedingungen gelesen, verstanden und akzeptiert hast."),
+                        text = tr("Mit Tippen auf „Akzeptieren“ bestätigst du, dass du alle obigen Bedingungen gelesen, verstanden und akzeptiert hast."),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -176,6 +176,8 @@ fun DisclaimerDialog(
                 ) {
                     Text(
                         text = tr("Schließen"),
+                        maxLines = 1,
+                        softWrap = false,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         fontWeight = FontWeight.Bold,
@@ -192,6 +194,8 @@ fun DisclaimerDialog(
                 ) {
                     Text(
                         text = tr("Abbrechen"),
+                        maxLines = 1,
+                        softWrap = false,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -203,7 +207,9 @@ fun DisclaimerDialog(
                     shape = BauhausCornerShape
                 ) {
                     Text(
-                        text = tr("Verstanden & Akzeptieren"),
+                        text = tr("Akzeptieren"),
+                        maxLines = 1,
+                        softWrap = false,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         fontWeight = FontWeight.Bold,

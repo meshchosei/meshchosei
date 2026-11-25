@@ -2759,15 +2759,15 @@
   "Gebruik deze app op eigen risico. Controleer altijd of je repeaterconfiguratie voldoet aan de lokale radiowetgeving voordat je uitzendt.",
   "Utilisez cette application à vos propres risques. Vérifiez toujours que la configuration de votre répéteur est conforme à la législation radio locale avant d'émettre."
  ],
- "Mit Tippen auf „Verstanden & Akzeptieren“ bestätigst du, dass du alle obigen Bedingungen gelesen, verstanden und akzeptiert hast.": [
-  "By tapping “Understood & Accept” you confirm that you have read, understood and agree to all conditions above.",
-  "Door op „Begrepen & accepteren” te tikken bevestig je dat je alle bovenstaande voorwaarden hebt gelezen, begrepen en aanvaard.",
-  "En touchant « Compris & accepter », vous confirmez avoir lu, compris et accepté toutes les conditions ci-dessus."
+ "Mit Tippen auf „Akzeptieren“ bestätigst du, dass du alle obigen Bedingungen gelesen, verstanden und akzeptiert hast.": [
+  "By tapping “Accept” you confirm that you have read, understood and agree to all conditions above.",
+  "Door op „Accepteren” te tikken bevestig je dat je alle bovenstaande voorwaarden hebt gelezen, begrepen en aanvaard.",
+  "En touchant « Accepter », vous confirmez avoir lu, compris et accepté toutes les conditions ci-dessus."
  ],
- "Verstanden & Akzeptieren": [
-  "Understood & Accept",
-  "Begrepen & accepteren",
-  "Compris & accepter"
+ "Akzeptieren": [
+  "Accept",
+  "Accepteren",
+  "Accepter"
  ],
  "Haftungsausschluss erneut anzeigen": [
   "Show disclaimer again",

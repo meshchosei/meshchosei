@@ -1,6 +1,6 @@
 # ROADMAP – meshchōsei
 
-Stand: 2026-11-25 · aktuelle Version: 1.10
+Stand: 2026-11-25 · aktuelle Version: 1.11
 
 | Version | Status | Inhalt |
 |---|---|---|
@@ -15,6 +15,7 @@ Stand: 2026-11-25 · aktuelle Version: 1.10
 | **1.08** | ✅ veröffentlicht (Tag `v1.08`) | Regionen: „+“ ohne zweiten Spinner, Neue-Region-Abschlusszeile in der Liste, Speichern-Button in der Routing-Karte, Regionen-Befehle warten auf echte Bestätigung + Nachlauf vor dem Neueinlesen |
 | **1.09** | ✅ veröffentlicht (Tag `v1.09`) | Konsequent eckig: Exit-Dialog, Status-Overlay, „ON“-Badge im Seitenmenü und alle übrigen Kästchen auf `BauhausCornerShape`; einzige runde Ausnahme USB/BT-Verbindungs-Badge |
 | **1.10** | ✅ veröffentlicht (Tag `v1.10`) | Haftungsausschluss: komplett über `tr()` in DE/EN/NL/FR, nur noch „EU“ (ohne Deutschland/BNetzA), beim Ansehen aus „Über & Lizenz“ nur ein „Schließen“-Button |
+| **1.11** | ✅ veröffentlicht (Tag `v1.11`) | Haftungsausschluss: kurzer Button „Akzeptieren“ (einzeilig), STYLE_GUIDE-Regel für Button-Labels (max. 1–2 Wörter) |
 | **1.1** | 📋 geplant | CLI-Autocomplete (F1), BLE-OTA-Firmware-Update (F2), Live-Repeater-Suche (F3), Präfix-Filter Repeater-Auswahl (F4) |
 
 Beide Features folgen den Regeln aus [`STYLE_GUIDE.md`](STYLE_GUIDE.md):

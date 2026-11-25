@@ -357,6 +357,7 @@ RefreshButton(
   - höchstens ~25 Zeichen, einzeilig, Grenzen in Klammern: „Admin password (max. 15)“ / „Mot de passe admin (15 max)“;
   - `softWrap = false` und `TextOverflow.Ellipsis` als Sicherheitsnetz, nicht als Normalfall.
 - Chips und Badges: ein bis zwei Wörter, 11 sp („Nur Repeater“, „ON“, „BLE · Mesh OTA“).
+- **Button-Beschriftungen (verbindlich seit v1.11):** kurz und prägnant, **höchstens 1–2 Wörter und immer einzeilig** – in allen vier Sprachen („Akzeptieren“ / „Accept“ / „Accepteren“ / „Accepter“, „Abbrechen“, „Schließen“, „Speichern“). Im Code `maxLines = 1, softWrap = false`. Was erklärt werden muss, steht im Hinweistext über den Buttons, nicht auf dem Button. So passen zwei Dialog-Buttons auch in FR/NL auf 360 dp kompakt nebeneinander.
 - Snackbars: ein Satz, der Grund und nächsten Schritt nennt („Bitte zuerst den aktiven Paketfilter ausschalten.“).
 - Prüfmaßstab ist immer die **längste** Sprache, meist FR oder NL, auf 360 dp Breite.
 
