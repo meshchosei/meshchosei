@@ -162,14 +162,6 @@
     <string name="care_active_badge">Active</string>
 
     <!-- Disclaimer Dialog (First Launch) -->
-    <string name="disclaimer_title">⚠ Important notice</string>
-    <string name="disclaimer_ai_notice">This is AI-generated software — no warranty of any kind.</string>
-    <string name="disclaimer_body">Please read the following carefully before using this app to configure LoRa repeater hardware.</string>
-    <string name="disclaimer_point_liability">This software is provided AS IS without any warranty. The developers accept no liability for damage to hardware, network disruptions or regulatory violations caused by use of this app.</string>
-    <string name="disclaimer_point_regulations">You are solely responsible for complying with all applicable radio regulations in your country. In Germany and the EU, the EU868 band is subject to ETSI EN 300 220 and BNetzA frequency plans. Exceeding allowed ERP/EIRP levels is illegal and may result in fines.</string>
-    <string name="disclaimer_point_responsibility">Use this app at your own risk. Always verify that your repeater configuration complies with local radio law before transmitting.</string>
-    <string name="disclaimer_accept_note">By tapping \'Confirm\' you confirm that you have read, understood and agree to all conditions above.</string>
-    <string name="disclaimer_accept_btn">I Confirm — Use at Own Risk</string>
 
     <!-- Device Capability Labels -->
     <string name="caps_unsupported">Not supported by this firmware</string>
@@ -210,7 +202,6 @@
     <string name="about_ai_body">Created with AI assistance based on the open source code of MeshCore, ZephCore and Dutch MeshCore. The operator remains solely responsible for complying with local radio regulations.</string>
     <string name="about_credits_title">Open source components</string>
     <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT License)\n• OpenStreetMap map tiles (© OpenStreetMap contributors, ODbL)</string>
-    <string name="about_show_disclaimer">Show disclaimer again</string>
     <string name="lang_nl">NL</string>
     <string name="lang_fr">FR</string>
     <string name="menu_hardware_antenna">Hardware &amp; Antenna</string>

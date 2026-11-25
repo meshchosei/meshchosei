@@ -162,14 +162,6 @@
     <string name="care_active_badge">Aktiv</string>
 
     <!-- Disclaimer Dialog (Erststart) -->
-    <string name="disclaimer_title">⚠ Wichtiger Hinweis</string>
-    <string name="disclaimer_ai_notice">Dies ist KI-generierte Software — ohne jegliche Gewährleistung.</string>
-    <string name="disclaimer_body">Bitte lies die folgenden Hinweise sorgfältig, bevor du diese App zur Konfiguration von LoRa-Repeater-Hardware einsetzt.</string>
-    <string name="disclaimer_point_liability">Diese Software wird OHNE JEGLICHE GEWÄHRLEISTUNG bereitgestellt. Die Entwickler übernehmen keinerlei Haftung für Hardware-Schäden, Netzwerkstörungen oder Verstöße gegen Funkregelungen, die durch die Nutzung entstehen.</string>
-    <string name="disclaimer_point_regulations">Du bist allein verantwortlich für die Einhaltung aller geltenden Funkvorschriften in deinem Land. In Deutschland und der EU ist das EU868-Band nach ETSI EN 300 220 und dem BNetzA-Frequenzplan geregelt. Das Überschreiten erlaubter ERP/EIRP-Grenzwerte ist illegal und kann Bußgelder nach sich ziehen.</string>
-    <string name="disclaimer_point_responsibility">Die Nutzung erfolgt auf eigene Gefahr. Stelle stets sicher, dass deine Repeater-Konfiguration dem lokalen Funkrecht entspricht, bevor du sendest.</string>
-    <string name="disclaimer_accept_note">Mit Tippen auf \'Bestätigen\' bestätigst du, dass du alle obigen Bedingungen gelesen, verstanden und akzeptiert hast.</string>
-    <string name="disclaimer_accept_btn">Bestätigen — Nutzung auf eigene Gefahr</string>
 
     <!-- Gerätefähigkeits-Labels -->
     <string name="caps_unsupported">Von dieser Firmware nicht unterstützt</string>
@@ -210,7 +202,6 @@
     <string name="about_ai_body">Entwickelt mit KI-Unterstützung auf Basis der offenen Quelltexte von MeshCore, ZephCore und Dutch MeshCore. Der Betreiber bleibt selbst für die Einhaltung der gesetzlichen Funkvorgaben verantwortlich.</string>
     <string name="about_credits_title">Verwendete Open-Source-Komponenten</string>
     <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT-Lizenz)\n• OpenStreetMap-Kartenkacheln (© OpenStreetMap-Mitwirkende, ODbL)</string>
-    <string name="about_show_disclaimer">Haftungsausschluss erneut anzeigen</string>
     <string name="lang_nl">NL</string>
     <string name="lang_fr">FR</string>
     <string name="menu_hardware_antenna">Hardware &amp; Antenne</string>

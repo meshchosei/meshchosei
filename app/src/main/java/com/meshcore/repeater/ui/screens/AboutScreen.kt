@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.i18n.tr
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -70,7 +72,7 @@ fun AboutScreen(viewModel: RepeaterViewModel, onShowDisclaimer: () -> Unit) {
             }
         }
         OutlinedButton(onClick = onShowDisclaimer, shape = BauhausCornerShape, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.about_show_disclaimer), fontSize = 12.sp)
+            Text(tr("Haftungsausschluss erneut anzeigen"), fontSize = 12.sp)
         }
         Spacer(Modifier.height(8.dp))
         Text(

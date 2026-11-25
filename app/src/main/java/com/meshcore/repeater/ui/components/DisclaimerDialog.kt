@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -30,37 +29,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import com.meshcore.repeater.R
 import com.meshcore.repeater.ui.theme.BauhausCornerShape
 import com.meshcore.repeater.ui.theme.LocalBauhausColors
 
 /**
- * Modaler Erststart-Haftungsausschluss-Dialog (Bauhaus-Design).
- * Wird beim ersten Start angezeigt und nach Bestätigung dauerhaft deaktiviert.
+ * Haftungsausschluss-Dialog (Bauhaus-Design, `BauhausCornerShape`). Alle Texte laufen über [tr] (assets/i18n.json),
+ * damit sie immer in der aktiven App-Sprache (DE/EN/NL/FR) erscheinen – auch beim Aufruf aus „Über & Lizenz“.
  *
- * @param isForced  true = kein Abbruch möglich (Erststart), false = schließbar (Info-Button)
+ * @param isInitialAcceptance true = Erststart: nicht wegklickbar, Buttons „Abbrechen“ (beendet die App) und
+ *   „Verstanden & Akzeptieren“; false = nachträgliches Ansehen: schließbar, nur ein breiter „Schließen“-Button.
+ * @param onAccept  Erststart: Zustimmung gespeichert
+ * @param onDismiss Erststart: Abbruch; sonst: Dialog schließen
  */
 @Composable
 fun DisclaimerDialog(
-    isForced: Boolean = true,
-    onAccept: () -> Unit,
-    onDismiss: (() -> Unit)? = null
+    isInitialAcceptance: Boolean,
+    onAccept: () -> Unit = {},
+    onDismiss: () -> Unit
 ) {
     val bColors = LocalBauhausColors.current
 
     AlertDialog(
         onDismissRequest = {
-            if (!isForced) onDismiss?.invoke()
+            if (!isInitialAcceptance) onDismiss()
         },
         properties = DialogProperties(
-            dismissOnBackPress = !isForced,
-            dismissOnClickOutside = !isForced
+            dismissOnBackPress = !isInitialAcceptance,
+            dismissOnClickOutside = !isInitialAcceptance
         ),
         containerColor = MaterialTheme.colorScheme.surface,
         shape = BauhausCornerShape,
@@ -74,7 +74,7 @@ fun DisclaimerDialog(
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = stringResource(R.string.disclaimer_title),
+                    text = tr("⚠ Wichtiger Hinweis"),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -103,7 +103,7 @@ fun DisclaimerDialog(
                     ) {
 
                         Text(
-                            text = stringResource(R.string.disclaimer_ai_notice),
+                            text = tr("Dies ist KI-generierte Software — ohne jegliche Gewährleistung."),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = bColors.signalRed,
@@ -115,7 +115,7 @@ fun DisclaimerDialog(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Text(
-                    text = stringResource(R.string.disclaimer_body),
+                    text = tr("Bitte lies die folgenden Hinweise sorgfältig, bevor du diese App zur Konfiguration von LoRa-Repeater-Hardware einsetzt."),
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurface,
                     lineHeight = 20.sp
@@ -129,9 +129,9 @@ fun DisclaimerDialog(
 
                 // Drei Punkte: Haftung, Eigenverantwortung, Funkrecht
                 listOf(
-                    stringResource(R.string.disclaimer_point_liability),
-                    stringResource(R.string.disclaimer_point_regulations),
-                    stringResource(R.string.disclaimer_point_responsibility)
+                    tr("Diese Software wird OHNE JEGLICHE GEWÄHRLEISTUNG bereitgestellt. Die Entwickler übernehmen keinerlei Haftung für Hardware-Schäden, Netzwerkstörungen oder Verstöße gegen Funkregelungen, die durch die Nutzung entstehen."),
+                    tr("Du bist allein verantwortlich für die Einhaltung aller geltenden Funkvorschriften in deinem Land. In der EU ist das EU868-Band nach ETSI EN 300 220 und den nationalen Frequenzplänen geregelt. Das Überschreiten erlaubter ERP/EIRP-Grenzwerte ist illegal und kann Bußgelder nach sich ziehen."),
+                    tr("Die Nutzung erfolgt auf eigene Gefahr. Stelle stets sicher, dass deine Repeater-Konfiguration dem lokalen Funkrecht entspricht, bevor du sendest.")
                 ).forEach { point ->
                     Row(
                         modifier = Modifier.padding(vertical = 4.dp),
@@ -153,23 +153,40 @@ fun DisclaimerDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
-
-                Text(
-                    text = stringResource(R.string.disclaimer_accept_note),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                // Zustimmungshinweis nur beim Erststart (beim Ansehen gibt es nichts zu bestätigen)
+                if (isInitialAcceptance) {
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Text(
+                        text = tr("Mit Tippen auf „Verstanden & Akzeptieren“ bestätigst du, dass du alle obigen Bedingungen gelesen, verstanden und akzeptiert hast."),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         },
         confirmButton = {
-            Row(
+            if (!isInitialAcceptance) {
+                // Nachträgliches Ansehen ("Über & Lizenz"): nur ein breiter "Schließen"-Button
+                Button(onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = bColors.cobalt),
+                    shape = BauhausCornerShape
+                ) {
+                    Text(
+                        text = tr("Schließen"),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            } else Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp)
             ) {
-                androidx.compose.material3.OutlinedButton(onClick = { onDismiss?.invoke() },
+                androidx.compose.material3.OutlinedButton(onClick = onDismiss,
                     modifier = Modifier.weight(1f),
                     shape = BauhausCornerShape
                 ) {
@@ -186,7 +203,7 @@ fun DisclaimerDialog(
                     shape = BauhausCornerShape
                 ) {
                     Text(
-                        text = tr("Bestätigen"),
+                        text = tr("Verstanden & Akzeptieren"),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         fontWeight = FontWeight.Bold,

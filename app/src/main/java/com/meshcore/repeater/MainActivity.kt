@@ -138,8 +138,8 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
     LaunchedEffect(disclaimerAccepted) { showDisclaimerForced = !disclaimerAccepted }
     var showDisclaimerInfo by remember { mutableStateOf(false) }
     val act = androidx.compose.ui.platform.LocalContext.current.findActivity()
-    if (showDisclaimerForced) { DisclaimerDialog(isForced = true, onAccept = { viewModel.acceptDisclaimer(); showDisclaimerForced = false }, onDismiss = { act?.finishAffinity() }) }
-    if (showDisclaimerInfo) { DisclaimerDialog(isForced = false, onAccept = { showDisclaimerInfo = false }, onDismiss = { showDisclaimerInfo = false }) }
+    if (showDisclaimerForced) { DisclaimerDialog(isInitialAcceptance = true, onAccept = { viewModel.acceptDisclaimer(); showDisclaimerForced = false }, onDismiss = { act?.finishAffinity() }) }
+    if (showDisclaimerInfo) { DisclaimerDialog(isInitialAcceptance = false, onDismiss = { showDisclaimerInfo = false }) }
 
     BackHandler {
         when {

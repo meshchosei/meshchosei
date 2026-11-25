@@ -162,14 +162,6 @@
     <string name="care_active_badge">Active</string>
 
     <!-- Disclaimer Dialog (First Launch) -->
-    <string name="disclaimer_title">⚠ Avis important</string>
-    <string name="disclaimer_ai_notice">Ceci est un logiciel généré par IA — sans aucune garantie.</string>
-    <string name="disclaimer_body">Veuillez lire attentivement ce qui suit avant d\'utiliser cette application pour configurer du matériel de répéteur LoRa.</string>
-    <string name="disclaimer_point_liability">Ce logiciel est fourni EN L\'ÉTAT, sans aucune garantie. Les développeurs déclinent toute responsabilité pour les dommages matériels, perturbations du réseau ou infractions à la réglementation radio liés à l\'utilisation de cette application.</string>
-    <string name="disclaimer_point_regulations">Vous êtes seul responsable du respect de toutes les réglementations radio applicables dans votre pays. Dans l\'UE, la bande EU868 relève de l\'ETSI EN 300 220 et des plans de fréquences nationaux. Dépasser les niveaux ERP/EIRP autorisés est illégal et peut entraîner des amendes.</string>
-    <string name="disclaimer_point_responsibility">Utilisez cette application à vos propres risques. Vérifiez toujours que la configuration de votre répéteur est conforme à la législation radio locale avant d\'émettre.</string>
-    <string name="disclaimer_accept_note">En touchant \'Confirmer\', vous confirmez avoir lu, compris et accepté toutes les conditions ci-dessus.</string>
-    <string name="disclaimer_accept_btn">I Confirm — Use at Own Risk</string>
 
     <!-- Device Capability Labels -->
     <string name="caps_unsupported">Not supported by this firmware</string>
@@ -210,7 +202,6 @@
     <string name="about_ai_body">Développé avec l\'aide de l\'IA à partir du code source ouvert de MeshCore, ZephCore et Dutch MeshCore. L\'exploitant reste seul responsable du respect de la réglementation radio.</string>
     <string name="about_credits_title">Composants open source utilisés</string>
     <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (licence MIT)\n• Tuiles OpenStreetMap (© contributeurs OpenStreetMap, ODbL)</string>
-    <string name="about_show_disclaimer">Afficher à nouveau l\'avertissement</string>
     <string name="lang_nl">NL</string>
     <string name="lang_fr">FR</string>
     <string name="menu_hardware_antenna">Matériel &amp; antenne</string>

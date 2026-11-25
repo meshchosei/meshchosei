@@ -2728,5 +2728,50 @@
   "{0} min",
   "{0} min",
   "{0} min"
+ ],
+ "⚠ Wichtiger Hinweis": [
+  "⚠ Important notice",
+  "⚠ Belangrijke mededeling",
+  "⚠ Avis important"
+ ],
+ "Dies ist KI-generierte Software — ohne jegliche Gewährleistung.": [
+  "This is AI-generated software — no warranty of any kind.",
+  "Dit is door AI gegenereerde software — zonder enige garantie.",
+  "Ceci est un logiciel généré par IA — sans aucune garantie."
+ ],
+ "Bitte lies die folgenden Hinweise sorgfältig, bevor du diese App zur Konfiguration von LoRa-Repeater-Hardware einsetzt.": [
+  "Please read the following carefully before using this app to configure LoRa repeater hardware.",
+  "Lees het volgende zorgvuldig voordat je deze app gebruikt om LoRa-repeaterhardware te configureren.",
+  "Veuillez lire attentivement ce qui suit avant d'utiliser cette application pour configurer du matériel de répéteur LoRa."
+ ],
+ "Diese Software wird OHNE JEGLICHE GEWÄHRLEISTUNG bereitgestellt. Die Entwickler übernehmen keinerlei Haftung für Hardware-Schäden, Netzwerkstörungen oder Verstöße gegen Funkregelungen, die durch die Nutzung entstehen.": [
+  "This software is provided AS IS without any warranty. The developers accept no liability for damage to hardware, network disruptions or regulatory violations caused by use of this app.",
+  "Deze software wordt ZONDER ENIGE GARANTIE geleverd. De ontwikkelaars aanvaarden geen aansprakelijkheid voor schade aan hardware, netwerkstoringen of overtredingen van radiovoorschriften door het gebruik van deze app.",
+  "Ce logiciel est fourni EN L'ÉTAT, sans aucune garantie. Les développeurs déclinent toute responsabilité pour les dommages matériels, perturbations du réseau ou infractions à la réglementation radio liés à l'utilisation de cette application."
+ ],
+ "Du bist allein verantwortlich für die Einhaltung aller geltenden Funkvorschriften in deinem Land. In der EU ist das EU868-Band nach ETSI EN 300 220 und den nationalen Frequenzplänen geregelt. Das Überschreiten erlaubter ERP/EIRP-Grenzwerte ist illegal und kann Bußgelder nach sich ziehen.": [
+  "You are solely responsible for complying with all applicable radio regulations in your country. In the EU, the EU868 band is subject to ETSI EN 300 220 and national frequency plans. Exceeding allowed ERP/EIRP levels is illegal and may result in fines.",
+  "Je bent zelf verantwoordelijk voor het naleven van alle geldende radiovoorschriften in je land. In de EU valt de EU868-band onder ETSI EN 300 220 en de nationale frequentieplannen. Het overschrijden van toegestane ERP/EIRP-waarden is illegaal en kan tot boetes leiden.",
+  "Vous êtes seul responsable du respect de toutes les réglementations radio applicables dans votre pays. Dans l'UE, la bande EU868 relève de l'ETSI EN 300 220 et des plans de fréquences nationaux. Dépasser les niveaux ERP/EIRP autorisés est illégal et peut entraîner des amendes."
+ ],
+ "Die Nutzung erfolgt auf eigene Gefahr. Stelle stets sicher, dass deine Repeater-Konfiguration dem lokalen Funkrecht entspricht, bevor du sendest.": [
+  "Use this app at your own risk. Always verify that your repeater configuration complies with local radio law before transmitting.",
+  "Gebruik deze app op eigen risico. Controleer altijd of je repeaterconfiguratie voldoet aan de lokale radiowetgeving voordat je uitzendt.",
+  "Utilisez cette application à vos propres risques. Vérifiez toujours que la configuration de votre répéteur est conforme à la législation radio locale avant d'émettre."
+ ],
+ "Mit Tippen auf „Verstanden & Akzeptieren“ bestätigst du, dass du alle obigen Bedingungen gelesen, verstanden und akzeptiert hast.": [
+  "By tapping “Understood & Accept” you confirm that you have read, understood and agree to all conditions above.",
+  "Door op „Begrepen & accepteren” te tikken bevestig je dat je alle bovenstaande voorwaarden hebt gelezen, begrepen en aanvaard.",
+  "En touchant « Compris & accepter », vous confirmez avoir lu, compris et accepté toutes les conditions ci-dessus."
+ ],
+ "Verstanden & Akzeptieren": [
+  "Understood & Accept",
+  "Begrepen & accepteren",
+  "Compris & accepter"
+ ],
+ "Haftungsausschluss erneut anzeigen": [
+  "Show disclaimer again",
+  "Disclaimer opnieuw tonen",
+  "Afficher à nouveau l'avertissement"
  ]
 }

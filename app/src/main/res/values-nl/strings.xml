@@ -162,14 +162,6 @@
     <string name="care_active_badge">Active</string>
 
     <!-- Disclaimer Dialog (First Launch) -->
-    <string name="disclaimer_title">⚠ Belangrijke mededeling</string>
-    <string name="disclaimer_ai_notice">Dit is door AI gegenereerde software — zonder enige garantie.</string>
-    <string name="disclaimer_body">Lees het volgende zorgvuldig voordat je deze app gebruikt om LoRa-repeaterhardware te configureren.</string>
-    <string name="disclaimer_point_liability">Deze software wordt ZONDER ENIGE GARANTIE geleverd. De ontwikkelaars aanvaarden geen aansprakelijkheid voor schade aan hardware, netwerkstoringen of overtredingen van radiovoorschriften door het gebruik van deze app.</string>
-    <string name="disclaimer_point_regulations">Je bent zelf verantwoordelijk voor het naleven van alle geldende radiovoorschriften in je land. In de EU valt de EU868-band onder ETSI EN 300 220 en de nationale frequentieplannen. Het overschrijden van toegestane ERP/EIRP-waarden is illegaal en kan tot boetes leiden.</string>
-    <string name="disclaimer_point_responsibility">Gebruik deze app op eigen risico. Controleer altijd of je repeaterconfiguratie voldoet aan de lokale radiowetgeving voordat je uitzendt.</string>
-    <string name="disclaimer_accept_note">Door op \'Bevestigen\' te tikken bevestig je dat je alle bovenstaande voorwaarden hebt gelezen, begrepen en aanvaard.</string>
-    <string name="disclaimer_accept_btn">I Confirm — Use at Own Risk</string>
 
     <!-- Device Capability Labels -->
     <string name="caps_unsupported">Not supported by this firmware</string>
@@ -210,7 +202,6 @@
     <string name="about_ai_body">Ontwikkeld met AI-ondersteuning op basis van de open broncode van MeshCore, ZephCore en Dutch MeshCore. De beheerder blijft zelf verantwoordelijk voor het naleven van de wettelijke radiovoorschriften.</string>
     <string name="about_credits_title">Gebruikte opensourcecomponenten</string>
     <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (MIT-licentie)\n• OpenStreetMap-kaarttegels (© OpenStreetMap-bijdragers, ODbL)</string>
-    <string name="about_show_disclaimer">Disclaimer opnieuw tonen</string>
     <string name="lang_nl">NL</string>
     <string name="lang_fr">FR</string>
     <string name="menu_hardware_antenna">Hardware &amp; antenne</string>
