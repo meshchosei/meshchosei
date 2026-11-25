@@ -1,9 +1,7 @@
 <resources>
     <!-- App & General -->
-    <string name="app_name">meshchōsei</string>
-    <string name="app_title_repeater">meshchōsei</string>
     <string name="app_title_configurator">FÜR MESHCORE</string>
-    <string name="app_edition_subtitle">ZephCore, DMC, Dutch MeshCore BW2 Edition</string>
+    <string name="app_edition_subtitle">ZephCore, DMC, Dutch MeshCore Edition</string>
     <string name="app_version_tag">v1.18.2 • Dutch-MeshCore Filter</string>
     <string name="action_ok">OK</string>
     <string name="action_cancel">Abbrechen</string>
@@ -93,7 +91,7 @@
     <string name="radio_compliance_unlocked">ACHTUNG: Gesetzliche Sendeleistungs-Sperre aufgehoben!</string>
     <string name="radio_compliance_switch">Gesetzliche Begrenzung aufheben</string>
 
-    <!-- Filter Screen (ZephCore, DMC, Dutch MeshCore BW2) -->
+    <!-- Filter Screen (ZephCore, DMC, Dutch MeshCore) -->
     <string name="filter_header">PAKET-FILTER &amp; REGELN</string>
     <string name="filter_master_switch">Paketfilter aktiv (filter on/off)</string>
     <string name="filter_master_on_desc">Filter-Engine läuft</string>
@@ -167,7 +165,7 @@
     <string name="caps_unsupported">Von dieser Firmware nicht unterstützt</string>
     <string name="caps_detecting">Erkenne Firmware-Fähigkeiten…</string>
     <string name="caps_no_gps">GPS auf dieser Hardware nicht verfügbar</string>
-    <string name="caps_no_filter_wl">Whitelist-Modus erfordert ZephCore, DMC, Dutch MeshCore BW2 Firmware</string>
+    <string name="caps_no_filter_wl">Whitelist-Modus erfordert ZephCore, DMC, Dutch MeshCore Firmware</string>
     <string name="offline_preview_label">Offline-Vorschau-Modus</string>
 
     <!-- Verbindungs-Gate -->
@@ -195,7 +193,6 @@
     <string name="menu_backup_sub">MeshCore-JSON sichern &amp; einspielen</string>
     <string name="menu_about">Über &amp; Lizenz</string>
     <string name="menu_about_sub">GNU GPLv3, Open Source &amp; Info</string>
-    <string name="about_title">meshchōsei</string>
     <string name="about_license_title">Lizenz: GNU GPLv3 (Freie Software)</string>
     <string name="about_license_body">Freie Open-Source-Software unter GNU GPLv3. Jeder darf sie kostenlos nutzen, einsehen, anpassen und unter denselben freien Bedingungen weitergeben. Bereitstellung OHNE GEWÄHRLEISTUNG (\"AS IS\").</string>
     <string name="about_ai_title">KI-gestützte Entwicklung</string>

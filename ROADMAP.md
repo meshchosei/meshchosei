@@ -1,6 +1,6 @@
 # ROADMAP – meshchōsei
 
-Stand: 2026-11-25 · aktuelle Version: 1.16
+Stand: 2026-11-25 · aktuelle Version: 1.17
 
 | Version | Status | Inhalt |
 |---|---|---|
@@ -21,6 +21,7 @@ Stand: 2026-11-25 · aktuelle Version: 1.16
 | **1.14** | ✅ veröffentlicht (Tag `v1.14`) | Disclaimer-Titel ohne doppeltes Warnsymbol, Scroll-Hinweis bei überlaufendem Inhalt (Screens im Querformat, Dialoge immer), neue `README.md` & `PRIVACY.md` |
 | **1.15** | ✅ veröffentlicht (Tag `v1.15`) | Bei geöffnetem Seitenmenü nur dessen Scroll-Hinweis; Hinweis des Hauptfensters dahinter ausgeblendet (`LocalSuppressScrollHint`) |
 | **1.16** | ✅ veröffentlicht (Tag `v1.16`) | Zuverlässige Filterstatus-Erkennung über LoRa: Retries mit gleichem Tag, langes Antwortfenster, Hilfetexte nicht mehr als Status gewertet, `filterStatusKnown` + Nachfragen bei Menü/Filter-Screen |
+| **1.17** | ✅ veröffentlicht (Tag `v1.17`) | Markenname „meshchōsei“ unübersetzbar in allen Sprachen; alter Arbeitstitel „Repeater Configurator“ aus Seitenmenü, App-Name und Über-Dialog entfernt; persönlicher Build-Zusatz „BW2“ entfernt |
 | **1.1** | 📋 geplant | CLI-Autocomplete (F1), BLE-OTA-Firmware-Update (F2), Live-Repeater-Suche (F3), Präfix-Filter Repeater-Auswahl (F4) |
 
 Beide Features folgen den Regeln aus [`STYLE_GUIDE.md`](STYLE_GUIDE.md):

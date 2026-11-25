@@ -1,9 +1,9 @@
 <resources>
     <!-- App & General -->
-    <string name="app_name">Repeater Configurator</string>
-    <string name="app_title_repeater">REPEATER</string>
-    <string name="app_title_configurator">CONFIGURATOR</string>
-    <string name="app_edition_subtitle">ZephCore &amp; DDMC (Dutch MeshCore) BW2 Edition</string>
+    <string name="app_name" translatable="false">meshchōsei</string>
+    <string name="app_title_repeater" translatable="false">meshchōsei</string>
+    <string name="app_title_configurator">FOR MESHCORE</string>
+    <string name="app_edition_subtitle">ZephCore &amp; DDMC (Dutch MeshCore) Edition</string>
     <string name="app_version_tag">v1.18.2 • Dutch-MeshCore Filter</string>
     <string name="action_ok">OK</string>
     <string name="action_cancel">Cancel</string>
@@ -93,7 +93,7 @@
     <string name="radio_compliance_unlocked">WARNING: Compliance lock disabled!</string>
     <string name="radio_compliance_switch">Unlock Legal Power Limit</string>
 
-    <!-- Filter Screen (ZephCore &amp; DDMC (Dutch MeshCore) BW2) -->
+    <!-- Filter Screen (ZephCore &amp; DDMC (Dutch MeshCore)) -->
     <string name="filter_header">PACKET FILTER &amp; RULES</string>
     <string name="filter_master_switch">Packet filter active (filter on/off)</string>
     <string name="filter_master_on_desc">Filter engine running</string>
@@ -167,7 +167,7 @@
     <string name="caps_unsupported">Not supported by this firmware</string>
     <string name="caps_detecting">Detecting firmware capabilities…</string>
     <string name="caps_no_gps">GPS not available on this hardware</string>
-    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore &amp; DDMC (Dutch MeshCore) BW2 firmware</string>
+    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore &amp; DDMC (Dutch MeshCore) firmware</string>
     <string name="offline_preview_label">Offline Preview Mode</string>
 
     <!-- Connection Gate -->
@@ -195,7 +195,7 @@
     <string name="menu_backup_sub">Save &amp; install MeshCore JSON backups</string>
     <string name="menu_about">About &amp; License</string>
     <string name="menu_about_sub">GNU GPLv3, open source &amp; info</string>
-    <string name="about_title">Repeater Configurator</string>
+    <string name="about_title" translatable="false">meshchōsei</string>
     <string name="about_license_title">License: GNU GPLv3 (free software)</string>
     <string name="about_license_body">Free and open source software licensed under GNU GPLv3. Everyone may use, study, modify and redistribute it under GPLv3 terms. Provided WITHOUT ANY WARRANTY (\"AS IS\").</string>
     <string name="about_ai_title">AI-assisted development</string>

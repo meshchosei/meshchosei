@@ -1,9 +1,7 @@
 <resources>
     <!-- App & General -->
-    <string name="app_name">meshchōsei</string>
-    <string name="app_title_repeater">meshchōsei</string>
     <string name="app_title_configurator">POUR MESHCORE</string>
-    <string name="app_edition_subtitle">ZephCore, DMC, Dutch MeshCore BW2 Edition</string>
+    <string name="app_edition_subtitle">ZephCore, DMC, Dutch MeshCore Edition</string>
     <string name="app_version_tag">v1.18.2 • Dutch-MeshCore Filter</string>
     <string name="action_ok">OK</string>
     <string name="action_cancel">Annuler</string>
@@ -93,7 +91,7 @@
     <string name="radio_compliance_unlocked">WARNING: Compliance lock disabled!</string>
     <string name="radio_compliance_switch">Unlock Legal Power Limit</string>
 
-    <!-- Filter Screen (ZephCore, DMC, Dutch MeshCore BW2) -->
+    <!-- Filter Screen (ZephCore, DMC, Dutch MeshCore) -->
     <string name="filter_header">FILTRE DE PAQUETS &amp; RÈGLES</string>
     <string name="filter_master_switch">Filtre de paquets actif (filter on/off)</string>
     <string name="filter_master_on_desc">Moteur de filtrage en marche</string>
@@ -167,7 +165,7 @@
     <string name="caps_unsupported">Not supported by this firmware</string>
     <string name="caps_detecting">Detecting firmware capabilities…</string>
     <string name="caps_no_gps">GPS not available on this hardware</string>
-    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore, DMC, Dutch MeshCore BW2 firmware</string>
+    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore, DMC, Dutch MeshCore firmware</string>
     <string name="offline_preview_label">Offline Preview Mode</string>
 
     <!-- Connection Gate -->
@@ -195,7 +193,6 @@
     <string name="menu_backup_sub">Sauvegarde &amp; restauration</string>
     <string name="menu_about">À propos &amp; licence</string>
     <string name="menu_about_sub">Licence GPLv3 &amp; infos</string>
-    <string name="about_title">meshchōsei</string>
     <string name="about_license_title">Licence : GNU GPLv3 (logiciel libre)</string>
     <string name="about_license_body">Logiciel libre et open source sous licence GNU GPLv3. Chacun peut l\'utiliser, l\'étudier, le modifier et le redistribuer selon les termes de la GPLv3. Fourni SANS AUCUNE GARANTIE (« EN L\'ÉTAT »).</string>
     <string name="about_ai_title">Développement assisté par IA</string>

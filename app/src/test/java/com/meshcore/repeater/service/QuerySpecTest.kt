@@ -23,7 +23,7 @@ class QuerySpecTest {
         assertFalse(ok("board", "51.881000"))
     }
     @Test fun ver() {
-        assertTrue(ok("ver", "v1.18.2-zephcore-BW2 (Build: 2026-11-01)"))
+        assertTrue(ok("ver", "v1.18.2-zephcore (Build: 2026-11-01)"))
         assertFalse(ok("ver", "869.618,62.5,8,8"))
         assertFalse(ok("ver", "51.881000"))
     }

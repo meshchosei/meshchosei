@@ -1,9 +1,7 @@
 <resources>
     <!-- App & General -->
-    <string name="app_name">meshchōsei</string>
-    <string name="app_title_repeater">meshchōsei</string>
     <string name="app_title_configurator">VOOR MESHCORE</string>
-    <string name="app_edition_subtitle">ZephCore, DMC, Dutch MeshCore BW2 Edition</string>
+    <string name="app_edition_subtitle">ZephCore, DMC, Dutch MeshCore Edition</string>
     <string name="app_version_tag">v1.18.2 • Dutch-MeshCore Filter</string>
     <string name="action_ok">OK</string>
     <string name="action_cancel">Cancel</string>
@@ -93,7 +91,7 @@
     <string name="radio_compliance_unlocked">WARNING: Compliance lock disabled!</string>
     <string name="radio_compliance_switch">Unlock Legal Power Limit</string>
 
-    <!-- Filter Screen (ZephCore, DMC, Dutch MeshCore BW2) -->
+    <!-- Filter Screen (ZephCore, DMC, Dutch MeshCore) -->
     <string name="filter_header">PAKKETFILTER &amp; REGELS</string>
     <string name="filter_master_switch">Pakketfilter actief (filter on/off)</string>
     <string name="filter_master_on_desc">Filterengine actief</string>
@@ -167,7 +165,7 @@
     <string name="caps_unsupported">Not supported by this firmware</string>
     <string name="caps_detecting">Detecting firmware capabilities…</string>
     <string name="caps_no_gps">GPS not available on this hardware</string>
-    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore, DMC, Dutch MeshCore BW2 firmware</string>
+    <string name="caps_no_filter_wl">Whitelist mode requires ZephCore, DMC, Dutch MeshCore firmware</string>
     <string name="offline_preview_label">Offline Preview Mode</string>
 
     <!-- Connection Gate -->
@@ -195,7 +193,6 @@
     <string name="menu_backup_sub">Back-up &amp; herstel</string>
     <string name="menu_about">Over &amp; licentie</string>
     <string name="menu_about_sub">GPLv3-licentie &amp; info</string>
-    <string name="about_title">meshchōsei</string>
     <string name="about_license_title">Licentie: GNU GPLv3 (vrije software)</string>
     <string name="about_license_body">Vrije opensourcesoftware onder GNU GPLv3. Iedereen mag haar gebruiken, bestuderen, aanpassen en onder de GPLv3-voorwaarden verspreiden. Geleverd ZONDER ENIGE GARANTIE (\"AS IS\").</string>
     <string name="about_ai_title">AI-ondersteunde ontwikkeling</string>
