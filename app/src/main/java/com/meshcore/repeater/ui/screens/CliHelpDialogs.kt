@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.hintedVerticalScroll
+
 import com.meshcore.repeater.i18n.tr
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -48,7 +50,7 @@ internal fun CliHelpDialog(onDismiss: () -> Unit, onSelectCommand: (CliHelpComma
                 }
                 HorizontalDivider(Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.outline)
                 Column(
-                    modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                    modifier = Modifier.weight(1f).hintedVerticalScroll(rememberScrollState(), always = true, fadeColor = MaterialTheme.colorScheme.surface),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     cliHelpCategories.forEach { cat ->

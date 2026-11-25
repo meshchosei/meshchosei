@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.hintedVerticalScroll
+
 import com.meshcore.repeater.ui.components.RefreshButton
 import com.meshcore.repeater.R
 import androidx.compose.ui.res.stringResource
@@ -141,7 +143,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .hintedVerticalScroll(rememberScrollState())
             .imePadding()
             .padding(16.dp)
     ) {

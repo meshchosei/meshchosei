@@ -267,6 +267,14 @@ RefreshButton(
   - Sie sind **optimistisch**. Bis zur Bestätigung durch die Firmware sind sie gesperrt (`…Pending`) und werden nicht von eingehenden Statuszeilen überschrieben.
   - Danach wird der echte Zustand **einmal** nachgelesen.
 
+### 2.9 Scroll-Hinweis bei überlaufendem Inhalt (seit v1.14)
+
+- Kann ein Scroll-Bereich weiter nach unten gescrollt werden (`scrollState.canScrollForward == true`), zeigt er am unteren Rand einen **dezenten Hinweis**: Fade-Kante in der Hintergrundfarbe (28 dp), feine 1-dp-Linie in `outline` und einen kleinen Pfeil nach unten (Chevron, `onSurfaceVariant`).
+- Der Hinweis blendet animiert aus, sobald das Ende erreicht ist.
+- **Screens:** nur im Querformat (im Hochformat ist Scrollen der Normalfall). **Dialoge und Seitenmenü:** Dialoge (Haftungsausschluss, CLI-Hilfe) immer, sobald ihr Inhalt überläuft; das Seitenmenü wie Screens nur im Querformat.
+- Umsetzung: `Modifier.hintedVerticalScroll(state, always = …, fadeColor = …)` statt `verticalScroll(state)` (`ui/components/ScrollHint.kt`). `fadeColor` ist die Containerfarbe: `background` für Screens, `surface` für Dialoge und Menü.
+- Nacktes `verticalScroll(…)` ist nicht erlaubt. `ScrollHintRuleTest` prüft das.
+
 ---
 
 ## 3. Kommunikations- & Protokoll-Architektur

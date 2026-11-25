@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.hintedVerticalScroll
+
 import com.meshcore.repeater.ui.components.BauhausSwitch
 import com.meshcore.repeater.ui.components.RefreshButton
 
@@ -74,7 +76,7 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
     val doSave = { viewModel.applyBasicSetupChanges(pendingChanges, BusyKey.ROUTING) }
 
     Column(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(12.dp),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).hintedVerticalScroll(rememberScrollState()).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Card(modifier = Modifier.fillMaxWidth(), shape = BauhausCornerShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {

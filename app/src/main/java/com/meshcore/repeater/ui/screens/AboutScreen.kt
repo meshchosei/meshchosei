@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.hintedVerticalScroll
+
 import com.meshcore.repeater.i18n.tr
 
 import androidx.compose.foundation.BorderStroke
@@ -36,7 +38,7 @@ fun AboutScreen(viewModel: RepeaterViewModel, onShowDisclaimer: () -> Unit) {
     var lastLogoTapMs by remember { mutableLongStateOf(0L) }
     var showPong by remember { mutableStateOf(false) }
     if (showPong) com.meshcore.repeater.ui.components.MonoPongDialog(onDismiss = { showPong = false })
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).hintedVerticalScroll(rememberScrollState()).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         // Kopf: Logo (5x tippen = MonoPong) + Versionsnummer dezent oben rechts
         Box(Modifier.fillMaxWidth().clip(BauhausCornerShape)) {
             com.meshcore.repeater.ui.components.MeshchoseiLogo(

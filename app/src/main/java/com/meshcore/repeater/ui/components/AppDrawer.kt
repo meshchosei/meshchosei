@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.components
 
+import com.meshcore.repeater.ui.components.hintedVerticalScroll
+
 import com.meshcore.repeater.i18n.tr
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -126,7 +128,7 @@ fun AppDrawerSheet(
         // gescrollt wird nur der innere Inhalt.
         modifier = Modifier.width(316.dp)
     ) {
-        Column(Modifier.fillMaxHeight().verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+        Column(Modifier.fillMaxHeight().hintedVerticalScroll(androidx.compose.foundation.rememberScrollState(), fadeColor = MaterialTheme.colorScheme.surface)) {
         // === Drawer Header ===
         Column(
             modifier = Modifier

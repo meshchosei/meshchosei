@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.hintedVerticalScroll
+
 import com.meshcore.repeater.i18n.tr
 import com.meshcore.repeater.ui.theme.BauhausCornerShape
 
@@ -72,7 +74,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(scrollState)
+            .hintedVerticalScroll(scrollState)
             .padding(16.dp)
     ) {
         // === Purpose & Concept Card ===

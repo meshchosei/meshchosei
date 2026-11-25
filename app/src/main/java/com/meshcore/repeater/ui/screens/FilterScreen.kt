@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.hintedVerticalScroll
+
 import com.meshcore.repeater.i18n.tr
 import com.meshcore.repeater.ui.components.BusyButton
 import com.meshcore.repeater.ui.components.BauhausSwitch
@@ -128,7 +130,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(scrollState)
+            .hintedVerticalScroll(scrollState)
             .padding(16.dp)
     ) {
         // =====================================================================

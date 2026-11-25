@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.hintedVerticalScroll
+
 import com.meshcore.repeater.i18n.tr
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -54,7 +56,7 @@ fun IdentityLocationScreen(viewModel: RepeaterViewModel) {
     var customPrivKeyHex by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(12.dp),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).hintedVerticalScroll(rememberScrollState()).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Card(modifier = Modifier.fillMaxWidth(), shape = BauhausCornerShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {

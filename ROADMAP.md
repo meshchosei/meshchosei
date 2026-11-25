@@ -1,6 +1,6 @@
 # ROADMAP – meshchōsei
 
-Stand: 2026-11-25 · aktuelle Version: 1.13
+Stand: 2026-11-25 · aktuelle Version: 1.14
 
 | Version | Status | Inhalt |
 |---|---|---|
@@ -18,6 +18,7 @@ Stand: 2026-11-25 · aktuelle Version: 1.13
 | **1.11** | ✅ veröffentlicht (Tag `v1.11`) | Haftungsausschluss: kurzer Button „Akzeptieren“ (einzeilig), STYLE_GUIDE-Regel für Button-Labels (max. 1–2 Wörter) |
 | **1.12** | ✅ veröffentlicht (Tag `v1.12`) | LoRa-Antwort-Tags (Präfix `XX\|`): verspätete Antworten (z. B. `get name` → `owner.info`) werden verworfen; `get dutycycle` versteht MeshCore-Format; CLI-Hilfe vollständig & firmware-korrekte Regionen-Befehle |
 | **1.13** | ✅ veröffentlicht (Tag `v1.13`) | Manuelle CLI-Befehle über LoRa: ein automatischer Retry mit gleichem Tag + klare Timeout-Meldung; Seitenmenü nur während des Start-Scans gesperrt, Menü/Screenwechsel bricht wartende CLI-Befehle ab |
+| **1.14** | ✅ veröffentlicht (Tag `v1.14`) | Disclaimer-Titel ohne doppeltes Warnsymbol, Scroll-Hinweis bei überlaufendem Inhalt (Screens im Querformat, Dialoge immer), neue `README.md` & `PRIVACY.md` |
 | **1.1** | 📋 geplant | CLI-Autocomplete (F1), BLE-OTA-Firmware-Update (F2), Live-Repeater-Suche (F3), Präfix-Filter Repeater-Auswahl (F4) |
 
 Beide Features folgen den Regeln aus [`STYLE_GUIDE.md`](STYLE_GUIDE.md):

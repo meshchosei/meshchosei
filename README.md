@@ -1,142 +1,90 @@
-# Repeater Configurator (Android App)
+# meshchōsei
 
-Native Android-App zur professionellen Konfiguration und Überwachung von **MeshCore-** und **ZephCore-Repeatern** (inkl. ZephCore BW2 Packet-Filter & Whitelist) über **USB-Serial OTG** oder **BLE-Companion Remote-Admin**.
+**meshchōsei** (調整, jap. „Abstimmung, Feineinstellung“) ist eine native Android-App zur Konfiguration und Wartung von **MeshCore**- und **ZephCore**-LoRa-Repeatern, direkt per **USB-OTG** oder drahtlos über einen **Companion-Node** (BLE/USB) mit **Remote-Admin über LoRa**.
 
-Entwickelt mit **Kotlin**, **Jetpack Compose** und **Material 3**.
+> *English summary:* meshchōsei is a native Android app (Kotlin, Jetpack Compose) for configuring and maintaining MeshCore and ZephCore LoRa repeaters via USB-OTG or remotely over LoRa through a companion node. UI in German, English, Dutch and French. Licensed under GNU GPLv3.
 
----
-
-## 🚀 Kernfunktionen & Architektur
-
-### 1. Navigation Drawer (Reinwisch-Seitenmenü)
-- **Strukturierte Bereiche:** Kein endloses Scrollen – direkter Wechsel zwischen den 5 Funktionsmodulen.
-- **Echtzeit-Badges:** Zeigt im Menü direkt an, ob der **Mesh-Schonmodus aktiv ist (mit Restzeit-Countdown)**, ob der **Whitelist-Modus** scharfgeschaltet ist und wie der Verbindungsstatus lautet.
+Oberfläche in **Deutsch, Englisch, Niederländisch und Französisch**, umschaltbar ohne Neustart.
 
 ---
 
-### 2. Die 5 Hauptbereiche
+## Hauptfunktionen
 
-#### 🔌 1. Verbindung (USB-Serial OTG & BLE-Companion)
-- **USB-OTG:** Erkennt automatisch angebundene USB-UART-Chips (CH340, CP210x, FTDI, Nordic nRF52 CDC-ACM, ESP32, RP2040 usw.) mit wählbarer Baudrate (Default: 115200).
-- **BLE-Companion:** Drahtlose Kopplung für Remote-Administration über Nordic UART Service (NUS) mit Live-RSSI-Feldstärkeanzeige.
-- **Integrierte Konsole:** Live-Terminal für eingehende und ausgehende CLI-Nachrichten sowie Schnelleingabe für manuelle Befehle (`ver`, `filter`, `telemetry`).
+| Bereich | Was die App kann |
+|---|---|
+| **Verbindung** | USB-Serial-OTG (CH340, CP210x, FTDI, nRF52-CDC, ESP32, RP2040 …) oder Companion-Node per BLE/USB; Remote-Admin-Login auf einen Repeater im Mesh. Automatische Erkennung von Rolle (Repeater/Companion), Firmware und Funktionsumfang. |
+| **Start-Scan** | Ein streng sequentieller Durchlauf liest Hardware, Funk, Identität, Routing, Filter und Regionen einmal vollständig ein; jede Antwort wird geprüft und eindeutig ihrem Befehl zugeordnet (über LoRa mit `XX\|`-Antwort-Tags). |
+| **Mesh-Schonmodus** | Senkt für Wartungsarbeiten die Sendeleistung temporär (`tempradio`); die Firmware stellt nach Ablauf selbstständig wieder her, auch wenn die App die Verbindung verliert. |
+| **Hardware & Antenne** | Board-Erkennung, Antennen- und Kabeldämpfungs-Presets, ERP/EIRP-Berechnung, Versorgung (Akku/USB/Solar), Status-LEDs. |
+| **Funk & Region** | LoRa-Parameter (Frequenz, Bandbreite, SF, CR), TX-Leistung und Duty-Cycle mit Länder-Presets und Compliance-Grenzen. |
+| **Identität & Standort** | Name, Besitzer-Info, Koordinaten auf OpenStreetMap-Karte, Admin-/Gast-Passwort, Schlüssel. |
+| **Routing & Adverts** | Weiterleitung, Pfad-Hash-Modus, Schleifen-Erkennung, Advert-Intervalle, Multi-ACKs sowie die komplette **Regionen-Verwaltung** (`region home/default/put/remove/allowf/denyf`). |
+| **Paket-Filter** | Blacklist (Dutch-MeshCore-Filter) und Whitelist: Kanäle, Pfad-Präfixe, Absender, Texte, Hops, Paketalter, Dry-Run. `filter RESET` ist durch Slide-to-Confirm geschützt. |
+| **CLI-Konsole** | Freie Befehlseingabe mit vollständiger, übersetzter Befehlsübersicht; über LoRa ein automatischer Retry und klare Timeout-Meldung. |
+| **Backup & Wiederherstellung** | JSON-Backup aller Variablen, Regionen und Filterlisten; Wiederherstellung per Abgleich (nur Abweichungen werden gesendet). |
 
-#### 📡 2. Funk, Land & Antenne (ERP/EIRP-Compliance)
-- **Ländererkennung & Presets:**
-  - Automatische Erkennung via Geräte-Locale (DE/EU868 Standard: 868.125 MHz, BW 250 kHz, SF 11, CR 4/5, max. 14 dBm ERP).
-  - Presets für EU869 High-Power (869.525 MHz bis 27 dBm / 500 mW ERP), US915, UK868 und benutzerdefinierte Frequenzen.
-- **Antennen-Presets:**
-  - Stock-Antenne (~2.0 dBi)
-  - RAK Glasfaser-Omni (5.8 dBi)
-  - Allnet High-Gain (7.3 dBi)
-  - High-Gain / Yagi (12.0 dBi)
-  - Unbekannt (+3.0 dBi konservativer Sicherheitszuschlag)
-  - Eigene Antenne (freie dBi-Eingabe) inkl. Kabel- und Pigtaildämpfung in dB.
-- **Automatische ERP/EIRP-Berechnung:**
-  $$\text{EIRP} = P_{\text{TX}} + G_{\text{Antenne}} - L_{\text{Kabel}}$$
-  $$\text{ERP} = \text{EIRP} - 2.15\,\text{dB}$$
-  $$\text{P}_{\text{TX,max}} = \text{Limit}_{\text{ERP}} + 2.15 - G_{\text{Antenne}} + L_{\text{Kabel}}$$
-- **Compliance-Sperre & Warnung:**
-  - Automatische Begrenzung der TX-Sendeleistung auf das gesetzliche Limit.
-  - Überschreitungen werden optisch gewarnt und sind standardmäßig gesperrt.
-  - Freigabe nur über einen bewussten Sicherheits-Sperrschalter (z. B. für lizenzierte Funkamateure oder Testumgebungen).
-
-#### 🛡️ 3. Filter & Whitelist (ZephCore BW2)
-- **Filter-Steuerung:** Hauptschalter (`filter on`/`filter off`) und Dry-Run-Testmodus (`filter dryrun on`/`filter dryrun off`).
-- **Modus-Umschaltung:**
-  - `filter mode blacklist`: Standardmodus (alles wird weitergeleitet, außer blockierte Kanäle/Pfade).
-  - `filter mode whitelist`: Strenger Modus (alles Weiterleiten blockiert, außer freigegebene Kanäle & Pfad-Präfixe).
-- **Kanal-Manager:** Schnellauswahl (`Public`, `#mesh-de`, `#notfunk`, `#test`) und Eingabefeld für `#kanalname` oder Hex-Hashes (`filter wl channel add/del`).
-- **Pfad-Präfixe:** Verwaltung von 2–8 Hex-Zeichen (`filter wl path add/del`).
-- **Statistiken:** Anzeige von durchgelassenen Paketen, verworfenen Paketen, Droprate in % und eingesparter Airtime.
-- **Geschützter Slide-to-Confirm:** Großbuchstaben-Schutzbefehl `filter RESET` ist gegen versehentliches Auslösen durch einen Wisch-Schieberegler geschützt.
-
-#### ⚡ 4. Mesh-Schonmodus (Auto-Revert Watchdog)
-- **Zweck:** Drosselt bei Wartungsarbeiten oder Remote-Administration über das Mesh temporär die Sendeleistung des Transceivers (z. B. auf 2 oder 5 dBm), um das umgebende LoRa-Mesh nicht durch Konfigurations-Bursts zu überlasten.
-- **Fail-Safe Watchdog (Firmware + App):**
-  - Einstellbar auf 5 oder 10 Minuten.
-  - Live-Countdown und Fortschrittsbalken in der App mit "Watchdog verlängern"-Taste (Keep-Alive).
-  - Nutzt den `tempradio`-Mechanismus in ZephCore: Reißt die Funkverbindung ab oder wird die App geschlossen, stellt der autonome Firmware-Watchdog nach Ablauf der Frist automatisch die gespeicherte reguläre Sendeleistung wieder her.
-
-#### 🔋 5. Hardware & Status
-- **Batterie- & Solar-Telemetrie:**
-  - Batteriespannung in V, Ladestand in %, Ladestatus-Anzeige.
-  - Solarpanel-Spannung (V), Ladestrom (mA) und berechnete Solarleistung in Watt ($P = U \times I$).
-  - Batterietemperatur in °C.
-- **LED-Steuerung:** Normaler Betrieb (`set leds on`), Stealth-Modus für getarnte Outdoor-Standorte (`set leds off`) und Boot-Blinken (2x 150 ms bei Neustart).
-- **GPS-Modus:** Aus, Intervall (15 Min / 60 Min) oder Always-On.
-- **Node-Befehle:** Konfiguration im Flash sichern (`save`), Node neu starten (`reboot`) mit Bestätigungsabfrage.
+Alle Änderungen gelten erst als gespeichert, wenn der Repeater sie **bestätigt** hat. Speichern-Buttons zeigen jederzeit, ob ungespeicherte Änderungen vorliegen.
 
 ---
 
-## 🛠️ Bauen & Ausführen
+## Unterstützte Firmwares
 
-### Voraussetzungen
-- **Android Studio** (Hedgehog, Iguana, Jellyfish oder neuer)
-- **JDK 17**
-- **Android SDK API 34** (mindestens API 26 / Android 8.0)
+| Firmware | Unterstützung |
+|---|---|
+| **MeshCore** (Repeater, Companion) | vollständig: CLI-Variablen, Regionen, Remote-Admin über Companion |
+| **ZephCore** (Repeater, Companion) | vollständig, zusätzlich Paket-Filter (Blacklist/Whitelist) und LED-Steuerung |
+| **Dutch MeshCore** (Filter) | Blacklist-Filterbefehle (DMC) |
 
-### Debug-APK über die Konsole bauen
+Das Verhalten der App wird laufend gegen die Quelltexte von MeshCore und ZephCore geprüft. Wo eine Anforderung der Firmware widerspricht, folgt die App der Firmware.
+
+## Unterstützte Boards
+
+Erkannt und mit passenden Hardware-Grenzen hinterlegt:
+
+- Heltec WiFi LoRa 32 V3 / V3.2
+- RAK4631 / WisBlock
+- Seeed XIAO nRF52840 / ESP32-S3 + Wio-SX1262
+- Seeed SenseCAP Solar Node P1 / P1-Pro
+- Seeed Wio Tracker L1
+- LilyGO T-Beam / T-Beam Supreme
+- LilyGO LoRa32 T3-S3
+- Elecrow ThinkNode M1 / M2
+- B&Q Station G2 (SX1262 + PA)
+- sowie jedes andere SX1262-Board (generisches Profil)
+
+---
+
+## Bauhaus-UI
+
+Die Oberfläche folgt einer strengen, an das Bauhaus angelehnten Formensprache (Details in [`STYLE_GUIDE.md`](STYLE_GUIDE.md)):
+
+- **Farben:** Signalrot (Primäraktionen), Kobaltblau (Information), Ocker (Warnung) auf Carbon/Off-White, mit Hell- und Dunkelmodus.
+- **Formen:** einheitlich `BauhausCornerShape` (2 dp): Karten, Buttons, Dialoge, Badges und eckige Schalter. Einzige runde Ausnahme ist das USB/BT-Verbindungs-Badge.
+- **Bedienung:** genau ein roter Speichern-Button pro Karte, kurze einzeilige Button-Beschriftungen, Braille-Spinner für laufende Vorgänge, Scroll-Hinweise bei überlaufendem Inhalt.
+
+---
+
+## Bauen
+
+Voraussetzungen: JDK 17, Android SDK 34 (minSdk 26 / Android 8.0).
+
 ```bash
-cd RepeaterConfigurator
-./gradlew assembleDebug
+./gradlew testDebugUnitTest   # Unit-Tests
+./gradlew assembleDebug       # Debug-APK: app/build/outputs/apk/debug/app-debug.apk
 ```
-Die erzeugte APK liegt anschließend unter:
-`app/build/outputs/apk/debug/app-debug.apk`
+
+Weitere Dokumente: [`ROADMAP.md`](ROADMAP.md) (Versionen), [`STYLE_GUIDE.md`](STYLE_GUIDE.md) (Design- und Protokollregeln), [`PRIVACY.md`](PRIVACY.md) (Datenschutz).
 
 ---
 
-## 📂 Projektstruktur
-```
-RepeaterConfigurator/
-├── app/
-│   ├── build.gradle.kts
-│   ├── proguard-rules.pro
-│   └── src/main/
-│       ├── AndroidManifest.xml
-│       ├── java/com/meshcore/repeater/
-│       │   ├── MainActivity.kt
-│       │   ├── model/
-│       │   │   ├── ConnectionModel.kt
-│       │   │   ├── RadioAntennaModel.kt
-│       │   │   ├── FilterModel.kt
-│       │   │   ├── MeshCareModel.kt
-│       │   │   └── HardwareModel.kt
-│       │   ├── service/
-│       │   │   ├── RepeaterProtocol.kt
-│       │   │   ├── SerialConnectionManager.kt
-│       │   │   └── BleConnectionManager.kt
-│       │   ├── viewmodel/
-│       │   │   └── RepeaterViewModel.kt
-│       │   └── ui/
-│       │       ├── components/
-│       │       │   ├── AppDrawer.kt
-│       │       │   ├── TopBar.kt
-│       │       │   └── SlideToConfirm.kt
-│       │       ├── navigation/
-│       │       │   └── NavDrawerItem.kt
-│       │       ├── screens/
-│       │       │   ├── ConnectionScreen.kt
-│       │       │   ├── RadioAntennaScreen.kt
-│       │       │   ├── FilterScreen.kt
-│       │       │   ├── MeshCareScreen.kt
-│       │       │   └── HardwareStatusScreen.kt
-│       │       └── theme/
-│       │           ├── Color.kt
-│       │           ├── Theme.kt
-│       │           └── Type.kt
-│       └── res/
-│           ├── drawable/
-│           ├── mipmap-anydpi-v26/
-│           ├── values/
-│           └── xml/
-│               └── usb_device_filter.xml
-├── gradle/
-│   ├── libs.versions.toml
-│   └── wrapper/
-│       └── gradle-wrapper.properties
-├── build.gradle.kts
-├── settings.gradle.kts
-├── gradlew
-└── gradlew.bat
-```
+## Hinweis
+
+Diese Software wurde mit KI-Unterstützung entwickelt und wird **ohne jegliche Gewährleistung** bereitgestellt. Du bist selbst dafür verantwortlich, die in deinem Land geltenden Funkvorschriften einzuhalten (in der EU: ETSI EN 300 220 und nationale Frequenzpläne).
+
+## Lizenz
+
+meshchōsei ist freie Software unter der **GNU General Public License v3.0 (GPLv3)**. Du darfst sie nutzen, untersuchen, verändern und unter denselben Bedingungen weitergeben.
+
+Verwendete Bibliotheken: Jetpack Compose & Material 3 (Apache 2.0), usb-serial-for-android (MIT). Kartendaten © OpenStreetMap-Mitwirkende (ODbL).
+
+🄯2026 AHGH

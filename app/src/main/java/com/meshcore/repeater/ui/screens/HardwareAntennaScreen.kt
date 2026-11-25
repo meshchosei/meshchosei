@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.hintedVerticalScroll
+
 import com.meshcore.repeater.model.BoardDatabase
 import com.meshcore.repeater.i18n.tr
 import com.meshcore.repeater.ui.components.BusyButton
@@ -58,7 +60,7 @@ fun HardwareAntennaScreen(viewModel: RepeaterViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
+            .hintedVerticalScroll(rememberScrollState())
             .padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {

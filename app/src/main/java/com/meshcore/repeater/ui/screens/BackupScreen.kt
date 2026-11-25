@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.hintedVerticalScroll
+
 import com.meshcore.repeater.i18n.tr
 import com.meshcore.repeater.ui.components.BusyButton
 import com.meshcore.repeater.ui.components.BusyOutlinedButton
@@ -87,7 +89,7 @@ fun BackupScreen(viewModel: RepeaterViewModel) {
     }
 
     Column(
-        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(12.dp),
+        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).hintedVerticalScroll(rememberScrollState()).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (!isConnected) {

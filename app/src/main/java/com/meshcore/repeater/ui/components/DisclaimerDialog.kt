@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.components
 
+import com.meshcore.repeater.ui.components.hintedVerticalScroll
+
 import com.meshcore.repeater.i18n.tr
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -74,7 +76,7 @@ fun DisclaimerDialog(
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = tr("⚠ Wichtiger Hinweis"),
+                    text = tr("Wichtiger Hinweis"),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -86,7 +88,7 @@ fun DisclaimerDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .hintedVerticalScroll(rememberScrollState(), always = true, fadeColor = MaterialTheme.colorScheme.surface)
             ) {
                 // AI-generiert Banner
                 Card(

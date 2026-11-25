@@ -55,4 +55,11 @@ class DisclaimerTranslationTest {
         assertEquals(listOf("Accept", "Accepteren", "Accepter"), translations("Akzeptieren"))
         assertFalse(json.contains("Verstanden & Akzeptieren"))
     }
+
+    /** v1.14: das Ocker-Warnsymbol steht schon vor dem Titel – kein zusätzliches ⚠/! im Titeltext. */
+    @Test fun titleHasNoWarningGlyph() {
+        assertTrue(keys.contains("Wichtiger Hinweis"))
+        for (text in listOf("Wichtiger Hinweis") + translations("Wichtiger Hinweis").orEmpty())
+            assertFalse(text, text.startsWith("⚠") || text.startsWith("!"))
+    }
 }
