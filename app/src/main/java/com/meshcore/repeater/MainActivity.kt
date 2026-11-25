@@ -123,8 +123,11 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
     val msgNotConnected = androidx.compose.ui.res.stringResource(com.meshcore.repeater.R.string.menu_blocked_not_connected)
     val msgUnsupported = androidx.compose.ui.res.stringResource(com.meshcore.repeater.R.string.menu_blocked_unsupported)
     val msgFilterActive = androidx.compose.ui.res.stringResource(com.meshcore.repeater.R.string.menu_blocked_filter_active)
-    val navigationAllowed = isConnected && capabilities.detectionComplete && (!capabilities.isCompanion || remoteAdminSession.isLoggedIn) &&
-        initialReadDone && !setupReading
+    // Menü-Sperre NUR während des initialen Start-Scans (isReading setzt ausschließlich startInitialScan) – nie wegen manueller CLI-Befehle
+    val navigationAllowed = com.meshcore.repeater.model.NavigationRules.navigationAllowed(
+        connected = isConnected, detectionComplete = capabilities.detectionComplete, isCompanion = capabilities.isCompanion,
+        remoteLoggedIn = remoteAdminSession.isLoggedIn, initialReadDone = initialReadDone, startScanReading = setupReading
+    )
 
     // Mesh-Schonmodus: per Remote-Admin (LoRa) ODER bei direkt per USB verbundenem Repeater; gesperrt nur bei Companion ohne Remote-Login
     val meshCareAvailable = !capabilities.isCompanion || remoteAdminSession.targetRepeater != null
@@ -150,6 +153,11 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
         }
     }
     if (showExitDialog) { AlertDialog(onDismissRequest = { showExitDialog = false }, shape = BauhausCornerShape, title = { Text(tr("App beenden?")) }, text = { Text(tr("Möchtest du den meshchōsei wirklich schließen?")) }, confirmButton = { TextButton(shape = BauhausCornerShape, onClick = { showExitDialog = false; try { viewModel.disconnect() } catch (_: Exception) {}; act?.finishAffinity(); return@TextButton }) { Text(tr("Beenden")) } }, dismissButton = { TextButton(shape = BauhausCornerShape, onClick = { showExitDialog = false }) { Text(tr("Abbrechen")) } }) }
+
+    // Seitenmenü öffnen oder Screen wechseln: wartende/laufende manuelle CLI-Befehle sauber abbrechen,
+    // damit sie den Mutex nicht bis zum (LoRa-)Timeout blockieren und der neue Screen sofort laden kann.
+    LaunchedEffect(drawerState.targetValue) { if (drawerState.targetValue == DrawerValue.Open) viewModel.cancelManualCli() }
+    LaunchedEffect(currentScreen) { if (currentScreen != NavDrawerItem.CLI_CONSOLE) viewModel.cancelManualCli() }
 
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         AppDrawerHost(

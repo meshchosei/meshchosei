@@ -256,6 +256,7 @@ RefreshButton(
 ### 2.8 Menü-Sperren mit differenzierten Hinweisen
 
 - Ein Drawer-Eintrag ist gesperrt (ausgegraut, `isEnabled = false`), solange `navigationAllowed` falsch ist. Das gilt so lange, bis Verbindung **und** erstes Einlesen abgeschlossen sind (`initialReadDone && !setupReading`).
+- **Menü-Sperre nur beim Start-Scan (seit v1.13):** `NavigationRules.navigationAllowed` hängt nur an Verbindung, Erkennung, Remote-Login und dem initialen Start-Scan, nie an manuellen CLI-Befehlen. Der Hamburger-Button ist immer bedienbar. Öffnen des Menüs oder ein Screenwechsel bricht wartende manuelle CLI-Befehle ab (`cancelManualCli`), damit sie den Mutex nicht bis zum Timeout blockieren.
 - Ein Klick auf einen gesperrten Eintrag navigiert nicht, sondern zeigt eine Snackbar mit dem **konkreten Grund**. Prüfreihenfolge:
   1. nicht verbunden → `menu_blocked_not_connected`;
   2. Firmware oder Verbindung kann das nicht → `menu_blocked_unsupported`;
@@ -278,6 +279,7 @@ RefreshButton(
   - Antworten, die der Validator nicht akzeptiert, sind Fremdzeilen und werden ignoriert.
   - `null` bedeutet Fehler oder „unknown command“.
 - **Antwort-Tags über LoRa (seit v1.12):** Jeder Remote-Befehl wird als `XX|befehl` gesendet (`CliReplyTag`, zwei Zeichen `0-9a-z`, laufend). MeshCore (`simple_repeater/MyMesh.cpp`) und ZephCore (`RepeaterMesh::handleCommand`) spiegeln das Präfix an den Antwortanfang. Nur eine Antwort mit genau dem Tag des laufenden Befehls zählt. Antworten mit fremdem Tag (verspätet nach Timeout) oder ohne Tag werden verworfen und im System-Log vermerkt. So landet z. B. eine späte `get name`-Antwort nie in `owner.info`. Der Inhalts-Validator gilt zusätzlich. USB-Direkt und lokale Companion-CLI bleiben ohne Tag.
+- **Manueller CLI-Retry über LoRa (seit v1.13):** Bleibt die Antwort auf einen Konsolenbefehl aus, wird er **einmal** mit demselben `XX|`-Tag wiederholt (Hinweis „↻ … erneut“ im CLI-Tab), danach folgt eine klare Timeout-Meldung. Nicht-idempotente Befehle (`reboot`, `erase`, `advert`, `password …`, `filter RESET`, `region remove …` usw., `ManualCliRetry`) werden nie automatisch wiederholt, weil der Repeater sie sonst doppelt ausführt.
 - Bei Timeout hebt `runQuery` die Zuordnung (`activeQueryCommand`, Validator, Waiter, Tag, Sammelpuffer) **sofort** auf. Der Sammelpuffer wird vor jedem Befehl geleert.
 - `activeQueryCommand` legt fest, welcher Parser zuständig ist. Beispiel: Filter-Status wird nur aus Antworten auf `filter…`-Befehle übernommen, Listen nur aus `… list`.
 - Die Timeouts hängen vom Transport ab: lokales USB/Companion ist kurz, Remote über LoRa länger.

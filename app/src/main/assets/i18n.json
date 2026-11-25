@@ -2903,5 +2903,30 @@
   "[ignored: no tag #{0} for \"{1}\"] {2}",
   "[genegeerd: geen tag #{0} voor \"{1}\"] {2}",
   "[ignoré : sans tag #{0} pour \"{1}\"] {2}"
+ ],
+ "✕ Nicht verbunden – \"{0}\" nicht gesendet.": [
+  "✕ Not connected – \"{0}\" not sent.",
+  "✕ Niet verbonden – \"{0}\" niet verzonden.",
+  "✕ Non connecté – « {0} » non envoyé."
+ ],
+ "↻ Keine Antwort – sende \"{0}\" erneut{1}…": [
+  "↻ No reply – resending \"{0}\"{1}…",
+  "↻ Geen antwoord – \"{0}\" opnieuw verzenden{1}…",
+  "↻ Pas de réponse – nouvel envoi de « {0} »{1}…"
+ ],
+ "⏱ Timeout: keine Antwort auf \"{0}\" – auch nicht nach Wiederholung.": [
+  "⏱ Timeout: no reply to \"{0}\" – not even after retrying.",
+  "⏱ Time-out: geen antwoord op \"{0}\" – ook niet na herhaling.",
+  "⏱ Délai dépassé : aucune réponse à « {0} », même après une nouvelle tentative."
+ ],
+ "⏱ Timeout: keine Antwort auf \"{0}\".": [
+  "⏱ Timeout: no reply to \"{0}\".",
+  "⏱ Time-out: geen antwoord op \"{0}\".",
+  "⏱ Délai dépassé : aucune réponse à « {0} »."
+ ],
+ "✕ Manueller CLI-Befehl abgebrochen (Menü/Screenwechsel).": [
+  "✕ Manual CLI command cancelled (menu/screen change).",
+  "✕ Handmatige CLI-opdracht geannuleerd (menu/schermwissel).",
+  "✕ Commande CLI manuelle annulée (menu/changement d'écran)."
  ]
 }

@@ -11,8 +11,8 @@ android {
         applicationId = "com.meshcore.repeater"
         minSdk = 26
         targetSdk = 34
-        versionCode = 112
-        versionName = "1.12"
+        versionCode = 113
+        versionName = "1.13"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

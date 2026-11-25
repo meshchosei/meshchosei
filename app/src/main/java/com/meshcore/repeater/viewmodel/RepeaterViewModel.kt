@@ -22,6 +22,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.delay
+import com.meshcore.repeater.service.ManualCliRetry
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -540,11 +543,50 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         notifyUser("Login vom Repeater abgelehnt – Passwort prüfen.")
     }
     /** Konsole: Befehl hinten in die sequentielle Warteschlange stellen (wartet auf laufende Abfragen). */
-    fun sendManualCommand(cmd: String) { enqueueCommands(listOf(cmd), isAuto = false) }
+    /** Eltern-Job aller manuellen CLI-Befehle – [cancelManualCli] bricht wartende/laufende sauber ab. */
+    private val manualCliParent = SupervisorJob(viewModelScope.coroutineContext[Job])
+
+    /**
+     * Manueller CLI-Befehl (Konsole). Streng sequentiell unter dem Mutex. Über LoRa (Remote-Admin):
+     * bleibt die Antwort mit passendem "XX|"-Tag im Antwortfenster aus, wird der Befehl EINMAL mit demselben
+     * Tag erneut gesendet (nur wenn [ManualCliRetry.isRetrySafe]); danach klare Timeout-Meldung im CLI-Log.
+     */
+    fun sendManualCommand(cmd: String) {
+        val c = cmd.trim()
+        if (c.isEmpty()) return
+        viewModelScope.launch(manualCliParent) {
+            sequentialQueryMutex.withLock {
+                if (!isLinkUp()) { logCli(tr("✕ Nicht verbunden – \"{0}\" nicht gesendet.", c)); return@withLock }
+                val remote = _remoteAdminSession.value.targetRepeater != null
+                val tag = if (remote) CliReplyTag.tagFor(cliTagSeq++) else null
+                var reply = runQuery(c, isAuto = false, fixedTag = tag)
+                var retried = false
+                if (reply == null && remote && isLinkUp() && ManualCliRetry.isRetrySafe(c)) {
+                    retried = true
+                    logCli(tr("↻ Keine Antwort – sende \"{0}\" erneut{1}…", c, tag?.let { " (#$it)" } ?: ""))
+                    reply = runQuery(c, isAuto = false, fixedTag = tag)
+                }
+                if (reply == null && isLinkUp()) logCli(
+                    if (retried) tr("⏱ Timeout: keine Antwort auf \"{0}\" – auch nicht nach Wiederholung.", c)
+                    else tr("⏱ Timeout: keine Antwort auf \"{0}\".", c)
+                )
+            }
+        }
+    }
+
+    /** Bricht wartende und laufende manuelle CLI-Befehle ab (Menü geöffnet / Screen gewechselt). */
+    fun cancelManualCli() {
+        if (manualCliParent.children.none { it.isActive }) return
+        manualCliParent.cancelChildren()
+        logCli(tr("✕ Manueller CLI-Befehl abgebrochen (Menü/Screenwechsel)."))
+    }
+
+    /** Meldung immer in den CLI-Tab (unabhängig vom Antwortfenster). */
+    private fun logCli(text: String) { _terminalLogs.value = (_terminalLogs.value + TerminalEntry(text, false)).takeLast(400) }
     /** Einzelner Set-/Aktionsbefehl aus der UI – ebenfalls streng sequentiell. */
     /** Von UI-Buttons ausgelöste Befehle gelten als System-Befehle (SYSTEM-Tab); nur manualCli = true landet im CLI-Tab. */
     fun sendCommand(cmd: String, manualCli: Boolean = false, busyKey: String? = null) {
-        if (busyKey == null) { enqueueCommands(listOf(cmd), isAuto = !manualCli); return }
+        if (busyKey == null) { if (manualCli) sendManualCommand(cmd) else enqueueCommands(listOf(cmd), isAuto = true); return }
         sendBusy(busyKey, cmd) { ok -> if (!ok) notifyUser(tr("\"{0}\" vom Repeater nicht bestätigt.", cmd.substringBefore(' ', cmd))) }
     }
 
@@ -561,14 +603,15 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
      * Sendet GENAU EINEN Befehl und wartet exklusiv auf dessen Antwort (Format-Validator) oder Timeout.
      * Muss unter [sequentialQueryMutex] aufgerufen werden. Rückgabe: null = Timeout, sonst QueryReply.
      */
-    private suspend fun runQuery(cmd: String, isAuto: Boolean = true, timeoutMs: Long = queryTimeoutMs(), capture: MutableList<String>? = null, trailingMs: Long? = null): QueryReply? {
+    private suspend fun runQuery(cmd: String, isAuto: Boolean = true, timeoutMs: Long = queryTimeoutMs(), capture: MutableList<String>? = null, trailingMs: Long? = null, fixedTag: String? = null): QueryReply? {
         if (cmd.isBlank() || !isLinkUp()) return null
         val c = cmd.trim()
         val key = c.lowercase()
         // Sauberer Start: kein Rest eines früheren Befehls im Sammelpuffer
         capture?.clear()
         // LoRa-Remote: eindeutiges Tag, das die Firmware an den Antwortanfang spiegelt (verspätete Antworten erkennbar)
-        val tag = if (_remoteAdminSession.value.targetRepeater != null) CliReplyTag.tagFor(cliTagSeq++).takeIf { CliReplyTag.wrap(it, c) != null } else null
+        // fixedTag: Wiederholung desselben Befehls mit demselben Tag (manueller CLI-Retry)
+        val tag = if (_remoteAdminSession.value.targetRepeater != null) (fixedTag ?: CliReplyTag.tagFor(cliTagSeq++)).takeIf { CliReplyTag.wrap(it, c) != null } else null
         val waiter = CompletableDeferred<QueryReply>()
         activeQueryTag = tag
         activeQueryValidator = QuerySpec.validatorFor(key)
