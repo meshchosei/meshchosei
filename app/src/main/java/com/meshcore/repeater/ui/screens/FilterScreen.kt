@@ -2,6 +2,8 @@ package com.meshcore.repeater.ui.screens
 
 import com.meshcore.repeater.i18n.tr
 import com.meshcore.repeater.ui.components.BusyButton
+import com.meshcore.repeater.ui.components.BauhausSwitch
+import com.meshcore.repeater.ui.components.RefreshButton
 import com.meshcore.repeater.viewmodel.BusyKey
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.LaunchedEffect
@@ -48,8 +50,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -136,7 +136,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
         // =====================================================================
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Text(stringResource(if (isWlView) R.string.menu_whitelist else R.string.menu_blacklist).uppercase(), style = MaterialTheme.typography.titleMedium, color = if (isWlView) bColors.cobalt else bColors.signalRed, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            androidx.compose.material3.OutlinedButton(shape = BauhausCornerShape, onClick = { viewModel.refreshAllFiltersFromNode() }) { Text(tr("Status laden"), fontSize = 11.sp) }
+            RefreshButton(onClick = { viewModel.refreshAllFiltersFromNode() }, busy = BusyKey.FILTER_REFRESH in busy, color = if (isWlView) bColors.cobalt else bColors.signalRed)
         }
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -172,14 +172,11 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Switch(
+                    BauhausSwitch(
                         checked = listActive,
                         enabled = !filterSwitchPending,
                         onCheckedChange = { on -> viewModel.setFilterActive(if (on) view else null) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = bColors.signalRed,
-                            checkedTrackColor = bColors.signalRed.copy(alpha = 0.35f)
-                        )
+                        activeColor = if (isWlView) bColors.cobalt else bColors.signalRed
                     )
                 }
 
@@ -209,13 +206,11 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             color = if (stats.dryRun) bColors.ochre else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Switch(
+                    // Dry-Run bleibt Ocker (Warnzustand "nur protokollieren", vgl. STYLE_GUIDE §2.3)
+                    BauhausSwitch(
                         checked = stats.dryRun,
                         onCheckedChange = { viewModel.setFilterDryRun(it) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = bColors.ochre,
-                            checkedTrackColor = bColors.ochre.copy(alpha = 0.35f)
-                        )
+                        activeColor = bColors.ochre
                     )
                 }
 

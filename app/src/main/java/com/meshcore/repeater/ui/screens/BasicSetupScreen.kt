@@ -1,5 +1,8 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.BauhausSwitch
+import com.meshcore.repeater.ui.components.RefreshButton
+
 import android.annotation.SuppressLint
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
@@ -260,19 +263,7 @@ fun BasicSetupScreen(viewModel: RepeaterViewModel) {
                 )
             }
 
-            // Schlichter rahmenloser TextButton mit einheitlicher ASCII-Spinner-Animation
-            TextButton(
-                onClick = { if (!setup.isReading) viewModel.readBasicSetupFromNode() },
-                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-                if (setup.isReading) {
-                    Text("$currentSpinner Lese...", fontFamily = FontFamily.Monospace, fontSize = 12.sp, color = bColors.cobalt, fontWeight = FontWeight.Bold)
-                } else {
-                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(15.dp), tint = bColors.cobalt)
-                    Spacer(Modifier.width(4.dp))
-                    Text("Neu einlesen", fontSize = 12.sp, color = bColors.cobalt, fontWeight = FontWeight.Medium)
-                }
-            }
+            RefreshButton(onClick = { viewModel.readBasicSetupFromNode() }, label = "Neu einlesen", busy = setup.isReading)
         }
 
         // Kompakter 1-zeiliger Hinweis während des ersten Einlesens
@@ -590,7 +581,7 @@ fun BasicSetupScreen(viewModel: RepeaterViewModel) {
                                         Text("Sicherheits-Sperre aufheben", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                                         Text(if (radioCfg.complianceUnlocked) "Freigegeben für Test- & Lizenzbetrieb" else "Begrenzt TX auf max. legalen Wert", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
-                                    Switch(checked = radioCfg.complianceUnlocked, enabled = inputEnabled, onCheckedChange = { viewModel.setComplianceUnlocked(it) })
+                                    BauhausSwitch(checked = radioCfg.complianceUnlocked, enabled = inputEnabled, onCheckedChange = { viewModel.setComplianceUnlocked(it) })
                                 }
 
                                 if (!liveRadioCfg.isCompliant && !radioCfg.complianceUnlocked) {
@@ -679,7 +670,7 @@ fun BasicSetupScreen(viewModel: RepeaterViewModel) {
                                         Text("Sicherheits-Sperre aufheben", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                                         Text(if (radioCfg.complianceUnlocked) "Freigegeben für Test- & Lizenzbetrieb" else "Begrenzt TX auf max. legalen Wert", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
-                                    Switch(checked = radioCfg.complianceUnlocked, enabled = inputEnabled, onCheckedChange = { viewModel.setComplianceUnlocked(it) })
+                                    BauhausSwitch(checked = radioCfg.complianceUnlocked, enabled = inputEnabled, onCheckedChange = { viewModel.setComplianceUnlocked(it) })
                                 }
 
                                 if (!liveRadioCfg.isCompliant && !radioCfg.complianceUnlocked) {
@@ -913,7 +904,7 @@ fun BasicSetupScreen(viewModel: RepeaterViewModel) {
 
                                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                                     Text("Repeater-Weiterleitung (set repeat)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                    Switch(checked = setup.repeatEnabled, enabled = inputEnabled, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(repeatEnabled = it)) }, colors = SwitchDefaults.colors(checkedTrackColor = bColors.signalRed))
+                                    BauhausSwitch(checked = setup.repeatEnabled, enabled = inputEnabled, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(repeatEnabled = it)) })
                                 }
 
                                 Text("Pfad-Hash-Modus:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -994,7 +985,7 @@ fun BasicSetupScreen(viewModel: RepeaterViewModel) {
 
                                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                                     Text("Mehrfache Empfangsbestätigungen (multi.acks = 1)", fontSize = 11.sp)
-                                    Switch(checked = setup.multiAcks == 1, enabled = inputEnabled, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(multiAcks = if (it) 1 else 0)) }, colors = SwitchDefaults.colors(checkedTrackColor = bColors.signalRed))
+                                    BauhausSwitch(checked = setup.multiAcks == 1, enabled = inputEnabled, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(multiAcks = if (it) 1 else 0)) })
                                 }
                             }
                         }
@@ -1395,7 +1386,7 @@ fun BasicSetupScreen(viewModel: RepeaterViewModel) {
                                 Text("Sicherheits-Sperre aufheben", fontWeight = FontWeight.SemiBold, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface)
                                 Text(if (radioCfg.complianceUnlocked) "Freigegeben für Test- & Lizenzbetrieb" else "Begrenzt TX auf max. legalen Wert", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            Switch(checked = radioCfg.complianceUnlocked, enabled = inputEnabled, onCheckedChange = { viewModel.setComplianceUnlocked(it) })
+                            BauhausSwitch(checked = radioCfg.complianceUnlocked, enabled = inputEnabled, onCheckedChange = { viewModel.setComplianceUnlocked(it) })
                         }
 
                         if (!liveRadioCfg.isCompliant && !radioCfg.complianceUnlocked) {
@@ -1491,7 +1482,7 @@ fun BasicSetupScreen(viewModel: RepeaterViewModel) {
                         Text("4. ROUTING, ADVERTS & HARDWARE", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = bColors.cobalt)
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             Text("Repeater-Weiterleitung aktiv (set repeat)", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            Switch(checked = setup.repeatEnabled, enabled = inputEnabled, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(repeatEnabled = it)) }, colors = SwitchDefaults.colors(checkedTrackColor = bColors.signalRed))
+                            BauhausSwitch(checked = setup.repeatEnabled, enabled = inputEnabled, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(repeatEnabled = it)) })
                         }
                         Text("Pfad-Hash-Modus (Node-ID Breite):", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1575,7 +1566,7 @@ fun BasicSetupScreen(viewModel: RepeaterViewModel) {
 
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             Text("Mehrfache Empfangsbestätigungen (multi.acks = 1)", fontSize = 12.sp)
-                            Switch(checked = setup.multiAcks == 1, enabled = inputEnabled, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(multiAcks = if (it) 1 else 0)) }, colors = SwitchDefaults.colors(checkedTrackColor = bColors.signalRed))
+                            BauhausSwitch(checked = setup.multiAcks == 1, enabled = inputEnabled, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(multiAcks = if (it) 1 else 0)) })
                         }
                     }
                 }

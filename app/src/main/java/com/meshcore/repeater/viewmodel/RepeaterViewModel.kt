@@ -84,6 +84,9 @@ object BusyKey {
     const val RULE = "rule"
     const val WATCH = "watch"
     const val FILTER_LOAD = "filter_load"
+    const val FILTER_REFRESH = "filter_refresh"
+    const val POWER = "power"
+    const val LEDS = "leds"
 }
 
 class RepeaterViewModel(application: Application) : AndroidViewModel(application) {
@@ -1412,10 +1415,11 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     /** "Versorgung abfragen" (Nutzeraktion): genau ein "power"-Befehl, kein Polling. */
     fun refreshPowerStatus() {
         if (!isLinkUp()) return
+        if (!tryMarkBusy(BusyKey.POWER)) return
         startRead(cancelPrevious = false) {
             _activeReadStatusText.value = QuerySpec.statusTextFor(RepeaterProtocol.CMD_POWER)
             runQuery(RepeaterProtocol.CMD_POWER)
-        }
+        }.invokeOnCompletion { clearBusy(BusyKey.POWER) }
     }
     fun requestTelemetry() { startRead(cancelPrevious = false) { runReadSequence(listOf(RepeaterProtocol.CMD_POWER, RepeaterProtocol.CMD_CLOCK, RepeaterProtocol.CMD_VER), retriesWireless = 1) } }
     fun rebootNode() { sendCommand(RepeaterProtocol.CMD_REBOOT) }
@@ -1476,17 +1480,28 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    /**
+     * Status-LEDs (Hardware-Screen): sendet "set leds <mode>", sofern vom bestätigten Stand abweichend.
+     * ZephCore: on/off/default; Standard-MeshCore kennt "set leds" nicht; "boot" = Custom-Erweiterung.
+     */
+    fun applyLedMode(busyKey: String = BusyKey.LEDS) {
+        val mode = _basicSetup.value.ledsMode.trim()
+        if (mode.isEmpty() || mode == _nodeBaseline.value.ledsMode) return
+        applyBasicSetupChanges(listOf(SetupChange("set leds $mode") { it.copy(ledsMode = mode) }), busyKey)
+    }
+
     private fun commitConfirmed(changes: List<SetupChange>, ok: List<Boolean>) {
         var b = _nodeBaseline.value
         changes.forEachIndexed { i, c -> if (ok.getOrElse(i) { false }) b = c.commit(b) }
         _nodeBaseline.value = b
     }
     fun refreshAllFiltersFromNode() {
+        if (!tryMarkBusy(BusyKey.FILTER_REFRESH)) return
         startRead(cancelPrevious = false) {
             _activeReadStatusText.value = "Filter-Status wird abgefragt…"
             val c = _deviceCapabilities.value
             runFilterListQueries(filterQueriesFor(c.supportsBlacklist, c.supportsWhitelist))
-        }
+        }.invokeOnCompletion { clearBusy(BusyKey.FILTER_REFRESH) }
     }
     fun executeFilterReset() { sendCommand(RepeaterProtocol.CMD_FILTER_RESET); _blockedChannels.value = emptyList(); _blockedPaths.value = emptyList(); _whitelistChannels.value = emptyList(); _whitelistPaths.value = emptyList(); _senderRules.value = emptyList(); _textRules.value = emptyList(); _watchChannels.value = emptyList() }
     // Hinzufügen/Löschen: Button arbeitet (Spinner), bis der Repeater bestätigt; erst dann wird die Liste geändert.

@@ -1,4 +1,6 @@
 package com.meshcore.repeater.ui.screens
+
+import com.meshcore.repeater.ui.components.RefreshButton
 import com.meshcore.repeater.R
 import androidx.compose.ui.res.stringResource
 import com.meshcore.repeater.i18n.tr
@@ -92,23 +94,6 @@ import com.meshcore.repeater.ui.theme.AlertRed
 import com.meshcore.repeater.ui.theme.BauhausCornerShape
 import com.meshcore.repeater.ui.theme.LocalBauhausColors
 import com.meshcore.repeater.viewmodel.RepeaterViewModel
-
-@Composable
-private fun AsciiSpinner(label: String, color: Color = Color(0xFF2196F3)) {
-    val frames = listOf("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
-    var idx by remember { mutableStateOf(0) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            kotlinx.coroutines.delay(100L)
-            idx = (idx + 1) % frames.size
-        }
-    }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text = frames[idx], fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = color)
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = color)
-    }
-}
 
 @Composable
 fun ConnectionScreen(viewModel: RepeaterViewModel) {
@@ -334,15 +319,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                         .padding(vertical = 4.dp, horizontal = 4.dp)
                                 )
                             }
-                            Text(
-                                text = "Sync",
-                                color = bColors.cobalt,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier
-                                    .clickable { viewModel.refreshUsbDevices() }
-                                    .padding(vertical = 4.dp, horizontal = 4.dp)
-                            )
+                            RefreshButton(onClick = { viewModel.refreshUsbDevices() })
                         }
                     }
 
@@ -506,19 +483,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 Text(tr("Repeater-Auswahl ({0})", meshContacts.size), style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold)
                                 Text(tr("Companion Mesh-Kontakte"), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            if (isRefreshingContacts) {
-                                AsciiSpinner("", bColors.cobalt)
-                            } else {
-                                Text(
-                                    text = "Sync",
-                                    color = bColors.cobalt,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .clickable { viewModel.refreshMeshContacts() }
-                                        .padding(vertical = 4.dp, horizontal = 4.dp)
-                                )
-                            }
+                            RefreshButton(onClick = { viewModel.refreshMeshContacts() }, busy = isRefreshingContacts)
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             FilterChip(shape = BauhausCornerShape, selected = filterOnlyRepeaters, onClick = { filterOnlyRepeaters = !filterOnlyRepeaters }, label = { Text(tr("Nur Repeater"), fontSize = 11.sp) })
@@ -773,7 +738,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                     fontSize = 12.sp,
                     color = if (initialReadDone) MaterialTheme.colorScheme.onSurfaceVariant else bColors.ochre
                 )
-                OutlinedButton(shape = BauhausCornerShape, onClick = { viewModel.readBasicSetupFromNode() }) { Text(tr("Neu einlesen"), fontSize = 12.sp) }
+                RefreshButton(onClick = { viewModel.readBasicSetupFromNode() }, label = tr("Neu einlesen"))
             }
             Spacer(modifier = Modifier.height(10.dp))
         }

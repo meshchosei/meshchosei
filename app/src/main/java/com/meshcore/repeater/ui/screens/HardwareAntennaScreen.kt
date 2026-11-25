@@ -2,6 +2,13 @@ package com.meshcore.repeater.ui.screens
 
 import com.meshcore.repeater.model.BoardDatabase
 import com.meshcore.repeater.i18n.tr
+import com.meshcore.repeater.ui.components.BusyButton
+import com.meshcore.repeater.ui.components.LocalTourMode
+import com.meshcore.repeater.ui.components.RefreshButton
+import com.meshcore.repeater.ui.components.RegisterTourSave
+import com.meshcore.repeater.viewmodel.BusyKey
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -40,6 +47,7 @@ fun HardwareAntennaScreen(viewModel: RepeaterViewModel) {
     val capabilities by viewModel.deviceCapabilities.collectAsState()
     val telemetry by viewModel.telemetry.collectAsState()
     val cfg by viewModel.radioConfig.collectAsState()
+    val busy by viewModel.busyActions.collectAsState()
 
     var cableLossInput by remember(cfg.cableLossDb) { mutableStateOf(cfg.cableLossDb.toString()) }
     var customGainInput by remember(cfg.customAntennaGainDbi) { mutableStateOf(cfg.customAntennaGainDbi.toString()) }
@@ -75,9 +83,7 @@ fun HardwareAntennaScreen(viewModel: RepeaterViewModel) {
                         color = if (telemetry.powerSource == PowerSource.BATTERY && telemetry.batteryPercent < 20) bColors.ochre else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f)
                     )
-                    TextButton(onClick = { viewModel.refreshPowerStatus() }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)) {
-                        Text(tr("Abfragen"), fontSize = 11.sp)
-                    }
+                    RefreshButton(onClick = { viewModel.refreshPowerStatus() }, label = tr("Abfragen"), busy = BusyKey.POWER in busy)
                 }
 
                 // Board-Profil aus der BoardDatabase
@@ -122,7 +128,10 @@ fun HardwareAntennaScreen(viewModel: RepeaterViewModel) {
             }
         }
 
-        // 2. Antennen-Setup & Kabeldämpfung
+        // 2. Status-LEDs (aus "Routing & Adverts" hierher verschoben – Hardware-Thema)
+        StatusLedSection(viewModel, BusyKey.LEDS in busy)
+
+        // 3. Antennen-Setup & Kabeldämpfung
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = BauhausCornerShape,
@@ -171,7 +180,7 @@ fun HardwareAntennaScreen(viewModel: RepeaterViewModel) {
             }
         }
 
-        // 3. Live-ERP/EIRP-Berechnung, Grenzwerte & TX-Abgleich
+        // 4. Live-ERP/EIRP-Berechnung, Grenzwerte & TX-Abgleich
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = BauhausCornerShape,
@@ -220,6 +229,56 @@ fun HardwareAntennaScreen(viewModel: RepeaterViewModel) {
                     tr("Der Wert wird nur vorgemerkt – unter \"Funk & Region\" kannst du ihn frei anpassen und speichern."),
                     fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+        }
+    }
+}
+
+/**
+ * Status-LEDs ("set leds"). Firmware: ZephCore kennt on/off/default, Standard-MeshCore hat kein "set leds";
+ * "boot" ist eine Custom-Erweiterung. Gesendet wird nur bei Abweichung vom bestätigten Stand (nodeBaseline).
+ * Im Setup-Tour-Modus übernimmt "Speichern & Weiter →" das Speichern.
+ */
+@Composable
+private fun StatusLedSection(viewModel: RepeaterViewModel, busy: Boolean) {
+    val bColors = LocalBauhausColors.current
+    val setup by viewModel.basicSetup.collectAsState()
+    val baseline by viewModel.nodeBaseline.collectAsState()
+    val changed = setup.ledsMode.isNotBlank() && setup.ledsMode != baseline.ledsMode
+    RegisterTourSave { viewModel.applyLedMode() }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = BauhausCornerShape,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionTitle(Icons.Default.Lightbulb, tr("STATUS-LEDS"), bColors.ochre)
+            Text(tr("Status-LEDs (set leds):"), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("on", "off", "boot").forEach { mode ->
+                    FilterChip(
+                        selected = setup.ledsMode.equals(mode, true),
+                        onClick = { viewModel.updateBasicSetupDraft(setup.copy(ledsMode = mode)) },
+                        label = { Text(mode, fontSize = 11.sp) },
+                        shape = BauhausCornerShape,
+                        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = bColors.cobalt, selectedLabelColor = Color.White)
+                    )
+                }
+            }
+            Text(
+                tr("Hinweis: \"boot\" ist eine Custom-Firmware-Erweiterung und wird von Standard-Firmware ggf. nicht unterstützt."),
+                fontSize = 10.sp, lineHeight = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (!LocalTourMode.current) {
+                BusyButton(
+                    busy = busy, enabled = changed, onClick = { viewModel.applyLedMode() },
+                    containerColor = bColors.signalRed, modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, tint = Color.White)
+                    Spacer(Modifier.width(8.dp))
+                    Text(tr("Speichern"), color = Color.White, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

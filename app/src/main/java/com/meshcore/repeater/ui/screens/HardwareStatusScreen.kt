@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.RefreshButton
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -91,15 +93,7 @@ fun HardwareStatusScreen(viewModel: RepeaterViewModel) {
                 color = bColors.signalRed,
                 fontWeight = FontWeight.Bold
             )
-            Text(
-                text = "Sync",
-                color = bColors.cobalt,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .clickable { viewModel.requestTelemetry() }
-                    .padding(vertical = 4.dp, horizontal = 4.dp)
-            )
+            RefreshButton(onClick = { viewModel.requestTelemetry() })
         }
         Spacer(modifier = Modifier.height(8.dp))
 

@@ -152,14 +152,60 @@ BusyButton(                                   // ui/components/BusyButton.kt
 
 **Kompakte Listen-Schalter:** In dichten Listen (z. B. „KONFIGURIERTE REGIONEN“) stehen eckige Bauhaus-Schalter `[HOME] [DEF] [FLOOD]` statt runder Material-Switches. Sie haben `BauhausCornerShape` (2 dp), 28 dp Höhe, Monospace 10 sp fett und eine 1-dp-Outline. Aktiv sind sie vollflächig in ihrer Signalfarbe (HOME = Rot, DEF = Kobalt, FLOOD = Ocker). Während einer Übertragung sind sie gesperrt.
 
-### 2.3 Tastatur-Verhalten
+### 2.3 Schalter: `BauhausSwitch` (verbindlich)
+
+Runde Material-`Switch`-Komponenten sind seit v1.04 **verboten**. Jeder Ein/Aus-Schalter ist ein `BauhausSwitch` (`ui/components/BauhausControls.kt`):
+
+```kotlin
+BauhausSwitch(
+    checked = setup.repeatEnabled,
+    onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(repeatEnabled = it)) },
+    enabled = inputEnabled,                 // optional
+    activeColor = bColors.signalRed         // Standard; Kobalt für Whitelist/Info
+)
+```
+
+- Form: rechteckige Spur 44 × 24 dp mit quadratischem Schieber 20 × 20 dp. Beide haben `BauhausCornerShape` (2 dp) und eine klare 1,5-dp-Rahmenlinie. Die Touch-Fläche ist 48 dp hoch.
+- **Aktiv:** Die Spur ist vollflächig in der Aktiv-Farbe, der Schieber weiß und rechts.
+- **Inaktiv:** Die Spur ist leer mit Outline-Rahmen, der Schieber in Outline-Farbe und links. Gesperrt bedeutet 40 % Deckkraft.
+- Aktiv-Farben:
+  - **Signalrot** ist der Standard, etwa für Weiterleitung, multi.acks und den Blacklist-Filter.
+  - **Kobaltblau** gilt für Whitelist- und Info-Schalter.
+  - **Einzige Ausnahme ist Ocker** für den Warnzustand „Dry-Run (nur protokollieren)“ im Filter-Screen.
+- Barrierefreiheit: `toggleable(role = Role.Switch)`. TalkBack liest ihn wie einen normalen Schalter vor.
+- Für kompakte, beschriftete Mehrfach-Schalter in Listen gelten die Listen-Schalter aus §2.2, zum Beispiel `[HOME] [DEF] [FLOOD]`.
+
+### 2.4 „Aktualisieren“ / „Neu einlesen“: `RefreshButton`
+
+Jede Aktion, die Werte vom Repeater oder von Geräten neu lädt, ist **ein** einheitlicher `RefreshButton` (`ui/components/BauhausControls.kt`). Kleine blaue Klicktexte („Sync“), rahmenlose `TextButton`s oder reine Icon-Buttons gibt es dafür nicht mehr.
+
+```kotlin
+RefreshButton(
+    onClick = { viewModel.refreshRegions() },
+    busy = BusyKey.REGION in busy,          // optional: Braille-Spinner statt Icon, gesperrt
+    label = tr("Aktualisieren")             // Standard; kurz halten ("Neu einlesen", "Abfragen")
+)
+```
+
+- Kompakter `OutlinedButton` mit `shape = BauhausCornerShape`, 1-dp-Rahmen in der Akzentfarbe (Standard Kobalt) und mindestens 32 dp Höhe.
+- Inhalt: das Icon `Icons.Default.Refresh` (16 dp) und ein kurzer Text (12 sp, fett, einzeilig).
+- Während des Ladens ersetzt der Braille-Spinner das Icon. Der Text bleibt, der Button ist gesperrt.
+- Er steht rechts in der Kopfzeile der betroffenen Card oder Sektion.
+- Einsatzorte:
+  - **Verbindung:** USB-Geräte, Companion-Kontakte und „Neu einlesen“;
+  - **Routing & Adverts:** Regionen;
+  - **Filter:** Status und Listen;
+  - **Hardware & Antenne:** Versorgung („Abfragen“).
+- Nicht gemeint ist „Auffrischen“ im Schonmodus. Dieser Button verlängert den Timer und lädt nichts neu, er bleibt die Primäraktion des Screens.
+
+### 2.5 Tastatur-Verhalten
 
 - Manifest: `android:windowSoftInputMode="adjustResize"`.
 - Scroll-Container: Modifier-Reihenfolge `verticalScroll(...)` → `imePadding()` → `padding(16.dp)`.
 - **Ohne Stauchung:** Screens mit einem Viewport-füllenden Layout, etwa die Verbindungsseite, merken sich die größte gemessene Höhe (`StableHeight`, pro Orientierung) und behalten sie, während die Tastatur offen ist. Der Inhalt scrollt dann, statt zusammengedrückt zu werden. Untergrenze: `maxOf(viewportHeight - 32.dp, 420.dp)`.
 - Eingabefelder sind `singleLine = true`. Labels haben `maxLines = 1`, `softWrap = false` und `TextOverflow.Ellipsis`.
 
-### 2.4 Navigation & System-Zurück
+### 2.6 Navigation & System-Zurück
 
 - Navigation läuft über einen Drawer (`AppDrawer`, `NavDrawerItem`). Startseite ist **CONNECTION**.
 - `BackHandler`, Reihenfolge verbindlich:
@@ -176,7 +222,7 @@ BusyButton(                                   // ui/components/BusyButton.kt
 - Compose-State wird nie während der Komposition geschrieben.
   - Beispiel: `I18n.language` wird vor `setContent` gesetzt und bei Änderungen per `LaunchedEffect(langCode)`.
 
-### 2.5 Status-Overlay mit Braille-Spinner
+### 2.7 Status-Overlay mit Braille-Spinner
 
 - Das Overlay ist eine zentrierte Card, `BoxScope.align(Center)`:
   - **feste Breite 300 dp**, `heightIn(min = 96.dp)`, Radius 14 dp, Elevation 8 dp, 1-dp-Outline.
@@ -186,7 +232,7 @@ BusyButton(                                   // ui/components/BusyButton.kt
 - **Gleiche Größe in allen Phasen.** Fortschritt und Abbrechen-Button behalten ihren Platz, auch wenn sie nicht gebraucht werden. Sie werden über `alpha(0f)` ausgeblendet, nicht entfernt. So sind Verbinden, Login, Erkennung und Einlesen exakt gleich groß.
 - Statustexte beschreiben, was gerade passiert („Lese Funkparameter…“). Es gibt keine doppelten oder generischen Texte.
 
-### 2.6 Menü-Sperren mit differenzierten Hinweisen
+### 2.8 Menü-Sperren mit differenzierten Hinweisen
 
 - Ein Drawer-Eintrag ist gesperrt (ausgegraut, `isEnabled = false`), solange `navigationAllowed` falsch ist. Das gilt so lange, bis Verbindung **und** erstes Einlesen abgeschlossen sind (`initialReadDone && !setupReading`).
 - Ein Klick auf einen gesperrten Eintrag navigiert nicht, sondern zeigt eine Snackbar mit dem **konkreten Grund**. Prüfreihenfolge:

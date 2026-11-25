@@ -1,5 +1,8 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.BauhausSwitch
+import com.meshcore.repeater.ui.components.RefreshButton
+
 import com.meshcore.repeater.i18n.tr
 import com.meshcore.repeater.ui.components.LocalTourMode
 import com.meshcore.repeater.ui.components.RegisterTourSave
@@ -12,7 +15,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,7 +56,6 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
             if (setup.repeatEnabled != baseline.repeatEnabled) add(SetupChange("set repeat ${if (setup.repeatEnabled) "on" else "off"}") { it.copy(repeatEnabled = setup.repeatEnabled) })
             if (setup.pathHashMode != baseline.pathHashMode) add(SetupChange("set path.hash.mode ${setup.pathHashMode}") { it.copy(pathHashMode = setup.pathHashMode) })
             if (setup.loopDetect.isNotBlank() && setup.loopDetect != baseline.loopDetect) add(SetupChange("set loop.detect ${setup.loopDetect.trim()}") { it.copy(loopDetect = setup.loopDetect) })
-            if (setup.ledsMode.isNotBlank() && setup.ledsMode != baseline.ledsMode) add(SetupChange("set leds ${setup.ledsMode.trim()}") { it.copy(ledsMode = setup.ledsMode) })
             if (setup.advertIntervalMin.isNotBlank() && setup.advertIntervalMin != baseline.advertIntervalMin) add(SetupChange("set advert.interval ${setup.advertIntervalMin.trim()}") { it.copy(advertIntervalMin = setup.advertIntervalMin) })
             if (setup.floodAdvertIntervalHours.isNotBlank() && setup.floodAdvertIntervalHours != baseline.floodAdvertIntervalHours) add(SetupChange("set flood.advert.interval ${setup.floodAdvertIntervalHours.trim()}") { it.copy(floodAdvertIntervalHours = setup.floodAdvertIntervalHours) })
             if (setup.txDelaySec.isNotBlank() && setup.txDelaySec != baseline.txDelaySec && setup.txDelaySec != "adaptive") add(SetupChange("set txdelay ${setup.txDelaySec.trim()}") { it.copy(txDelaySec = setup.txDelaySec) })
@@ -68,10 +69,10 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
     ) {
         Card(modifier = Modifier.fillMaxWidth(), shape = BauhausCornerShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(tr("ROUTING, ADVERTS & STATUS-LEDS"), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = bColors.cobalt)
+                Text(tr("ROUTING & ADVERTS"), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = bColors.cobalt)
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(tr("Repeater-Weiterleitung aktiv (set repeat)"), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    Switch(checked = setup.repeatEnabled, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(repeatEnabled = it)) }, colors = SwitchDefaults.colors(checkedTrackColor = bColors.signalRed))
+                    BauhausSwitch(checked = setup.repeatEnabled, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(repeatEnabled = it)) })
                 }
                 Text(tr("Pfad-Hash-Modus (Node-ID Breite):"), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -85,24 +86,13 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
                         FilterChip(selected = setup.loopDetect.equals(mode, true), onClick = { viewModel.updateBasicSetupDraft(setup.copy(loopDetect = mode)) }, label = { Text(mode, fontSize = 11.sp) }, shape = BauhausCornerShape)
                     }
                 }
-                Text(tr("Status-LEDs (set leds):"), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("on", "off", "boot").forEach { mode ->
-                        FilterChip(selected = setup.ledsMode.equals(mode, true), onClick = { viewModel.updateBasicSetupDraft(setup.copy(ledsMode = mode)) }, label = { Text(mode, fontSize = 11.sp) }, shape = BauhausCornerShape)
-                    }
-                }
-                // ZephCore kennt nur on/off/default, Standard-MeshCore hat kein "set leds" – "boot" ist eine Custom-Erweiterung
-                Text(
-                    tr("Hinweis: \"boot\" ist eine Custom-Firmware-Erweiterung und wird von Standard-Firmware ggf. nicht unterstützt."),
-                    fontSize = 10.sp, lineHeight = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(value = setup.advertIntervalMin, onValueChange = { viewModel.updateBasicSetupDraft(setup.copy(advertIntervalMin = it)) }, label = { Text(tr("Advert (Min)"), fontSize = 11.sp) }, modifier = Modifier.weight(1f), singleLine = true, shape = BauhausCornerShape)
                     OutlinedTextField(value = setup.floodAdvertIntervalHours, onValueChange = { viewModel.updateBasicSetupDraft(setup.copy(floodAdvertIntervalHours = it)) }, label = { Text(tr("Flood-Adv (Std)"), fontSize = 11.sp) }, modifier = Modifier.weight(1f), singleLine = true, shape = BauhausCornerShape)
                 }
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(tr("Mehrfache Empfangsbestätigungen (multi.acks = 1)"), fontSize = 12.sp)
-                    Switch(checked = setup.multiAcks == 1, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(multiAcks = if (it) 1 else 0)) }, colors = SwitchDefaults.colors(checkedTrackColor = bColors.signalRed))
+                    BauhausSwitch(checked = setup.multiAcks == 1, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(multiAcks = if (it) 1 else 0)) })
                 }
             }
         }
@@ -167,9 +157,7 @@ private fun RegionsSection(viewModel: RepeaterViewModel, state: RegionState, bus
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(tr("KONFIGURIERTE REGIONEN"), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = bColors.cobalt, modifier = Modifier.weight(1f))
-                BusyOutlinedButton(busy = busy, onClick = { viewModel.refreshRegions() }, color = bColors.cobalt, busyText = null) {
-                    Icon(Icons.Default.Refresh, contentDescription = tr("Aktualisieren"), tint = bColors.cobalt, modifier = Modifier.size(16.dp))
-                }
+                RefreshButton(onClick = { viewModel.refreshRegions() }, busy = busy)
             }
             when (state.supported) {
                 null -> { Text(tr("Regionen noch nicht gelesen – \"Aktualisieren\" tippen."), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant); return@Column }

@@ -2693,5 +2693,15 @@
   "Backup aborted – packet filter could not be read completely.",
   "Back-up afgebroken – pakketfilter kon niet volledig worden gelezen.",
   "Sauvegarde annulée – filtre de paquets illisible en entier."
+ ],
+ "ROUTING & ADVERTS": [
+  "ROUTING & ADVERTS",
+  "ROUTING & ADVERTS",
+  "ROUTAGE & ADVERTS"
+ ],
+ "STATUS-LEDS": [
+  "STATUS LEDS",
+  "STATUS-LEDS",
+  "LED D'ÉTAT"
  ]
 }
