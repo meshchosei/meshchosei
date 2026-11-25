@@ -37,9 +37,9 @@ Alle Änderungen gelten erst als gespeichert, wenn der Repeater sie **bestätigt
 
 Das Verhalten der App wird laufend gegen die Quelltexte von MeshCore und ZephCore geprüft. Wo eine Anforderung der Firmware widerspricht, folgt die App der Firmware.
 
-## Unterstützte Boards
+## Hinterlegte Board-Profile (Hardware-Datenbank)
 
-Erkannt und mit passenden Hardware-Grenzen hinterlegt:
+Für folgende Boards sind Hardware-Profile (Transceiver, maximale TX-Leistung und typische Pigtail-Dämpfung) anhand der Herstellerdaten und Firmware-Board-Strings hinterlegt (bislang physisch getestet mit dem Seeed Wio Tracker L1; weitere Boards werden automatisch erkannt oder können manuell gewählt werden):
 
 - Heltec WiFi LoRa 32 V3 / V3.2
 - RAK4631 / WisBlock
