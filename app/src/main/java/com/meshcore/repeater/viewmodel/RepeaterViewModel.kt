@@ -11,6 +11,7 @@ import com.meshcore.repeater.service.ChannelHash
 import com.meshcore.repeater.service.FilterListParser
 import com.meshcore.repeater.service.InputValidator
 import com.meshcore.repeater.service.MeshCoreBackup
+import com.meshcore.repeater.model.FilterStatusRules
 import com.meshcore.repeater.service.CliReplyTag
 import com.meshcore.repeater.service.QuerySpec
 import com.meshcore.repeater.service.RepeaterProtocol
@@ -93,6 +94,7 @@ object BusyKey {
     const val WATCH = "watch"
     const val FILTER_LOAD = "filter_load"
     const val FILTER_REFRESH = "filter_refresh"
+    const val FILTER_STATUS = "filter_status"
     const val POWER = "power"
     const val LEDS = "leds"
     const val FILTER_DRYRUN = "filter_dryrun"
@@ -234,6 +236,40 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
 
     private val _filterStats = MutableStateFlow(FilterStats(filterEnabled = false))
     val filterStats: StateFlow<FilterStats> = _filterStats
+
+    /** true erst nach gültiger Antwort auf "filter" (und bei Whitelist-Firmware "filter mode"). */
+    private val _filterStatusKnown = MutableStateFlow(false)
+    val filterStatusKnown: StateFlow<Boolean> = _filterStatusKnown
+    @Volatile private var filterEnabledKnown = false
+    @Volatile private var filterModeKnown = false
+    private fun updateFilterStatusKnown() {
+        _filterStatusKnown.value = FilterStatusRules.isKnown(filterEnabledKnown, filterModeKnown, _deviceCapabilities.value.supportsWhitelist)
+    }
+    private fun resetFilterStatusKnown() { filterEnabledKnown = false; filterModeKnown = false; _filterStatusKnown.value = false }
+
+    /**
+     * Solange der Filterstatus unbekannt ist (z. B. LoRa-Antwort im Start-Scan verloren): beim Öffnen des
+     * Seitenmenüs oder eines Filter-Screens EINMAL automatisch "filter" (+ "filter mode") nachfragen –
+     * still, ohne Overlay, mit Tag, langem LoRa-Fenster und einem Retry.
+     */
+    fun ensureFilterStatusKnown() {
+        val c = _deviceCapabilities.value
+        if (_filterStatusKnown.value || !isLinkUp() || initialScanRunning || !c.detectionComplete) return
+        if (!(c.supportsBlacklist || c.supportsWhitelist)) return
+        if (c.isCompanion && !_remoteAdminSession.value.isLoggedIn) return
+        if (!tryMarkBusy(BusyKey.FILTER_STATUS)) return
+        viewModelScope.launch {
+            sequentialQueryMutex.withLock {
+                for (q in FilterStatusRules.statusQueries(c.supportsBlacklist, c.supportsWhitelist)) {
+                    if (!isLinkUp()) break
+                    val tag = newRetryTag()
+                    for (attempt in 1..(if (_remoteAdminSession.value.targetRepeater != null) 2 else 1)) {
+                        if (runQuery(q, timeoutMs = filterListTimeoutMs(), fixedTag = tag) != null) break
+                    }
+                }
+            }
+        }.invokeOnCompletion { clearBusy(BusyKey.FILTER_STATUS) }
+    }
 
     private val _whitelistChannels = MutableStateFlow<List<WhitelistChannel>>(emptyList())
     val whitelistChannels: StateFlow<List<WhitelistChannel>> = _whitelistChannels
@@ -599,6 +635,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         else -> 900L                                                       // USB-Direkt
     }
 
+    /** LoRa-Remote: ein Tag für alle Versuche EINES Befehls (Retry mit gleichem Tag); sonst null. */
+    private fun newRetryTag(): String? = if (_remoteAdminSession.value.targetRepeater != null) CliReplyTag.tagFor(cliTagSeq++) else null
+
     /**
      * Sendet GENAU EINEN Befehl und wartet exklusiv auf dessen Antwort (Format-Validator) oder Timeout.
      * Muss unter [sequentialQueryMutex] aufgerufen werden. Rückgabe: null = Timeout, sonst QueryReply.
@@ -758,7 +797,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 _activeReadStatusText.value = tr("Backup: \"{0}\" wird gelesen…", def.key)
                 _readProgress.value = (i + 1) to defs.size
                 var reply: QueryReply? = null
-                for (attempt in 1..(if (wireless) 2 else 1)) { reply = runQuery("get ${def.key}"); if (reply != null) break }
+                val tag = newRetryTag()
+                for (attempt in 1..(if (wireless) 2 else 1)) { reply = runQuery("get ${def.key}", fixedTag = tag); if (reply != null) break }
                 if (wireless && reply == null && noteRemoteTimeout()) { notifyUser("Backup abgebrochen – Repeater antwortet nicht."); return@startRead }
                 reply?.value?.let { MeshCoreBackup.replyToJson(def, it) }?.let { vars[def.key] = it }
             }
@@ -819,6 +859,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     /** Validierte Antwort in den passenden Zustand schreiben – ausschließlich für den Befehl, der sie angefordert hat. */
     private fun applyQueryResult(cmd: String, v: String) {
         val s = _basicSetup.value
+        // Filterstatus gilt erst nach einer gültigen (validierten) Status-Antwort als bekannt
+        if (cmd == "filter") { filterEnabledKnown = true; updateFilterStatusKnown() }
+        if (cmd == "filter mode") { filterModeKnown = true; updateFilterStatusKnown() }
         fun adaptiveOr(x: String) = if (x.startsWith("adaptive", true)) "adaptive" else x
         when (cmd) {
             "board" -> { _hardwareInfo.value = _hardwareInfo.value.copy(boardModel = v); applyDetectedBoard(v) }
@@ -880,6 +923,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     }
     private fun resetInitialReadState() {
         readJob?.cancel()
+        resetFilterStatusKnown()
         initialScanRunning = false
         filterAutoLoadDone.clear()
         _hasCompletedInitialRead.value = false
@@ -896,6 +940,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         if (initialScanRunning && readJob?.isActive == true) return // z. B. doppelte Login-Bestätigung
         initialScanRunning = true
         _hasCompletedInitialRead.value = false
+        resetFilterStatusKnown()
         _deviceCapabilities.value = _deviceCapabilities.value.copy(detectionComplete = false)
         startRead {
             // Remote: Key des Ziel-Repeaters; USB-direkt: leeren und per "get public.key" neu einlesen (kein Key vom vorigen Gerät)
@@ -973,13 +1018,14 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
 
     /** Status- und Listenabfragen passend zu den erkannten Filter-Funktionen. */
     private fun filterQueriesFor(bl: Boolean, wl: Boolean): List<String> =
-        (if (bl) BL_STATUS_QUERIES + BL_LIST_QUERIES else emptyList()) + (if (wl) WL_STATUS_QUERIES + WL_LIST_QUERIES else emptyList())
+        FilterStatusRules.statusQueries(bl, wl) + (if (bl) BL_LIST_QUERIES else emptyList()) + (if (wl) WL_LIST_QUERIES else emptyList())
 
     /** Ein Befehl mit Wiederholung über LoRa. first = false -> Remote-Link verloren. */
     private suspend fun queryWithRetries(cmd: String): Pair<Boolean, QueryReply?> {
         val wireless = _remoteAdminSession.value.targetRepeater != null
         var reply: QueryReply? = null
-        for (attempt in 1..(if (wireless) 2 else 1)) { reply = runQuery(cmd); if (reply != null) break }
+        val tag = newRetryTag()   // Wiederholung mit DEMSELBEN Tag: eine verspätete Antwort auf Versuch 1 zählt noch
+        for (attempt in 1..(if (wireless) 2 else 1)) { reply = runQuery(cmd, fixedTag = tag); if (reply != null) break }
         if (wireless && reply == null && noteRemoteTimeout()) return false to null
         return true to reply
     }
@@ -998,9 +1044,11 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             _readProgress.value = (progressOffset + i + 1) to progressTotal
             val isList = q.endsWith(" list")
             var reply: QueryReply? = null
+            val tag = newRetryTag()   // gleiches Tag für beide Versuche (verspätete LoRa-Antwort auf Versuch 1 bleibt gültig)
             for (attempt in 1..(if (wireless) 2 else 1)) {
-                reply = if (isList) runQuery(q, timeoutMs = filterListTimeoutMs(), trailingMs = if (wireless) FILTER_LIST_TRAILING_LORA_MS else null)
-                        else runQuery(q)
+                // Status ("filter", "filter mode") bekommt über LoRa dasselbe lange Antwortfenster wie die Listen
+                reply = if (isList) runQuery(q, timeoutMs = filterListTimeoutMs(), trailingMs = if (wireless) FILTER_LIST_TRAILING_LORA_MS else null, fixedTag = tag)
+                        else runQuery(q, timeoutMs = filterListTimeoutMs(), fixedTag = tag)
                 if (reply != null) break
             }
             if (wireless && reply == null && noteRemoteTimeout()) return false
@@ -1048,8 +1096,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         val wireless = _remoteAdminSession.value.targetRepeater != null
         val isList = cmd.endsWith(" list")
         var reply: QueryReply? = null
+        val tag = newRetryTag()
         for (attempt in 1..(if (wireless) 2 else 1)) {
-            reply = if (isList) runQuery(cmd, timeoutMs = filterListTimeoutMs(), trailingMs = if (wireless) FILTER_LIST_TRAILING_LORA_MS else null) else runQuery(cmd)
+            reply = if (isList) runQuery(cmd, timeoutMs = filterListTimeoutMs(), trailingMs = if (wireless) FILTER_LIST_TRAILING_LORA_MS else null, fixedTag = tag) else runQuery(cmd, fixedTag = tag)
             if (reply != null) break
         }
         if (wireless && reply == null && noteRemoteTimeout()) return false to null
@@ -1137,9 +1186,10 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         if (progressOffset != null) { _activeReadStatusText.value = QuerySpec.statusTextFor("region"); _readProgress.value = (progressOffset + 1) to progressTotal }
         val lines = mutableListOf<String>()
         var tree: QueryReply? = null
+        val tag = newRetryTag()
         for (attempt in 1..(if (wireless) 2 else 1)) {
             lines.clear()
-            tree = runQuery("region", capture = lines, timeoutMs = queryTimeoutMs() + if (wireless) 1500L else 300L,
+            tree = runQuery("region", capture = lines, fixedTag = tag, timeoutMs = queryTimeoutMs() + if (wireless) 1500L else 300L,
                 trailingMs = if (wireless) REGION_TRAILING_LORA_MS else REGION_TRAILING_USB_MS)   // alle Baumzeilen abwarten
             if (tree != null) break
         }
@@ -1320,7 +1370,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         // Nach einem Umschalten veraltete Status-Antworten 1,5 s lang nicht auf Modus/Ein-Aus anwenden (kein Hin- und Herspringen)
         // Solange ein Ein/Aus-Befehl läuft, eingehende Status-Updates für Modus und Ein/Aus ignorieren (kein Zurückspringen)
         // Nur Antworten auf "filter…"-Befehle auswerten (keine Verwechslung durch fremde Zeilen)
-        val parsedStats = if (activeQueryCommand?.startsWith("filter") == true) RepeaterProtocol.parseFilterStats(body, _filterStats.value) else _filterStats.value
+        // Nur Status-/Schaltantworten – nie Hilfetexte ("filter on|off" in "filter help") oder Listen
+        val parsedStats = if (FilterStatusRules.shouldParseStatus(activeQueryCommand)) RepeaterProtocol.parseFilterStats(body, _filterStats.value) else _filterStats.value
         _filterStats.value = if (_filterSwitchPending.value) parsedStats.copy(mode = _filterStats.value.mode, filterEnabled = _filterStats.value.filterEnabled) else parsedStats
 
         // 1. Telemetrie ("power") wird ausschließlich in applyQueryResult() übernommen.

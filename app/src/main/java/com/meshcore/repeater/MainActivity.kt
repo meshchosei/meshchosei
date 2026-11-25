@@ -156,7 +156,12 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
 
     // Seitenmenü öffnen oder Screen wechseln: wartende/laufende manuelle CLI-Befehle sauber abbrechen,
     // damit sie den Mutex nicht bis zum (LoRa-)Timeout blockieren und der neue Screen sofort laden kann.
-    LaunchedEffect(drawerState.targetValue) { if (drawerState.targetValue == DrawerValue.Open) viewModel.cancelManualCli() }
+    LaunchedEffect(drawerState.targetValue) {
+        if (drawerState.targetValue == DrawerValue.Open) {
+            viewModel.cancelManualCli()
+            viewModel.ensureFilterStatusKnown()   // Filterstatus unbekannt (z. B. LoRa-Antwort verloren): einmal nachfragen
+        }
+    }
     LaunchedEffect(currentScreen) { if (currentScreen != NavDrawerItem.CLI_CONSOLE) viewModel.cancelManualCli() }
 
     // Scroll-Hinweis: bei offenem (oder sich öffnendem) Seitenmenü nur im Menü, nicht im Hauptfenster dahinter

@@ -95,7 +95,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
     val busy by viewModel.busyActions.collectAsState()
     val initialReadDone by viewModel.hasCompletedInitialRead.collectAsState()
     // Einmalig beim Öffnen: Filter aktiv, aber Kanalliste leer (z. B. über LoRa abgeschnitten) -> automatisch nachladen
-    LaunchedEffect(view, initialReadDone) { if (initialReadDone) viewModel.ensureFilterChannelsLoaded(view) }
+    LaunchedEffect(view, initialReadDone) { if (initialReadDone) { viewModel.ensureFilterStatusKnown(); viewModel.ensureFilterChannelsLoaded(view) } }
     val scrollState = rememberScrollState()
 
     // Whitelist State

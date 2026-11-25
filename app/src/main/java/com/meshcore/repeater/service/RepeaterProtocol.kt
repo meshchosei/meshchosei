@@ -327,11 +327,14 @@ object RepeaterProtocol {
             val lower = line.trim().removePrefix(">").trim().lowercase(Locale.ROOT)
             when {
                 // Ein/Aus: "Filter on: Blocked [...]" (Status), "Filter: on" / "Filter: off" (Befehlsantwort)
+                // Zusammenfassung (FilterStat::formatSummary) hängt bei aktivem Dry-Run " (dry-run)" an
                 FILTER_ON_RE.containsMatchIn(lower) || lower.contains("filter: enabled") || lower.contains("filter is on") -> {
                     updated = updated.copy(filterEnabled = true)
+                    if (lower.contains("blocked [")) updated = updated.copy(dryRun = lower.contains("(dry-run)"))
                 }
                 FILTER_OFF_RE.containsMatchIn(lower) || lower.contains("filter: disabled") || lower.contains("filter is off") -> {
                     updated = updated.copy(filterEnabled = false)
+                    if (lower.contains("blocked [")) updated = updated.copy(dryRun = lower.contains("(dry-run)"))
                 }
                 lower.contains("dryrun: on") || lower.contains("dry-run on") || lower.contains("dryrun: enabled") -> {
                     updated = updated.copy(dryRun = true)
