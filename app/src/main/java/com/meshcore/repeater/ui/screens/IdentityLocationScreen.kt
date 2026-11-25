@@ -172,6 +172,9 @@ fun IdentityLocationScreen(viewModel: RepeaterViewModel) {
         if (!inTour) {
             BusyButton(
                 busy = BusyKey.IDENTITY in busy, onClick = { doSave() },
+                hasUnsavedChanges = setup.nodeName != baseline.nodeName || setup.ownerInfo != baseline.ownerInfo ||
+                    setup.latitude != baseline.latitude || setup.longitude != baseline.longitude ||
+                    newAdminPassword.isNotBlank() || newGuestPassword.isNotBlank() || clearGuestPassword,
                 containerColor = bColors.signalRed, modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, tint = Color.White)

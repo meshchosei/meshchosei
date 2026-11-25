@@ -18,6 +18,24 @@ class RegionParserTest {
         assertEquals("de-ni", home)
     }
 
+    // v1.07: verspätete Antwort eines LoRa-Timeout-Versuchs + Antwort des Wiederholungsversuchs im selben Puffer
+    @Test fun duplicateTreesAreRebuiltNotAppended() {
+        val once = listOf("* F", " de F", "  de-ni^ F", " nl F")
+        val (list, _, home) = RegionParser.parseTree(once + once)
+        assertEquals(listOf("de", "de-ni", "nl"), list.map { it.name })
+        assertEquals("de-ni", home)
+    }
+
+    @Test fun duplicateNamesWithinOneTreeAppearOnce() {
+        val (list, _, _) = RegionParser.parseTree(listOf("* F", " de F", " #de F", " nl F", " nl F"))
+        assertEquals(listOf("de", "nl"), list.map { it.name })
+    }
+
+    @Test fun regionNamesStayCaseSensitiveLikeFirmware() {
+        val (list, _, _) = RegionParser.parseTree(listOf("* F", " Berlin F", " berlin F"))
+        assertEquals(listOf("Berlin", "berlin"), list.map { it.name })
+    }
+
     @Test fun wildcardDeniedAndHashNamesStripped() {
         val (list, wildcardFlood, _) = RegionParser.parseTree(listOf("*", " #bsmesh F"))
         assertFalse(wildcardFlood)

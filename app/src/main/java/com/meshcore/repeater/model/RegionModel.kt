@@ -58,6 +58,11 @@ object RegionParser {
     /**
      * Baum aus "region" (Zeilen ohne "-> "-Präfix) in eine flache Liste wandeln.
      * Rückgabe: Regionen ohne Wildcard, Flood-Status der Wildcard, Home-Markierung ("^").
+     *
+     * Duplikate: Die Firmware gibt jede Region genau einmal aus (RegionMap::printChildRegions). Über LoRa kann aber
+     * eine verspätete Antwort eines Timeout-Versuchs zusammen mit der Antwort des Wiederholungsversuchs im selben
+     * Puffer landen – dann stehen zwei vollständige Bäume hintereinander. Jede neue Wurzelzeile "*" beginnt daher
+     * einen neuen Baum (die Liste wird neu aufgebaut, nicht angehängt), zusätzlich wird nach Namen dedupliziert.
      */
     fun parseTree(lines: List<String>): Triple<List<RegionInfo>, Boolean, String?> {
         val out = mutableListOf<RegionInfo>()
@@ -76,6 +81,7 @@ object RegionParser {
             if (t.isEmpty() || t.contains(' ')) continue
             while (stack.isNotEmpty() && stack.last().first >= indent) stack.removeAt(stack.lastIndex)
             if (t == "*") {
+                if (indent == 0) { out.clear(); stack.clear(); home = null }   // neuer Baum -> neu aufbauen statt anhängen
                 wildcardFlood = flood
             } else {
                 val parent = stack.lastOrNull()?.second ?: "*"
@@ -84,7 +90,8 @@ object RegionParser {
             }
             stack += indent to t
         }
-        return Triple(out, wildcardFlood, home)
+        // Firmware vergleicht Namen mit strcmp (Groß-/Kleinschreibung zählt, "#" wird ignoriert) -> exakt nach Namen deduplizieren
+        return Triple(out.distinctBy { it.name }, wildcardFlood, home)
     }
 
     /** Firmware RegionMap::is_name_char: '-', '$', '#', Ziffern, Buchstaben (inkl. Umlaute); keine Leerzeichen. */

@@ -272,7 +272,7 @@ private fun StatusLedSection(viewModel: RepeaterViewModel, busy: Boolean) {
             )
             if (!LocalTourMode.current) {
                 BusyButton(
-                    busy = busy, enabled = changed, onClick = { viewModel.applyLedMode() },
+                    busy = busy, hasUnsavedChanges = changed, onClick = { viewModel.applyLedMode() },
                     containerColor = bColors.signalRed, modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, tint = Color.White)

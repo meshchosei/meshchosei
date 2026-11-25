@@ -30,6 +30,7 @@ import com.meshcore.repeater.ui.theme.BauhausCornerShape
 import com.meshcore.repeater.ui.theme.LocalBauhausColors
 import com.meshcore.repeater.viewmodel.BasicSetupState
 import com.meshcore.repeater.viewmodel.RepeaterViewModel
+import com.meshcore.repeater.viewmodel.radioDiffersFrom
 
 /** Regions-Presets (ohne "CUSTOM" – die Felder darunter sind immer frei editierbar). */
 private val RegionPresets = listOf(
@@ -50,6 +51,7 @@ private fun presetMatches(r: CountryRegion, s: BasicSetupState): Boolean =
 fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
     val config by viewModel.radioConfig.collectAsState()
     val setup by viewModel.basicSetup.collectAsState()
+    val baseline by viewModel.nodeBaseline.collectAsState()
     val bColors = LocalBauhausColors.current
     val inTour = LocalTourMode.current
     val busy by viewModel.busyActions.collectAsState()
@@ -170,6 +172,7 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
             Spacer(Modifier.height(8.dp))
             BusyButton(
                 busy = BusyKey.RADIO in busy,
+                hasUnsavedChanges = setup.radioDiffersFrom(baseline),
                 onClick = { viewModel.saveRadioDraft() },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 containerColor = bColors.signalRed

@@ -44,9 +44,15 @@ fun RowScope.BusyContent(busy: Boolean, color: Color, busyText: String? = tr("Sp
     } else idle()
 }
 
+/** Deckkraft des Speichern-Buttons ohne ungespeicherte Änderungen (STYLE_GUIDE §2.2 "Geändert vs. unverändert"). */
+const val SAVED_STATE_ALPHA = 0.38f
+
 /**
  * Speichern-/Senden-Button mit Arbeitszustand: Während [busy] ist der Button gesperrt (kein Doppelklick),
  * bleibt aber in seiner Signalfarbe (nicht grau) und zeigt den rotierenden Braille-Spinner samt "Speichere…".
+ *
+ * [hasUnsavedChanges] = false: alles gespeichert -> gedecktes Rot ([SAVED_STATE_ALPHA]) und gesperrt;
+ * true: volles Signalrot mit weißer Fettschrift. Standard true (Senden-Aktionen ohne Änderungsbegriff).
  */
 @Composable
 fun BusyButton(
@@ -55,6 +61,7 @@ fun BusyButton(
     containerColor: Color,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    hasUnsavedChanges: Boolean = true,
     contentColor: Color = Color.White,
     shape: Shape = BauhausCornerShape,
     busyText: String? = tr("Speichere…"),
@@ -63,14 +70,14 @@ fun BusyButton(
 ) {
     Button(
         onClick = { if (!busy) onClick() },
-        enabled = enabled && !busy,
+        enabled = enabled && hasUnsavedChanges && !busy,
         modifier = modifier,
         shape = shape,
         contentPadding = contentPadding,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor, contentColor = contentColor,
             // Arbeitszustand: gesperrt, aber sichtbar "aktiv"; echtes Disabled (enabled = false) bleibt gedämpft
-            disabledContainerColor = if (busy) containerColor.copy(alpha = 0.85f) else containerColor.copy(alpha = 0.35f),
+            disabledContainerColor = if (busy) containerColor.copy(alpha = 0.85f) else containerColor.copy(alpha = SAVED_STATE_ALPHA),
             disabledContentColor = if (busy) contentColor else contentColor.copy(alpha = 0.7f)
         )
     ) { BusyContent(busy, contentColor, busyText, idle = content) }

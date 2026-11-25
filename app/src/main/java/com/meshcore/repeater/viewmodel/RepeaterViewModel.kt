@@ -61,6 +61,10 @@ data class BasicSetupState(
  * Ein Set-Befehl plus die Übernahme in die "gespeichert"-Basis ([RepeaterViewModel.nodeBaseline]).
  * [commit] wird NUR angewendet, wenn der Repeater den Befehl ohne Fehler bestätigt hat.
  */
+/** true, wenn der Funk-Entwurf (Funkparameter, TX, Duty-Cycle) vom bestätigten Stand abweicht. */
+fun BasicSetupState.radioDiffersFrom(b: BasicSetupState): Boolean =
+    freqMhz != b.freqMhz || bwKhz != b.bwKhz || sf != b.sf || cr != b.cr || txPowerDbm != b.txPowerDbm || dutyCyclePercent != b.dutyCyclePercent
+
 class SetupChange(val command: String, val commit: (BasicSetupState) -> BasicSetupState = { it })
 
 /**

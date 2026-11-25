@@ -146,6 +146,22 @@ BusyButton(                                   // ui/components/BusyButton.kt
 - Eingabefelder werden nur geleert, wenn der Befehl wirklich gesendet wurde (Rückgabe `true`).
 - Betroffene Screens: `RadioAntennaScreen`, `IdentityLocationScreen` (inkl. GPS, Private Key), `RoutingAdvertsScreen` (inkl. Advert, Regionen), `BackupScreen` (Erstellen, Installieren) und `FilterScreen` (alle Hinzufügen-Buttons).
 
+**Geändert vs. unverändert (verbindlich für alle Speichern-Buttons, seit v1.07):**
+
+- **Keine ungespeicherten Änderungen** (`hasUnsavedChanges == false`): Der Button erscheint in gedecktem Rot (`bColors.signalRed.copy(alpha = 0.38f)`, Konstante `SAVED_STATE_ALPHA`) und ist gesperrt. So ist auf einen Blick erkennbar, dass alles gespeichert ist.
+- **Mindestens ein Feld geändert** (`hasUnsavedChanges == true`): Der Button erscheint in vollem, leuchtendem Signalrot (`bColors.signalRed`) mit weißer Fettschrift und ist klickbar.
+- „Geändert“ bedeutet: Der Entwurf weicht vom **bestätigten** Stand `nodeBaseline` ab. Nach der Bestätigung durch den Repeater wird der Button daher automatisch wieder gedeckt. Bei Timeout oder Fehlerantwort bleibt er leuchtend.
+- Umsetzung: `BusyButton(…, hasUnsavedChanges = …)`. Der Vergleich liegt bei der Logik des Screens bzw. im ViewModel und nie in der Button-Komponente:
+
+| Screen | `hasUnsavedChanges` |
+|---|---|
+| Funk & Region | `setup.radioDiffersFrom(baseline)` (Funkparameter, TX, Duty-Cycle) |
+| Identität & Standort | Name, Besitzer, lat/lon ≠ Basis oder neues Admin-/Gast-Passwort bzw. „Gast-Passwort löschen“ |
+| Routing & Adverts | `pendingChanges.isNotEmpty()` |
+| Hardware & Antenne (Status-LEDs) | `setup.ledsMode != baseline.ledsMode` |
+
+- Senden-Aktionen ohne Änderungsbegriff (z. B. „Advert senden“, Hinzufügen-Buttons) lassen den Parameter weg (Standard `true`).
+
 - Jeder Screen hat genau **einen** roten Primärbutton, volle Breite, 52 dp hoch, mit weißer Fettschrift. Sekundäraktionen sind `OutlinedButton` mit `BauhausCornerShape`.
 - **Tour-Modus:** Ein Screen registriert seine Aktion über `RegisterTourSave { … }` und blendet den eigenen Button aus (`if (!inTour)`). In der Tour-Leiste erscheint dann „Speichern & Weiter →“. Es gibt nie zwei rote Buttons gleichzeitig.
 - Destruktive oder riskante Aktionen laufen über `SlideToConfirm` statt über einen Klick.

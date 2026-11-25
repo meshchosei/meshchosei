@@ -105,7 +105,7 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
         // Im Setup-Tour-Modus übernimmt "Speichern & Weiter →" in der Tour-Leiste
         if (!LocalTourMode.current) {
             BusyButton(
-                busy = BusyKey.ROUTING in busy, onClick = { doSave() },
+                busy = BusyKey.ROUTING in busy, onClick = { doSave() }, hasUnsavedChanges = pendingChanges.isNotEmpty(),
                 containerColor = bColors.signalRed, modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, tint = Color.White)
@@ -168,7 +168,8 @@ private fun RegionsSection(viewModel: RepeaterViewModel, state: RegionState, bus
             // Wildcard "*": nur Flood (Home/Default/Löschen gibt es für die Wurzel nicht)
             RegionRow(name = "*", parent = null, isHome = false, isDefault = false, flood = state.wildcardFlood, busy = busy, wildcard = true,
                 onHome = {}, onDefault = {}, onFlood = { viewModel.setRegionFlood("*", !state.wildcardFlood) }, onRemove = {})
-            state.regions.forEach { r ->
+            // Jede Region genau einmal (Parser dedupliziert bereits; hier zusätzlich als Absicherung der Anzeige)
+            state.regions.distinctBy { it.name }.forEach { r ->
                 val isHome = state.home == r.name; val isDef = state.default == r.name
                 RegionRow(
                     name = r.name, parent = r.parent, isHome = isHome, isDefault = isDef, flood = r.floodAllowed, busy = busy,
