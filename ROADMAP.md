@@ -1,6 +1,6 @@
 # ROADMAP – meshchōsei
 
-Stand: 2026-11-25 · aktuelle Version: 1.07
+Stand: 2026-11-25 · aktuelle Version: 1.08
 
 | Version | Status | Inhalt |
 |---|---|---|
@@ -12,6 +12,7 @@ Stand: 2026-11-25 · aktuelle Version: 1.07
 | **1.05** | ✅ veröffentlicht (Tag `v1.05`) | Seitenmenü: Flagge der tatsächlich aktiven Sprache auch bei Systemsprache hervorgehoben |
 | **1.06** | ✅ veröffentlicht (Tag `v1.06`) | Audit-Fixes: Filter-Dry-Run/Max-Hops/Alter/RESET erst nach Bestätigung, Overlay-Abbruch trifft laufenden Job, Regionen-Anzeige bleibt bei Backup-Fehler, Alt-Screens entfernt |
 | **1.07** | ✅ veröffentlicht (Tag `v1.07`) | Regionen erscheinen genau einmal (Neuaufbau je Baum + Deduplizierung), einheitliches „Geändert vs. unverändert“-Rot für alle Speichern-Buttons |
+| **1.08** | ✅ veröffentlicht (Tag `v1.08`) | Regionen: „+“ ohne zweiten Spinner, Neue-Region-Abschlusszeile in der Liste, Speichern-Button in der Routing-Karte, Regionen-Befehle warten auf echte Bestätigung + Nachlauf vor dem Neueinlesen |
 | **1.1** | 📋 geplant | CLI-Autocomplete (F1), BLE-OTA-Firmware-Update (F2), Live-Repeater-Suche (F3), Präfix-Filter Repeater-Auswahl (F4) |
 
 Beide Features folgen den Regeln aus [`STYLE_GUIDE.md`](STYLE_GUIDE.md):

@@ -1103,7 +1103,10 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
 
     /**
      * Regionen-Befehle streng nacheinander senden; beim ersten Fehler abbrechen (Fehlertext der Firmware
-     * wird angezeigt). Danach wird der Regionen-Stand neu eingelesen, damit die Anzeige dem Repeater entspricht.
+     * wird angezeigt). Jeder Befehl wartet auf seine echte Bestätigung ([QuerySpec.regionActionValidator]:
+     * "OK…", " home is now …", " default scope is now …"). Danach folgt ein Nachlauf ([REGION_SETTLE_LORA_MS]
+     * bzw. [REGION_SETTLE_USB_MS]), in dem verspätete LoRa-Antworten abfließen, und erst dann wird der
+     * Regionen-Stand neu eingelesen – so überschreibt kein zu frühes Nachlesen die gerade gesendete Änderung.
      */
     private fun runRegionCommands(cmds: List<String>, successMsg: String) {
         if (!isLinkUp()) { notifyUser("Nicht verbunden."); return }
@@ -1116,6 +1119,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 if (r == null) { err = tr("keine Antwort auf \"{0}\"", c); break }
                 if (r.value == null) { err = "${r.error ?: "Err"} ($c)"; break }
             }
+            delay(if (_remoteAdminSession.value.targetRepeater != null) REGION_SETTLE_LORA_MS else REGION_SETTLE_USB_MS)
             if (isLinkUp()) readRegions()
             _uiEvents.tryEmit(if (err == null) tr(successMsg) else tr("Regionen: nicht übernommen – {0}", err))
         }.invokeOnCompletion { clearBusy(BusyKey.REGION) }
@@ -1631,6 +1635,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         const val REGION_STEPS = 3
         const val REGION_TRAILING_USB_MS = 800L      // USB: Baumzeilen kommen einzeln nach der "->"-Zeile
         const val REGION_TRAILING_LORA_MS = 2_000L
+        /** Nachlauf nach Regionen-Schreibbefehlen, bevor "region" neu gelesen wird (verspätete Antworten abfließen lassen). */
+        const val REGION_SETTLE_LORA_MS = 1_500L
+        const val REGION_SETTLE_USB_MS = 250L
         const val FILTER_LIST_EXTRA_LORA_MS = 3_500L   // Listen über LoRa: 4,5 s + 3,5 s = 8 s Antwortfenster
         const val FILTER_LIST_TRAILING_LORA_MS = 2_000L // Nachlauf für evtl. Folgezeilen über LoRa
         const val PREF_KNOWN_CHANNELS = "known_channel_names"

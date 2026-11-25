@@ -163,8 +163,13 @@ BusyButton(                                   // ui/components/BusyButton.kt
 - Senden-Aktionen ohne Änderungsbegriff (z. B. „Advert senden“, Hinzufügen-Buttons) lassen den Parameter weg (Standard `true`).
 
 - Jeder Screen hat genau **einen** roten Primärbutton, volle Breite, 52 dp hoch, mit weißer Fettschrift. Sekundäraktionen sind `OutlinedButton` mit `BauhausCornerShape`.
+- **Zuordnung (seit v1.08):** Hat ein Screen neben dem Speichern-Block weitere Karten, die ihre Befehle direkt senden (z. B. „KONFIGURIERTE REGIONEN“ unter „ROUTING & ADVERTS“), steht der Speichern-Button **innerhalb** der Karte, deren Entwurf er speichert, als letztes Element. So ist eindeutig, wofür er gilt.
 - **Tour-Modus:** Ein Screen registriert seine Aktion über `RegisterTourSave { … }` und blendet den eigenen Button aus (`if (!inTour)`). In der Tour-Leiste erscheint dann „Speichern & Weiter →“. Es gibt nie zwei rote Buttons gleichzeitig.
 - Destruktive oder riskante Aktionen laufen über `SlideToConfirm` statt über einen Klick.
+
+**Hinzufügen als Abschlusszeile (seit v1.08):** In Listen mit Zeilen-Layout (z. B. Regionen) ist die Eingabe für einen neuen Eintrag die **letzte Zeile der Liste** und kein separater Block darunter. Sie hat dasselbe Zeilen-Layout (gleiche Paddings), einen 1-dp-Rahmen in Signalrot (`BorderStroke(1.dp, bColors.signalRed)`, `BauhausCornerShape`) und kompakte, 28 dp hohe Monospace-Felder (Regionen: Name ~70 % mit Platzhalter „Neue Region“, Parent ~30 %, vorbelegt `*`). Rechts sitzt an exakt der Position des Mülleimer-Icons (36-dp-Zelle) der eckige signalrote `+`-Button. Ungültige Eingaben färben das Feld rot (2-dp-Rahmen), der `+`-Button ist dann gedeckt (`SAVED_STATE_ALPHA`).
+
+**Ein Spinner pro Ladevorgang:** Während eine Liste neu geladen wird, dreht der Braille-Spinner **nur** im auslösenden `RefreshButton`. Andere Buttons derselben Karte (Hinzufügen, Listen-Schalter, Löschen) sind gesperrt, zeigen aber keinen eigenen Spinner.
 
 **Kompakte Listen-Schalter:** In dichten Listen (z. B. „KONFIGURIERTE REGIONEN“) stehen eckige Bauhaus-Schalter `[HOME] [DEF] [FLOOD]` statt runder Material-Switches. Sie haben `BauhausCornerShape` (2 dp), 28 dp Höhe, Monospace 10 sp fett und eine 1-dp-Outline. Aktiv sind sie vollflächig in ihrer Signalfarbe (HOME = Rot, DEF = Kobalt, FLOOD = Ocker). Während einer Übertragung sind sie gesperrt.
 

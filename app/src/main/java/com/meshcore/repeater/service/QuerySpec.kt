@@ -39,7 +39,28 @@ object QuerySpec {
         return c.startsWith("filter") || c == "region" || c.startsWith("region def") || c == "help" || c == "clock" || c == "stats" || c.startsWith("neighbors")
     }
 
-    fun validatorFor(cmd: String): (String) -> Boolean = when (cmd.trim().lowercase()) {
+    /**
+     * Regionen-Schreibbefehle (MeshCore/ZephCore CommonCLI::handleRegionCmd) – nur die echte Bestätigung annehmen,
+     * damit verspätete Baum-/Statuszeilen (LoRa) nicht als "OK" eines Folgebefehls gewertet werden:
+     *  - "region home X"    -> " home is now X"
+     *  - "region default X" -> " default scope is now X" (speichert selbst)
+     *  - put / allowf / denyf / remove / save -> "OK" bzw. "OK - (flood allowed)"
+     * Fehlerantworten ("Err - …") fängt [isErrorReply] vorher ab. null = kein Regionen-Schreibbefehl.
+     */
+    fun regionActionValidator(cmd: String): ((String) -> Boolean)? {
+        val parts = cmd.trim().split(Regex("\\s+"))
+        if (parts.size < 2 || !parts[0].equals("region", true)) return null
+        val sub = parts[1].lowercase()
+        return when {
+            sub == "home" && parts.size >= 3 -> { v -> v.contains("home is now", true) }
+            sub == "default" && parts.size >= 3 -> { v -> v.contains("default scope is now", true) }
+            sub in setOf("put", "allowf", "denyf", "remove") && parts.size >= 3 -> { v -> v.trim().startsWith("OK", true) }
+            sub == "save" && parts.size == 2 -> { v -> v.trim().startsWith("OK", true) }
+            else -> null
+        }
+    }
+
+    fun validatorFor(cmd: String): (String) -> Boolean = regionActionValidator(cmd) ?: when (cmd.trim().lowercase()) {
         "board" -> { v -> v.length in 2..64 && v.any { it.isLetter() } && !isForeignFormat(v) && !v.startsWith("filter", true) }
         "ver" -> { v -> VERSION_ANY.containsMatchIn(v) && v.any { it.isLetter() } && !RADIO.matches(v) && !COORD.matches(v) }
         "get radio" -> { v -> RADIO.matches(v) }

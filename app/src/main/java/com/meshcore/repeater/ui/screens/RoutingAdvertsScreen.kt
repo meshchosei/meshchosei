@@ -12,7 +12,15 @@ import com.meshcore.repeater.model.RegionParser
 import com.meshcore.repeater.model.RegionState
 import com.meshcore.repeater.viewmodel.BusyKey
 import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import com.meshcore.repeater.ui.components.SAVED_STATE_ALPHA
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.ui.draw.clip
@@ -63,6 +71,8 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
         }
     }
 
+    val doSave = { viewModel.applyBasicSetupChanges(pendingChanges, BusyKey.ROUTING) }
+
     Column(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -94,25 +104,24 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
                     Text(tr("Mehrfache Empfangsbestätigungen (multi.acks = 1)"), fontSize = 12.sp)
                     BauhausSwitch(checked = setup.multiAcks == 1, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(multiAcks = if (it) 1 else 0)) })
                 }
+                // "Speichern" gehört ausschließlich zu dieser Karte (Routing/Adverts). Die Regionen-Liste darunter
+                // sendet ihre CLI-Befehle direkt. Im Setup-Tour-Modus übernimmt "Speichern & Weiter →" in der Tour-Leiste.
+                if (!LocalTourMode.current) {
+                    BusyButton(
+                        busy = BusyKey.ROUTING in busy, onClick = { doSave() }, hasUnsavedChanges = pendingChanges.isNotEmpty(),
+                        containerColor = bColors.signalRed, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, tint = Color.White)
+                        Spacer(Modifier.width(8.dp))
+                        Text(tr("Speichern"), color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
+        RegisterTourSave { if (pendingChanges.isNotEmpty()) doSave() }
 
-        val doSave = { viewModel.applyBasicSetupChanges(pendingChanges, BusyKey.ROUTING) }
         val regionState by viewModel.regionState.collectAsState()
         RegionsSection(viewModel, regionState, BusyKey.REGION in busy)
-
-        RegisterTourSave { if (pendingChanges.isNotEmpty()) doSave() }
-        // Im Setup-Tour-Modus übernimmt "Speichern & Weiter →" in der Tour-Leiste
-        if (!LocalTourMode.current) {
-            BusyButton(
-                busy = BusyKey.ROUTING in busy, onClick = { doSave() }, hasUnsavedChanges = pendingChanges.isNotEmpty(),
-                containerColor = bColors.signalRed, modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, tint = Color.White)
-                Spacer(Modifier.width(8.dp))
-                Text(tr("Speichern"), color = Color.White, fontWeight = FontWeight.Bold)
-            }
-        }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             BusyOutlinedButton(
@@ -142,7 +151,8 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
 
 /**
  * KONFIGURIERTE REGIONEN (MeshCore/ZephCore "region …") – eine einzige Karte:
- * je Region eine Zeile mit eckigen Bauhaus-Schaltern [HOME] [DEF] [FLOOD] + Löschen, darunter eine Zeile zum Hinzufügen.
+ * je Region eine Zeile mit eckigen Bauhaus-Schaltern [HOME] [DEF] [FLOOD] + Löschen; die letzte Zeile ([RegionAddRow],
+ * signalroter Rahmen) legt eine neue Region an.
  * Jede Aktion wird sofort gesendet (put/allowf/denyf/remove/home + "region save"; "region default" speichert selbst)
  * und danach der Regionen-Stand neu eingelesen.
  */
@@ -181,29 +191,13 @@ private fun RegionsSection(viewModel: RepeaterViewModel, state: RegionState, bus
             }
             if (state.regions.isEmpty()) Text(tr("Noch keine eigenen Regionen."), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(vertical = 4.dp))
-            // Eine kompakte Zeile zum Hinzufügen ("region put" erlaubt Flood standardmäßig)
-            val nameOk = newName.isBlank() || RegionParser.isValidName(newName)
-            val parentOk = newParent.isBlank() || newParent.trim() == "*" || RegionParser.isValidName(newParent)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                OutlinedTextField(
-                    value = newName, onValueChange = { newName = it.filterNot(Char::isWhitespace).take(RegionParser.MAX_NAME_LEN) },
-                    placeholder = { Text(tr("Neue Region"), fontSize = 12.sp) }, isError = !nameOk, singleLine = true,
-                    textStyle = LocalTextStyle.current.copy(fontSize = 13.sp, fontFamily = FontFamily.Monospace),
-                    shape = BauhausCornerShape, modifier = Modifier.weight(1f)
-                )
-                OutlinedTextField(
-                    value = newParent, onValueChange = { newParent = it.filterNot(Char::isWhitespace).take(RegionParser.MAX_NAME_LEN) },
-                    placeholder = { Text(tr("Parent"), fontSize = 12.sp) }, isError = !parentOk, singleLine = true,
-                    textStyle = LocalTextStyle.current.copy(fontSize = 13.sp, fontFamily = FontFamily.Monospace),
-                    shape = BauhausCornerShape, modifier = Modifier.width(84.dp)
-                )
-                BusyButton(
-                    busy = busy, enabled = newName.isNotBlank() && nameOk && parentOk, containerColor = bColors.cobalt, busyText = null,
-                    contentPadding = PaddingValues(0.dp), modifier = Modifier.size(48.dp),
-                    onClick = { viewModel.addRegion(newName, newParent.ifBlank { "*" }, flood = true); newName = "" }
-                ) { Icon(Icons.Default.Add, contentDescription = tr("Hinzufügen"), tint = Color.White) }
-            }
+            // Abschlusszeile der Liste: neue Region anlegen ("region put" erlaubt Flood standardmäßig)
+            RegionAddRow(
+                name = newName, parent = newParent, busy = busy,
+                onNameChange = { newName = it.filterNot(Char::isWhitespace).take(RegionParser.MAX_NAME_LEN) },
+                onParentChange = { newParent = it.filterNot(Char::isWhitespace).take(RegionParser.MAX_NAME_LEN) },
+                onAdd = { viewModel.addRegion(newName, newParent.ifBlank { "*" }, flood = true); newName = "" }
+            )
         }
     }
 
@@ -246,6 +240,69 @@ private fun RegionRow(
             }
         } else Spacer(Modifier.width(36.dp))
     }
+}
+
+/**
+ * Abschlusszeile der Regionen-Liste im identischen Zeilen-Layout von [RegionRow] (gleiche Paddings, 1-dp-Rahmen
+ * in Signalrot): links Name (~70 %) und Parent (~30 %, vorbelegt "*"), rechts an der Position des Mülleimer-Icons
+ * der eckige signalrote "+"-Button. Kein eigener Spinner – den Ladezustand zeigt nur "Aktualisieren".
+ */
+@Composable
+private fun RegionAddRow(
+    name: String, parent: String, busy: Boolean,
+    onNameChange: (String) -> Unit, onParentChange: (String) -> Unit, onAdd: () -> Unit
+) {
+    val bColors = LocalBauhausColors.current
+    val nameOk = name.isBlank() || RegionParser.isValidName(name)
+    val parentOk = parent.isBlank() || parent.trim() == "*" || RegionParser.isValidName(parent)
+    val canAdd = !busy && name.isNotBlank() && nameOk && parentOk
+    Row(
+        modifier = Modifier.fillMaxWidth().clip(BauhausCornerShape)
+            .border(BorderStroke(1.dp, bColors.signalRed), BauhausCornerShape)
+            .padding(start = 10.dp, end = 2.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        RegionInputField(name, onNameChange, tr("Neue Region"), isError = !nameOk, enabled = !busy, modifier = Modifier.weight(0.7f))
+        RegionInputField(parent, onParentChange, tr("Parent"), isError = !parentOk, enabled = !busy, modifier = Modifier.weight(0.3f))
+        // Gleiche 36-dp-Zelle wie das Mülleimer-Icon der Regionen-Zeilen
+        Box(
+            modifier = Modifier.size(36.dp).clickable(enabled = canAdd, role = Role.Button, onClick = onAdd)
+                .semantics { contentDescription = tr("Hinzufügen") },
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                Modifier.size(28.dp).clip(BauhausCornerShape)
+                    .background(if (canAdd) bColors.signalRed else bColors.signalRed.copy(alpha = SAVED_STATE_ALPHA)),
+                contentAlignment = Alignment.Center
+            ) { Icon(Icons.Default.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp)) }
+        }
+    }
+}
+
+/** Kompaktes, eckiges Eingabefeld (28 dp hoch, Monospace) für [RegionAddRow]. */
+@Composable
+private fun RegionInputField(value: String, onValueChange: (String) -> Unit, placeholder: String, isError: Boolean, enabled: Boolean, modifier: Modifier) {
+    val bColors = LocalBauhausColors.current
+    val textColor = if (isError) bColors.signalRed else MaterialTheme.colorScheme.onSurface
+    BasicTextField(
+        value = value, onValueChange = onValueChange, enabled = enabled, singleLine = true,
+        textStyle = TextStyle(fontSize = 13.sp, fontFamily = FontFamily.Monospace, color = textColor),
+        cursorBrush = SolidColor(bColors.signalRed),
+        keyboardOptions = KeyboardOptions(autoCorrect = false, imeAction = ImeAction.Next),
+        modifier = modifier.height(28.dp),
+        decorationBox = { inner ->
+            Box(
+                Modifier.fillMaxSize().clip(BauhausCornerShape)
+                    .border(if (isError) 2.dp else 1.dp, if (isError) bColors.signalRed else MaterialTheme.colorScheme.outline, BauhausCornerShape)
+                    .padding(horizontal = 6.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                if (value.isEmpty()) Text(placeholder, fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                inner()
+            }
+        }
+    )
 }
 
 /** Eckiger Bauhaus-Schalter (2 dp, BauhausCornerShape) statt rundem Material-Switch: aktiv = vollflächig in Signalfarbe. */

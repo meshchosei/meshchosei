@@ -95,4 +95,33 @@ class QuerySpecTest {
         assertTrue(ok("filter wl channel list", "d9,11"))
         assertFalse(ok("filter wl channel list", "Filter: mode whitelist"))
     }
+
+    /** CommonCLI::handleRegionCmd (MeshCore & ZephCore): nur die echte Bestätigung zählt, keine verspäteten Baumzeilen. */
+    @Test fun regionActionsAcceptOnlyRealConfirmation() {
+        assertTrue(ok("region put Berlin", "OK - (flood allowed)"))
+        assertTrue(ok("region put Mitte Berlin", "OK - (flood allowed)"))
+        assertTrue(ok("region allowf Berlin", "OK"))
+        assertTrue(ok("region denyf Berlin", "OK"))
+        assertTrue(ok("region remove Berlin", "OK"))
+        assertTrue(ok("region save", "OK"))
+        assertTrue(ok("region home Berlin", "home is now Berlin"))
+        assertTrue(ok("region default Berlin", "default scope is now Berlin"))
+        assertTrue(ok("region default <null>", "default scope is now <null>"))
+        // verspätete Zeilen eines früheren "region"/"region home"-Laufs dürfen nicht als Bestätigung gelten
+        assertFalse(ok("region put Berlin", "* F"))
+        assertFalse(ok("region allowf Berlin", " Berlin F"))
+        assertFalse(ok("region save", "home is Berlin"))
+        assertFalse(ok("region home Berlin", "home is Berlin"))
+        assertFalse(ok("region default Berlin", "default scope is Berlin"))
+        assertFalse(ok("region remove Berlin", "-> Berlin"))
+    }
+
+    @Test fun regionReadQueriesKeepTheirValidators() {
+        assertTrue(ok("region", "* F"))
+        assertFalse(ok("region", "OK"))
+        assertTrue(ok("region home", "home is *"))
+        assertTrue(QuerySpec.regionActionValidator("region") == null)
+        assertTrue(QuerySpec.regionActionValidator("region home") == null)
+        assertTrue(QuerySpec.regionActionValidator("region default") == null)
+    }
 }
