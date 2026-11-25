@@ -5,7 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -20,11 +20,20 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 
+/**
+ * true = Scroll-Hinweise in diesem Teilbaum ausblenden. MainActivity setzt das für das Hauptfenster, solange
+ * das Seitenmenü offen ist – dann zeigt nur das Menü selbst seinen Hinweis (seit v1.15).
+ */
+val LocalSuppressScrollHint = compositionLocalOf { false }
+
 /** Reine Sichtbarkeitsregel des Scroll-Hinweises (STYLE_GUIDE.md §2.9). */
 object ScrollHintRule {
-    /** Sichtbar, solange weiter nach unten gescrollt werden kann – bei Screens nur im Querformat, bei Dialogen immer. */
-    fun visible(canScrollForward: Boolean, isLandscape: Boolean, always: Boolean): Boolean =
-        canScrollForward && (always || isLandscape)
+    /**
+     * Sichtbar, solange weiter nach unten gescrollt werden kann – bei Screens nur im Querformat, bei Dialogen immer;
+     * nie, wenn [suppressed] (Hauptfenster hinter geöffnetem Seitenmenü).
+     */
+    fun visible(canScrollForward: Boolean, isLandscape: Boolean, always: Boolean, suppressed: Boolean = false): Boolean =
+        !suppressed && canScrollForward && (always || isLandscape)
 }
 
 /**
@@ -38,7 +47,7 @@ object ScrollHintRule {
  */
 fun Modifier.scrollHint(state: ScrollState, always: Boolean = false, fadeColor: Color? = null): Modifier = composed {
     val landscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val show = ScrollHintRule.visible(state.canScrollForward, landscape, always)
+    val show = ScrollHintRule.visible(state.canScrollForward, landscape, always, suppressed = LocalSuppressScrollHint.current)
     val alpha by animateFloatAsState(if (show) 1f else 0f, label = "scrollHint")
     val fade = fadeColor ?: MaterialTheme.colorScheme.background
     val line = MaterialTheme.colorScheme.outline

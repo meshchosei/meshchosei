@@ -159,7 +159,10 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
     LaunchedEffect(drawerState.targetValue) { if (drawerState.targetValue == DrawerValue.Open) viewModel.cancelManualCli() }
     LaunchedEffect(currentScreen) { if (currentScreen != NavDrawerItem.CLI_CONSOLE) viewModel.cancelManualCli() }
 
+    // Scroll-Hinweis: bei offenem (oder sich öffnendem) Seitenmenü nur im Menü, nicht im Hauptfenster dahinter
+    val drawerOpen = drawerState.isOpen || drawerState.targetValue == DrawerValue.Open
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
+      CompositionLocalProvider(com.meshcore.repeater.ui.components.LocalSuppressScrollHint provides false) {
         AppDrawerHost(
             currentRoute = currentScreen, connectionState = connectionState, meshCareFlow = viewModel.meshCareState, filterStatsFlow = viewModel.filterStats,
             firmwareVersion = capabilities.firmwareVersion, themeMode = themeMode, appLanguage = appLanguage, effectiveLang = langCodeFor(appLanguage), navigationAllowed = navigationAllowed,
@@ -190,7 +193,9 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
             onThemeChange = { viewModel.setThemeMode(it) }, onLanguageChange = { viewModel.setAppLanguage(it) },
             onShowDisclaimer = { showDisclaimerInfo = true; scope.launch { drawerState.close() } }
         )
+      }
     }) {
+      CompositionLocalProvider(com.meshcore.repeater.ui.components.LocalSuppressScrollHint provides drawerOpen) {
         Scaffold(topBar = { TopBarHost(title = stringResource(currentScreen.titleRes), connectionState = connectionState, viewModel = viewModel, capabilities = capabilities, onMenuClick = { scope.launch { if (drawerState.isClosed) drawerState.open() else drawerState.close() } }) }, snackbarHost = { SnackbarHost(snackbarHostState) }, containerColor = MaterialTheme.colorScheme.background) { paddingValues ->
             Column(Modifier.fillMaxSize().padding(paddingValues).background(MaterialTheme.colorScheme.background)) {
                 Box(Modifier.weight(1f)) {
@@ -257,6 +262,7 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
                 }
             }
         }
+      }
     }
 }
 

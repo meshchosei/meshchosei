@@ -15,6 +15,21 @@ class ScrollHintRuleTest {
         assertFalse(ScrollHintRule.visible(canScrollForward = false, isLandscape = false, always = true))
     }
 
+    /** v1.15: Hauptfenster hinter geöffnetem Seitenmenü zeigt keinen Hinweis, das Menü selbst schon. */
+    @Test fun suppressedBehindOpenDrawer() {
+        assertFalse(ScrollHintRule.visible(canScrollForward = true, isLandscape = true, always = false, suppressed = true))
+        assertFalse(ScrollHintRule.visible(canScrollForward = true, isLandscape = true, always = true, suppressed = true))
+        assertTrue(ScrollHintRule.visible(canScrollForward = true, isLandscape = true, always = false, suppressed = false))
+    }
+
+    /** MainActivity: Menü liefert false, Hauptfenster den Drawer-Zustand. */
+    @Test fun mainActivityProvidesSuppression() {
+        val main = listOf(File("src/main/java"), File("app/src/main/java")).first { it.isDirectory }
+            .resolve("com/meshcore/repeater/MainActivity.kt").readText()
+        assertTrue(main.contains("LocalSuppressScrollHint provides false"))
+        assertTrue(main.contains("LocalSuppressScrollHint provides drawerOpen"))
+    }
+
     /** STYLE_GUIDE §2.9: kein nacktes verticalScroll mehr – jeder Scroll-Container trägt den Hinweis. */
     @Test fun everyScrollContainerUsesHint() {
         val src = listOf(File("src/main/java"), File("app/src/main/java")).first { it.isDirectory }
