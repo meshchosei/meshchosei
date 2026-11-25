@@ -34,8 +34,9 @@ import kotlinx.coroutines.launch
 /** Prozessweit: Splashscreen wurde bereits gezeigt (überlebt neue Activity-Instanzen, z. B. durch USB_DEVICE_ATTACHED). */
 private var splashShownInProcess = false
 
+/** Effektive 2-Buchstaben-Sprache ("de|en|nl|fr"); SYSTEM = Systemsprache (auch "de-DE" -> "de"). */
 private fun langCodeFor(lang: com.meshcore.repeater.model.AppLanguage): String =
-    if (lang == com.meshcore.repeater.model.AppLanguage.SYSTEM) com.meshcore.repeater.i18n.I18n.systemLanguage() else lang.code
+    com.meshcore.repeater.i18n.I18n.effectiveLanguage(if (lang == com.meshcore.repeater.model.AppLanguage.SYSTEM) "" else lang.code)
 
 /** Navigationsverlauf übersteht Display-Drehung / Activity-Neuaufbau (gespeichert als Enum-Namen). */
 private val NavHistorySaver = androidx.compose.runtime.saveable.listSaver<androidx.compose.runtime.snapshots.SnapshotStateList<NavDrawerItem>, String>(
@@ -151,7 +152,7 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         AppDrawerHost(
             currentRoute = currentScreen, connectionState = connectionState, meshCareFlow = viewModel.meshCareState, filterStatsFlow = viewModel.filterStats,
-            firmwareVersion = capabilities.firmwareVersion, themeMode = themeMode, appLanguage = appLanguage, navigationAllowed = navigationAllowed,
+            firmwareVersion = capabilities.firmwareVersion, themeMode = themeMode, appLanguage = appLanguage, effectiveLang = langCodeFor(appLanguage), navigationAllowed = navigationAllowed,
             meshCareAvailable = meshCareAvailable,
             supportsBlacklist = blacklistMenuEnabled, supportsWhitelist = whitelistMenuEnabled,
             // Geführtes Setup: KEINE erneute Abfrage – die Werte stammen aus dem einmaligen Start-Scan

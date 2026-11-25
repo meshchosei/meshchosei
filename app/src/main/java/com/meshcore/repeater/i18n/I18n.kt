@@ -13,12 +13,30 @@ import java.util.Locale
  * [language] ist Compose-State: jeder Text, der in der Komposition über [tr] gelesen wird, aktualisiert sich
  * beim Sprachwechsel im Seitenmenü sofort.
  */
+/** Reine Sprachcode-Normalisierung (ohne Compose-State, daher JVM-testbar). */
+object LanguageCode {
+    val SUPPORTED = listOf("de", "en", "nl", "fr")
+
+    /**
+     * Effektive 2-Buchstaben-App-Sprache: Nutzerwahl, sonst Systemsprache.
+     * Leer, "system" oder ein vollständiges Locale ("de-DE", "de_DE") werden auf "de|en|nl|fr" normalisiert;
+     * nicht unterstützte Sprachen fallen auf "en" zurück.
+     */
+    fun effective(selected: String?, systemLang: String): String {
+        val sel = selected?.trim().orEmpty().takeUnless { it.equals("system", ignoreCase = true) }.orEmpty()
+        return sel.ifBlank { systemLang }.lowercase(Locale.ROOT).take(2).let { if (it in SUPPORTED) it else "en" }
+    }
+}
+
 object I18n {
     /** "de", "en", "nl" oder "fr" */
     var language: String by mutableStateOf(systemLanguage())
     private var table: Map<String, Array<String>> = emptyMap()   // de -> [en, nl, fr]
 
-    fun systemLanguage(): String = Locale.getDefault().language.lowercase(Locale.ROOT).let { if (it in setOf("de", "en", "nl", "fr")) it else "en" }
+    fun systemLanguage(): String = LanguageCode.effective("", Locale.getDefault().language)
+
+    /** Siehe [LanguageCode.effective]. */
+    fun effectiveLanguage(selected: String?, systemLang: String = Locale.getDefault().language): String = LanguageCode.effective(selected, systemLang)
 
     fun init(context: Context) {
         if (table.isNotEmpty()) return

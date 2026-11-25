@@ -76,6 +76,8 @@ fun AppDrawerHost(
     filterStatsFlow: kotlinx.coroutines.flow.StateFlow<FilterStats>,
     themeMode: ThemeMode,
     appLanguage: AppLanguage,
+    /** Normalisierte, tatsächlich aktive Sprache ("de|en|nl|fr") – auch bei Systemsprache. */
+    effectiveLang: String,
     firmwareVersion: String,
     navigationAllowed: Boolean,
     meshCareAvailable: Boolean,
@@ -91,7 +93,7 @@ fun AppDrawerHost(
     val filterStats by filterStatsFlow.collectAsState()
     AppDrawerSheet(
         currentRoute = currentRoute, connectionState = connectionState, meshCareState = meshCareState, filterStats = filterStats,
-        themeMode = themeMode, appLanguage = appLanguage, firmwareVersion = firmwareVersion, navigationAllowed = navigationAllowed,
+        themeMode = themeMode, appLanguage = appLanguage, effectiveLang = effectiveLang, firmwareVersion = firmwareVersion, navigationAllowed = navigationAllowed,
         meshCareAvailable = meshCareAvailable, supportsBlacklist = supportsBlacklist, supportsWhitelist = supportsWhitelist, onStartGuidedSetup = onStartGuidedSetup, onItemClick = onItemClick,
         onThemeChange = onThemeChange, onLanguageChange = onLanguageChange, onShowDisclaimer = onShowDisclaimer
     )
@@ -105,6 +107,7 @@ fun AppDrawerSheet(
     filterStats: FilterStats,
     themeMode: ThemeMode,
     appLanguage: AppLanguage,
+    effectiveLang: String = com.meshcore.repeater.i18n.I18n.effectiveLanguage(if (appLanguage == AppLanguage.SYSTEM) "" else appLanguage.code),
     firmwareVersion: String = "",
     navigationAllowed: Boolean,
     meshCareAvailable: Boolean = true,
@@ -317,7 +320,8 @@ fun AppDrawerSheet(
                     }
                 }
                 listOf(AppLanguage.DE to "🇩🇪", AppLanguage.EN to "🇬🇧", AppLanguage.NL to "🇳🇱", AppLanguage.FR to "🇫🇷").forEach { (lang, flag) ->
-                    val isActive = appLanguage == lang
+                    // Auch bei Systemsprache (AppLanguage.SYSTEM) ist die tatsächlich aktive Flagge hervorgehoben
+                    val isActive = effectiveLang == lang.code
                     Box(
                         modifier = Modifier
                             .weight(1f)
