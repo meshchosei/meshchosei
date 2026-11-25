@@ -51,16 +51,17 @@ val LocalBauhausColors = staticCompositionLocalOf {
     )
 }
 
-// Geometrische Bauhaus-Form: BauhausCornerShape = 2.dp (Standard für Cards, Buttons, Chips, Felder);
-// Material-Shapes darüber: extraSmall 2.dp, small/medium 4.dp, large 6.dp, extraLarge 8.dp
+// Geometrische Bauhaus-Form: BauhausCornerShape = 2.dp – einzige Form für Cards, Buttons, Chips, Felder,
+// Badges und Dialoge (STYLE_GUIDE.md §1.2). Seit v1.09 liegen auch alle Material-Shapes auf 2.dp, damit
+// Komponenten ohne explizites shape (z. B. Menüs, Snackbars) nicht wieder runder werden.
 val BauhausCornerShape = RoundedCornerShape(2.dp)
 
 val BauhausShapes = Shapes(
-    extraSmall = RoundedCornerShape(2.dp),
-    small = RoundedCornerShape(4.dp),
-    medium = RoundedCornerShape(4.dp),
-    large = RoundedCornerShape(6.dp),
-    extraLarge = RoundedCornerShape(8.dp)
+    extraSmall = BauhausCornerShape,
+    small = BauhausCornerShape,
+    medium = BauhausCornerShape,
+    large = BauhausCornerShape,
+    extraLarge = BauhausCornerShape
 )
 
 private val BauhausDarkColorScheme = darkColorScheme(

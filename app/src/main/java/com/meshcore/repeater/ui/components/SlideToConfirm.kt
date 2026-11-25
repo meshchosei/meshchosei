@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.components
 
+import com.meshcore.repeater.ui.theme.BauhausCornerShape
+
 import com.meshcore.repeater.i18n.tr
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -15,8 +17,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
@@ -57,7 +57,7 @@ fun SlideToConfirm(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .clip(RoundedCornerShape(28.dp))
+            .clip(BauhausCornerShape)
             .background(trackColor)
     ) {
         val density = LocalDensity.current
@@ -96,7 +96,7 @@ fun SlideToConfirm(
                 .padding(2.dp)
                 .offset { IntOffset(dragOffset.roundToInt(), 0) }
                 .size(52.dp)
-                .clip(CircleShape)
+                .clip(BauhausCornerShape)
                 .background(if (isConfirmed) BauhausDarkSignalRed else thumbColor)
                 .draggable(
                     orientation = Orientation.Horizontal,

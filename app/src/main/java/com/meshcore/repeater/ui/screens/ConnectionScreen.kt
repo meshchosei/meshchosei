@@ -36,7 +36,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.BluetoothSearching
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -342,6 +341,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         LazyColumn(modifier = Modifier.weight(1f)) {
                             items(usbDevices) { dev ->
                                 Card(
+                                    shape = BauhausCornerShape,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 4.dp),
@@ -433,6 +433,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             LazyColumn(modifier = Modifier.weight(1f)) {
                                 items(bleDevices) { ble ->
                                     Card(
+                                        shape = BauhausCornerShape,
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 4.dp),
@@ -490,6 +491,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             FilterChip(shape = BauhausCornerShape, selected = filterOnlyKnownPaths, onClick = { filterOnlyKnownPaths = !filterOnlyKnownPaths }, label = { Text(tr("Nur aktive Pfade"), fontSize = 11.sp) })
                         }
                         OutlinedTextField(
+                            shape = BauhausCornerShape,
                             value = contactSearchQuery,
                             onValueChange = { contactSearchQuery = it },
                             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -525,6 +527,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 )
                             }
                             Card(
+                                shape = BauhausCornerShape,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .border(1.dp, if (remoteAdmin.isLoggedIn) Color(0xFF4CAF50) else bColors.cobalt, BauhausCornerShape),
@@ -560,7 +563,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
 
                                         Box(
                                             modifier = Modifier
-                                                .clip(RoundedCornerShape(6.dp))
+                                                .clip(BauhausCornerShape)
                                                 .background(if (remoteAdmin.isLoggedIn) bColors.signalRed.copy(alpha = 0.2f) else bColors.ochre.copy(alpha = 0.2f))
                                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                                         ) {
@@ -579,6 +582,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         OutlinedTextField(
+                                            shape = BauhausCornerShape,
                                             value = remoteAdmin.savedPassword,
                                             onValueChange = { viewModel.setRemoteAdminPassword(it) },
                                             modifier = Modifier.weight(1f),
@@ -648,6 +652,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 items(filteredContacts) { contact ->
                                     val isSelected = remoteAdmin.targetRepeater?.pubKeyHex == contact.pubKeyHex
                                     Card(
+                                        shape = BauhausCornerShape,
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 3.dp)
@@ -678,7 +683,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                                     Spacer(modifier = Modifier.width(6.dp))
                                                     Box(
                                                         modifier = Modifier
-                                                            .clip(RoundedCornerShape(4.dp))
+                                                            .clip(BauhausCornerShape)
                                                             .background(if (contact.isRepeater) bColors.signalRed.copy(alpha = 0.2f) else bColors.cobalt.copy(alpha = 0.2f))
                                                             .padding(horizontal = 6.dp, vertical = 2.dp)
                                                     ) {

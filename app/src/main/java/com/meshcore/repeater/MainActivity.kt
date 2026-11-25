@@ -1,5 +1,7 @@
 package com.meshcore.repeater
 
+import com.meshcore.repeater.ui.theme.BauhausCornerShape
+
 import com.meshcore.repeater.i18n.tr
 import com.meshcore.repeater.i18n.findActivity
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -147,7 +149,7 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
             else -> showExitDialog = true
         }
     }
-    if (showExitDialog) { AlertDialog(onDismissRequest = { showExitDialog = false }, title = { Text(tr("App beenden?")) }, text = { Text(tr("Möchtest du den meshchōsei wirklich schließen?")) }, confirmButton = { TextButton(onClick = { showExitDialog = false; try { viewModel.disconnect() } catch (_: Exception) {}; act?.finishAffinity(); return@TextButton }) { Text(tr("Beenden")) } }, dismissButton = { TextButton(onClick = { showExitDialog = false }) { Text(tr("Abbrechen")) } }) }
+    if (showExitDialog) { AlertDialog(onDismissRequest = { showExitDialog = false }, shape = BauhausCornerShape, title = { Text(tr("App beenden?")) }, text = { Text(tr("Möchtest du den meshchōsei wirklich schließen?")) }, confirmButton = { TextButton(shape = BauhausCornerShape, onClick = { showExitDialog = false; try { viewModel.disconnect() } catch (_: Exception) {}; act?.finishAffinity(); return@TextButton }) { Text(tr("Beenden")) } }, dismissButton = { TextButton(shape = BauhausCornerShape, onClick = { showExitDialog = false }) { Text(tr("Abbrechen")) } }) }
 
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         AppDrawerHost(
@@ -222,13 +224,13 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
                     Surface(tonalElevation = 3.dp) {
                         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             if (step > 1) {
-                                TextButton(modifier = Modifier.width(96.dp), onClick = { val prev = (step - 1).coerceAtLeast(1); setupTourStep = prev; navHistory[navHistory.lastIndex] = tourScreens[prev - 1] }) { Text(tr("← Zurück")) }
+                                TextButton(shape = BauhausCornerShape, modifier = Modifier.width(96.dp), onClick = { val prev = (step - 1).coerceAtLeast(1); setupTourStep = prev; navHistory[navHistory.lastIndex] = tourScreens[prev - 1] }) { Text(tr("← Zurück")) }
                             } else {
                                 Spacer(Modifier.width(96.dp))
                             }
                             Text(tr("Setup {0} / 5", step), fontWeight = FontWeight.Bold)
                             val saveAction = tourSave.action
-                            Button(onClick = {
+                            Button(shape = BauhausCornerShape, onClick = {
                                 saveAction?.invoke()
                                 if (step < 5) { val next = step + 1; setupTourStep = next; navHistory[navHistory.lastIndex] = tourScreens[next - 1] } else { setupTourStep = null; navHistory[navHistory.lastIndex] = NavDrawerItem.CONNECTION }
                             }) {
@@ -263,7 +265,7 @@ private fun BoxScope.ReadStatusOverlay(text: String, progress: Pair<Int, Int>?, 
     LaunchedEffect(Unit) { while (true) { kotlinx.coroutines.delay(80L); frame = (frame + 1) % BrailleSpinnerFrames.size } }
     Card(
         modifier = Modifier.align(Alignment.Center).width(300.dp).heightIn(min = 96.dp),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+        shape = BauhausCornerShape,
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
@@ -280,7 +282,7 @@ private fun BoxScope.ReadStatusOverlay(text: String, progress: Pair<Int, Int>?, 
                 progress = { if (showProgress) cur.toFloat() / total.coerceAtLeast(1) else 0f },
                 modifier = Modifier.fillMaxWidth().alpha(if (showProgress) 1f else 0f)
             )
-            TextButton(onClick = { onCancel?.invoke() }, enabled = onCancel != null, modifier = Modifier.alpha(if (onCancel != null) 1f else 0f)) { Text(tr("Abbrechen")) }
+            TextButton(shape = BauhausCornerShape, onClick = { onCancel?.invoke() }, enabled = onCancel != null, modifier = Modifier.alpha(if (onCancel != null) 1f else 0f)) { Text(tr("Abbrechen")) }
         }
     }
 }

@@ -13,7 +13,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Memory
@@ -109,7 +108,7 @@ fun HardwareAntennaScreen(viewModel: RepeaterViewModel) {
                 }
                 // Manuelle Auswahl – immer möglich, standardmäßig aufgeklappt, wenn nicht erkannt
                 var showBoardPicker by remember(cfg.boardAutoDetected) { mutableStateOf(!cfg.boardAutoDetected) }
-                TextButton(onClick = { showBoardPicker = !showBoardPicker }, contentPadding = PaddingValues(0.dp)) {
+                TextButton(shape = BauhausCornerShape, onClick = { showBoardPicker = !showBoardPicker }, contentPadding = PaddingValues(0.dp)) {
                     Text(if (showBoardPicker) tr("Board-Auswahl ausblenden") else tr("Board manuell wählen…"), fontSize = 12.sp)
                 }
                 if (showBoardPicker) {
@@ -295,7 +294,7 @@ private fun SectionTitle(icon: androidx.compose.ui.graphics.vector.ImageVector, 
 @Composable
 private fun ValueTile(title: String, value: String, sub: String?, valueColor: Color, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 10.dp, vertical = 6.dp)
+        modifier = modifier.clip(BauhausCornerShape).background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
         Text(title, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(value, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = valueColor, fontFamily = FontFamily.Monospace)

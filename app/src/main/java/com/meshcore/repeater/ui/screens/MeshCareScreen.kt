@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
@@ -81,7 +79,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp)
+            shape = BauhausCornerShape
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -90,7 +88,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .clip(CircleShape)
+                        .clip(BauhausCornerShape)
                         .background(bColors.ochre.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -124,9 +122,9 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(1.dp, bColors.ochre, RoundedCornerShape(12.dp)),
+                    .border(1.dp, bColors.ochre, BauhausCornerShape),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1C12)),
-                shape = RoundedCornerShape(12.dp)
+                shape = BauhausCornerShape
             ) {
                 Column(
                     modifier = Modifier
@@ -159,7 +157,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(8.dp)
-                            .clip(RoundedCornerShape(4.dp)),
+                            .clip(BauhausCornerShape),
                         color = bColors.ochre,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
@@ -218,7 +216,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(12.dp)
+                shape = BauhausCornerShape
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -272,7 +270,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
                             .fillMaxWidth()
                             .height(52.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = bColors.ochre),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = BauhausCornerShape
                     ) {
                         Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
@@ -292,7 +290,7 @@ fun MeshCareScreen(viewModel: RepeaterViewModel) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp)
+            shape = BauhausCornerShape
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

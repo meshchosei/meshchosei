@@ -52,7 +52,7 @@ fun AboutScreen(viewModel: RepeaterViewModel, onShowDisclaimer: () -> Unit) {
                 modifier = Modifier.align(Alignment.TopEnd).padding(10.dp)
             )
         }
-        Card(Modifier.fillMaxWidth(), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+        Card(Modifier.fillMaxWidth(), shape = BauhausCornerShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
             Column(Modifier.padding(16.dp)) {
                 Text(stringResource(R.string.about_license_title), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface); Spacer(Modifier.height(6.dp))
                 Text(stringResource(R.string.about_license_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant); Spacer(Modifier.height(12.dp))

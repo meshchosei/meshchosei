@@ -36,13 +36,13 @@ Regeln:
 
 ### 1.2 Formen
 
-- **`BauhausCornerShape = RoundedCornerShape(2.dp)`** ist die Standardform für Cards, Buttons, Chips, TextFields, Badges und Dialoge. Kanten sind fast eckig.
+- **`BauhausCornerShape = RoundedCornerShape(2.dp)`** ist seit v1.09 die **einzige** Form für alle Kästchen: Cards, Buttons (auch `TextButton`), Chips, TextFields, Badges, Kacheln, Overlays und Dialoge (`AlertDialog(shape = BauhausCornerShape, …)`, auch der „App beenden“-Dialog). Kanten sind fast eckig.
   Der Code-Kommentar in `BauhausTheme.kt` nennt seit rc12 ebenfalls 2 dp; früher stand dort irreführend „strict 4.dp radii“.
-- `BauhausShapes`: extraSmall 2 dp, small/medium 4 dp, large 6 dp, extraLarge 8 dp. Größere Radien sind tabu.
-- **Ausnahmen** mit weicherer Form:
-  - der große Speichern-Button: 12 dp;
-  - das Status-Overlay: 14 dp;
-  - das Logo-Icon-Quadrat: 12 % der Kantenlänge.
+- `BauhausShapes`: seit v1.09 liegen **alle** Stufen (extraSmall bis extraLarge) auf `BauhausCornerShape`. Material-Komponenten ohne explizites `shape` (Menüs, Snackbars, Dialoge) werden dadurch nicht wieder runder. Trotzdem gilt: `shape = BauhausCornerShape` immer explizit setzen, denn Material-Buttons ignorieren das Theme und sind standardmäßig pillenförmig.
+- **Verboten:** `CircleShape`, `RoundedCornerShape(n)` mit eigenem Radius und das pillenförmige Material-`Badge`. Badges wie „ON“ im Seitenmenü sind ein `Text` mit `Modifier.clip(BauhausCornerShape).background(farbe.copy(alpha = 0.2f))`.
+- **Einzige runde Ausnahme:** das USB-/BT-Verbindungs-Badge (Icon-Kreis neben dem Gerätenamen in der Verbindungskarte, `ConnectionScreen`). Frühere Ausnahmen (Status-Overlay 14 dp, Speichern-Button 12 dp) gibt es nicht mehr.
+- Kein UI-Kästchen und daher nicht betroffen: das Logo-Emblem (`MeshchoseiLogo`, Ecken 12 % der Kantenlänge wie das Launcher-Icon).
+- `ShapeConsistencyTest` prüft die Quelltexte und schlägt bei neuen runden Formen fehl.
 - Rahmen sind immer `BorderStroke(1.dp, colorScheme.outline)`. Für Hervorhebungen 1 dp in einer Akzentfarbe, zum Beispiel Kobalt für die Datenschutz-Card.
 - Keine Schatten auf normalen Cards. Elevation (8 dp) bekommen nur schwebende Elemente wie das Overlay.
 
@@ -246,7 +246,7 @@ RefreshButton(
 ### 2.7 Status-Overlay mit Braille-Spinner
 
 - Das Overlay ist eine zentrierte Card, `BoxScope.align(Center)`:
-  - **feste Breite 300 dp**, `heightIn(min = 96.dp)`, Radius 14 dp, Elevation 8 dp, 1-dp-Outline.
+  - **feste Breite 300 dp**, `heightIn(min = 96.dp)`, `BauhausCornerShape` (2 dp, seit v1.09; vorher 14 dp), Elevation 8 dp, klare 1-dp-Outline.
   - Spinner-Frames: `⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏`, 80 ms pro Frame, 34 sp, Monospace, Farbe `primary`.
   - Der Klartext der aktuellen Abfrage ist SemiBold und 14 sp, **immer `minLines = 2, maxLines = 2`**.
   - Darunter „Abfrage x von y“ und ein `LinearProgressIndicator`, danach „Abbrechen“.

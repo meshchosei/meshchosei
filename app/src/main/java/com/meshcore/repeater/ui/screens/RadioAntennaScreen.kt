@@ -4,7 +4,6 @@ import com.meshcore.repeater.i18n.tr
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -91,7 +90,7 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(12.dp)
+            shape = BauhausCornerShape
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(tr("Regions-Preset übernehmen (Werte danach frei anpassbar):"), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -112,6 +111,7 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
 
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
+                        shape = BauhausCornerShape,
                         value = setup.freqMhz, isError = !freqOk,
                         onValueChange = { raw -> decimal(raw, 8)?.let { v -> edit { it.copy(freqMhz = v) } } },
                         label = { Text(tr("Frequenz (MHz)"), fontSize = 11.sp) },
@@ -119,6 +119,7 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
                         modifier = Modifier.weight(1f), singleLine = true
                     )
                     OutlinedTextField(
+                        shape = BauhausCornerShape,
                         value = setup.bwKhz, isError = !bwOk,
                         onValueChange = { raw -> decimal(raw, 6)?.let { v -> edit { it.copy(bwKhz = v) } } },
                         label = { Text(tr("Bandbreite (kHz)"), fontSize = 11.sp) },
@@ -128,6 +129,7 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
+                        shape = BauhausCornerShape,
                         value = setup.sf, isError = !sfOk,
                         onValueChange = { raw -> integer(raw, 2)?.let { v -> edit { it.copy(sf = v) } } },
                         label = { Text("SF (5..12)", fontSize = 11.sp) },
@@ -135,6 +137,7 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
                         modifier = Modifier.weight(1f), singleLine = true
                     )
                     OutlinedTextField(
+                        shape = BauhausCornerShape,
                         value = setup.cr, isError = !crOk,
                         onValueChange = { raw -> integer(raw.removePrefix("4/"), 1)?.let { v -> edit { it.copy(cr = v) } } },
                         label = { Text("CR 4/x (5..8)", fontSize = 11.sp) },
@@ -144,6 +147,7 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
+                        shape = BauhausCornerShape,
                         value = setup.txPowerDbm, isError = !txOk,
                         onValueChange = { raw -> integer(raw, 3, allowMinus = true)?.let { v -> edit { it.copy(txPowerDbm = v) } } },
                         label = { Text("TX (dBm)", fontSize = 11.sp) },
@@ -151,6 +155,7 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
                         modifier = Modifier.weight(1f), singleLine = true
                     )
                     OutlinedTextField(
+                        shape = BauhausCornerShape,
                         value = setup.dutyCyclePercent, isError = !dutyOk,
                         onValueChange = { raw -> decimal(raw.removeSuffix("%"), 5)?.let { v -> edit { it.copy(dutyCyclePercent = v) } } },
                         label = { Text(tr("Duty-Cycle (%)"), fontSize = 11.sp) },

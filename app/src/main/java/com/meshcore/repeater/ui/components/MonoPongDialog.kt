@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.components
 
+import com.meshcore.repeater.ui.theme.BauhausCornerShape
+
 import com.meshcore.repeater.i18n.tr
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
@@ -8,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
@@ -202,7 +203,7 @@ fun MonoPongDialog(onDismiss: () -> Unit) {
                 }
                 if (gameOver) {
                     Column(
-                        Modifier.align(Alignment.Center).background(MeshchoseiColors.Carbon.copy(alpha = 0.92f), RoundedCornerShape(4.dp)).padding(20.dp),
+                        Modifier.align(Alignment.Center).background(MeshchoseiColors.Carbon.copy(alpha = 0.92f), BauhausCornerShape).padding(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text("GAME OVER", color = MeshchoseiColors.SignalRed, fontWeight = FontWeight.Black, letterSpacing = 0.25.em, fontSize = 20.sp)
@@ -210,10 +211,10 @@ fun MonoPongDialog(onDismiss: () -> Unit) {
                         Text(tr("Punkte: {0}", score) + if (score > 0 && score >= highscore) tr("  · neuer Highscore!") else "", color = MeshchoseiColors.Paper, fontSize = 13.sp)
                         Spacer(Modifier.height(14.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Button(onClick = { round++ }, shape = RoundedCornerShape(2.dp), colors = ButtonDefaults.buttonColors(containerColor = MeshchoseiColors.SignalRed)) {
+                            Button(onClick = { round++ }, shape = BauhausCornerShape, colors = ButtonDefaults.buttonColors(containerColor = MeshchoseiColors.SignalRed)) {
                                 Text(tr("Nochmal"), color = MeshchoseiColors.Paper)
                             }
-                            OutlinedButton(onClick = onDismiss, shape = RoundedCornerShape(2.dp), border = BorderStroke(1.dp, MeshchoseiColors.Paper.copy(alpha = 0.6f))) {
+                            OutlinedButton(onClick = onDismiss, shape = BauhausCornerShape, border = BorderStroke(1.dp, MeshchoseiColors.Paper.copy(alpha = 0.6f))) {
                                 Text(tr("Schließen"), color = MeshchoseiColors.Paper)
                             }
                         }

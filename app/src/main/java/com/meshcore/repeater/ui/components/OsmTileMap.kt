@@ -1,5 +1,7 @@
 package com.meshcore.repeater.ui.components
 
+import com.meshcore.repeater.ui.theme.BauhausCornerShape
+
 import com.meshcore.repeater.i18n.tr
 import android.graphics.BitmapFactory
 import android.util.LruCache
@@ -8,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -276,7 +277,7 @@ fun OsmTileMap(
             TileMapButton("+") { zoom = (zoom + 1).coerceAtMost(MAX_ZOOM) }
             TileMapButton("−") { zoom = (zoom - 1).coerceAtLeast(MIN_ZOOM) }
         }
-        Surface(Modifier.align(Alignment.TopStart).padding(8.dp), shape = RoundedCornerShape(4.dp), color = Color.Black.copy(alpha = 0.6f)) {
+        Surface(Modifier.align(Alignment.TopStart).padding(8.dp), shape = BauhausCornerShape, color = Color.Black.copy(alpha = 0.6f)) {
             Text(if (hasPos) tr("Zoom {0} · ziehen = verschieben", zoom) else tr("Ziehen oder tippen = Standort setzen"), color = Color.White, fontSize = 10.sp,
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
         }
@@ -295,7 +296,7 @@ private fun fetchTile(key: String): ImageBitmap? = try {
 
 @Composable
 private fun TileMapButton(label: String, onClick: () -> Unit) {
-    Surface(onClick = onClick, shape = RoundedCornerShape(6.dp), color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f), tonalElevation = 2.dp, modifier = Modifier.size(36.dp)) {
+    Surface(onClick = onClick, shape = BauhausCornerShape, color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f), tonalElevation = 2.dp, modifier = Modifier.size(36.dp)) {
         Box(contentAlignment = Alignment.Center) { Text(label, fontSize = 18.sp, fontWeight = FontWeight.Bold) }
     }
 }
