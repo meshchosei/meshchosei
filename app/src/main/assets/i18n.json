@@ -284,25 +284,25 @@
   "Ingelogd",
   "Connecté"
  ],
- "Wähle USB-OTG oder BLE-Companion (Mesh OTA)": [
-  "Choose USB-OTG or BLE companion (Mesh OTA)",
-  "Kies USB-OTG of BLE-companion (Mesh OTA)",
-  "Choisissez USB-OTG ou compagnon BLE (Mesh OTA)"
+ "Wähle USB-OTG oder BLE-OTA": [
+  "Choose USB-OTG or BLE-OTA",
+  "Kies USB-OTG of BLE-OTA",
+  "Choisissez USB-OTG ou BLE-OTA"
  ],
  "Trennen": [
   "Disconnect",
   "Verbreken",
   "Déconnecter"
  ],
- "USB-Serial (OTG)": [
-  "USB-Serial (OTG)",
-  "USB-serieel (OTG)",
-  "USB-série (OTG)"
+ "USB-OTG": [
+  "USB-OTG",
+  "USB-OTG",
+  "USB-OTG"
  ],
- "BLE Companion (Mesh OTA)": [
-  "BLE Companion (Mesh OTA)",
-  "BLE-companion (Mesh OTA)",
-  "Compagnon BLE (Mesh OTA)"
+ "BLE-OTA": [
+  "BLE-OTA",
+  "BLE-OTA",
+  "BLE-OTA"
  ],
  "Erkannte OTG-Geräte ({0})": [
   "Detected OTG devices ({0})",
@@ -329,10 +329,10 @@
   "Zoeken naar Bluetooth-nodes...",
   "Recherche de nœuds Bluetooth..."
  ],
- "Verbinde dich per Bluetooth mit deinem Companion-Node (um empfangene Repeater über das Mesh zu steuern) oder direkt mit einem BLE-fähigen Repeater.\n\nTippe oben auf 'Scan'.": [
-  "Connect via Bluetooth to your companion node (to control repeaters received over the mesh) or directly to a BLE-capable repeater.\n\nTap 'Scan' above.",
-  "Verbind via Bluetooth met je companion-node (om via de mesh ontvangen repeaters te bedienen) of direct met een repeater met BLE.\n\nTik bovenaan op 'Scan'.",
-  "Connectez-vous en Bluetooth à votre nœud compagnon (pour piloter les répéteurs reçus via le mesh) ou directement à un répéteur compatible BLE.\n\nTouchez 'Scan' en haut."
+ "Verbinde dich per Bluetooth mit deinem Companion-Node (um empfangene Repeater über das Mesh zu steuern) oder direkt mit einem BLE-fähigen Repeater.\n\nTippe oben auf ↻.": [
+  "Connect via Bluetooth to your companion node (to control repeaters received over the mesh) or directly to a BLE-capable repeater.\n\nTap ↻ above.",
+  "Verbind via Bluetooth met je companion-node (om via de mesh ontvangen repeaters te bedienen) of direct met een repeater met BLE.\n\nTik bovenaan op ↻.",
+  "Connectez-vous en Bluetooth à votre nœud compagnon (pour piloter les répéteurs reçus via le mesh) ou directement à un répéteur compatible BLE.\n\nTouchez ↻ en haut."
  ],
  "{0} • RSSI: {1} dBm": [
   "{0} • RSSI: {1} dBm",
@@ -2104,16 +2104,6 @@
   "Radiowaarden permanent in flash opgeslagen!",
   "Valeurs radio enregistrées définitivement en flash !"
  ],
- "BLE · Mesh OTA": [
-  "BLE · Mesh OTA",
-  "BLE · Mesh-OTA",
-  "BLE · Mesh OTA"
- ],
- "USB · Seriell": [
-  "USB · Serial",
-  "USB · Serieel",
-  "USB · Série"
- ],
  "Hinweis: Der Repeater läuft im Blacklist-Modus – diese Freigaben wirken erst im Whitelist-Modus.": [
   "Note: the repeater runs in blacklist mode – these allowances only take effect in whitelist mode.",
   "Let op: de repeater draait in blacklistmodus – deze vrijgaven werken pas in whitelistmodus.",
@@ -3573,5 +3563,25 @@
   "Query power supply",
   "Voeding opvragen",
   "Interroger l'alimentation"
+ ],
+ "Kontakte neu einlesen": [
+  "Reload contacts",
+  "Contacten opnieuw inlezen",
+  "Recharger les contacts"
+ ],
+ "Passwort gespeichert": [
+  "Password saved",
+  "Wachtwoord opgeslagen",
+  "Mot de passe enregistré"
+ ],
+ "Scan stoppen": [
+  "Stop scan",
+  "Scan stoppen",
+  "Arrêter le scan"
+ ],
+ "Kein Repeater gewählt": [
+  "No repeater selected",
+  "Geen repeater gekozen",
+  "Aucun répéteur choisi"
  ]
 }

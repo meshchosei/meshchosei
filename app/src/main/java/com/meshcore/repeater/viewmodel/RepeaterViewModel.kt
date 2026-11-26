@@ -527,6 +527,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         if (contact?.pubKeyHex != _remoteAdminSession.value.targetRepeater?.pubKeyHex) { readJob?.cancel(); _hasCompletedInitialRead.value = false; loginTimeoutJob?.cancel(); loginAttemptPending = false }
         if (contact == null) { _remoteAdminSession.value = _remoteAdminSession.value.copy(targetRepeater = null, isLoggedIn = false, isLoggingIn = false); return }
         _remoteAdminSession.value = RemoteAdminSession(targetRepeater = contact, savedPassword = prefs.getString("pwd_${contact.pubKeyHex}", "") ?: ""); _basicSetup.value = _basicSetup.value.copy(publicKeyHex = contact.pubKeyHex) }
+    /** true, wenn für diesen Repeater ein Admin-Passwort gespeichert ist (Schlüssel-Merkmal in der Repeater-Auswahl). */
+    fun hasSavedPassword(pubKeyHex: String): Boolean = !prefs.getString("pwd_$pubKeyHex", "").isNullOrEmpty()
     fun setRemoteAdminPassword(password: String) { val t = _remoteAdminSession.value.targetRepeater ?: return; prefs.edit().putString("pwd_${t.pubKeyHex}", password).apply(); _remoteAdminSession.value = _remoteAdminSession.value.copy(savedPassword = password) }
     /**
      * Remote-Login: der Companion bestätigt mit RESP_CODE_SENT (0x06) nur das VERSENDEN (inkl. est_timeout).

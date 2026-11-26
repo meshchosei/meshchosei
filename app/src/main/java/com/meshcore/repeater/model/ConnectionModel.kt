@@ -3,8 +3,8 @@ package com.meshcore.repeater.model
 import com.meshcore.repeater.i18n.tr
 
 enum class ConnectionType(val displayName: String) {
-    USB_SERIAL("USB-Serial (OTG)"),
-    BLE_COMPANION("BLE Companion (Remote)")
+    USB_SERIAL("USB-OTG"),
+    BLE_COMPANION("BLE-OTA")
 }
 
 sealed class ConnectionState {

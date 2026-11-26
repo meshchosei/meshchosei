@@ -3,6 +3,22 @@ package com.meshcore.repeater.ui.screens
 import com.meshcore.repeater.ui.components.hintedVerticalScroll
 
 import com.meshcore.repeater.ui.components.RefreshButton
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import com.meshcore.repeater.ui.components.InlineRefreshIcon
+import kotlinx.coroutines.delay
 import com.meshcore.repeater.R
 import androidx.compose.ui.res.stringResource
 import com.meshcore.repeater.i18n.tr
@@ -96,6 +112,7 @@ import com.meshcore.repeater.ui.theme.BauhausCornerShape
 import com.meshcore.repeater.ui.theme.LocalBauhausColors
 import com.meshcore.repeater.viewmodel.RepeaterViewModel
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ConnectionScreen(viewModel: RepeaterViewModel) {
     val connectionState by viewModel.connectionState.collectAsState()
@@ -201,10 +218,10 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         // Verbunden ohne Ziel-Repeater: nur ein kurzes, einzeiliges Badge statt langer Beschreibung
                         Text(
                             text = when {
-                                linkState.connectionType == ConnectionType.BLE_COMPANION -> tr("BLE · Mesh OTA")
+                                linkState.connectionType == ConnectionType.BLE_COMPANION -> tr("BLE-OTA")
                                 caps.isDirectRepeater || (!caps.isCompanion && caps.firmwareVersion.isNotBlank()) -> tr("USB · Repeater")
                                 caps.isCompanion -> tr("USB · Companion")
-                                else -> tr("USB · Seriell")
+                                else -> tr("USB-OTG")
                             },
                             fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false,
                             color = Color(0xFF4CAF50),
@@ -216,7 +233,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 "${remoteAdmin.targetRepeater?.name} • ${if (remoteAdmin.isLoggedIn) tr("Eingeloggt") else tr(remoteAdmin.sessionStatus)}"
                             }
                             is ConnectionState.Connecting -> tr(state.message)
-                            else -> tr("Wähle USB-OTG oder BLE-Companion (Mesh OTA)")
+                            else -> tr("Wähle USB-OTG oder BLE-OTA")
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
@@ -258,7 +275,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                 enabled = usbEnabled,
                 onClick = { if (usbEnabled) viewModel.selectConnectionType(ConnectionType.USB_SERIAL) },
                 modifier = Modifier.alpha(if (usbEnabled) 1f else 0.35f),
-                text = { Text(tr("USB-Serial (OTG)"), fontWeight = FontWeight.SemiBold) },
+                text = { Text(tr("USB-OTG"), fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false) },
                 icon = { Icon(Icons.Default.Usb, contentDescription = null) }
             )
             Tab(
@@ -266,7 +283,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                 enabled = bleEnabled,
                 onClick = { if (bleEnabled) { viewModel.selectConnectionType(ConnectionType.BLE_COMPANION, startScan = false); scanWithPermissions() } },
                 modifier = Modifier.alpha(if (bleEnabled) 1f else 0.35f),
-                text = { Text(tr("BLE Companion (Mesh OTA)"), fontWeight = FontWeight.SemiBold) },
+                text = { Text(tr("BLE-OTA"), fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false) },
                 icon = { Icon(Icons.Default.Bluetooth, contentDescription = null) }
             )
         }
@@ -320,7 +337,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                         .padding(vertical = 4.dp, horizontal = 4.dp)
                                 )
                             }
-                            RefreshButton(onClick = { viewModel.refreshUsbDevices() })
+                            InlineRefreshIcon(onClick = { viewModel.refreshUsbDevices() }, contentDescription = tr("Aktualisieren"))
                         }
                     }
 
@@ -395,26 +412,17 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 color = MaterialTheme.colorScheme.onSurface
                             )
 
+                            // Scan per rahmenlosem ↻, laufender Scan per Stop-Icon (Signalrot) – kein Text
                             if (isScanningBle) {
-                                Text(
-                                    text = tr("Stop"),
-                                    color = bColors.signalRed,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .clickable { viewModel.stopBleScan() }
-                                        .padding(vertical = 4.dp, horizontal = 4.dp)
-                                )
+                                Box(
+                                    Modifier.size(28.dp).clip(BauhausCornerShape)
+                                        .clickable(role = androidx.compose.ui.semantics.Role.Button, onClickLabel = tr("Scan stoppen")) { viewModel.stopBleScan() },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(Icons.Default.Stop, contentDescription = tr("Scan stoppen"), tint = bColors.signalRed, modifier = Modifier.size(18.dp))
+                                }
                             } else {
-                                Text(
-                                    text = tr("Scan"),
-                                    color = bColors.cobalt,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .clickable { scanWithPermissions() }
-                                        .padding(vertical = 4.dp, horizontal = 4.dp)
-                                )
+                                InlineRefreshIcon(onClick = { scanWithPermissions() }, contentDescription = tr("Scan"))
                             }
                         }
 
@@ -426,7 +434,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = if (isScanningBle) tr("Suche nach Bluetooth-Nodes...") else tr("Verbinde dich per Bluetooth mit deinem Companion-Node (um empfangene Repeater über das Mesh zu steuern) oder direkt mit einem BLE-fähigen Repeater.\n\nTippe oben auf 'Scan'."),
+                                    text = if (isScanningBle) tr("Suche nach Bluetooth-Nodes...") else tr("Verbinde dich per Bluetooth mit deinem Companion-Node (um empfangene Repeater über das Mesh zu steuern) oder direkt mit einem BLE-fähigen Repeater.\n\nTippe oben auf ↻."),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -477,27 +485,142 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         }
                     }
                 } else if (connectionState is ConnectionState.Connected) {
-                    // Connected to Companion (BLE oder USB): Entweder Liste ODER Login-Karte (kein Quetschen!)
+                    // Connected to Companion (BLE oder USB): Auswahlfeld + Klappmenü, darunter die Login-Karte
                     Column(modifier = Modifier.fillMaxSize()) {
-                        if (remoteAdmin.targetRepeater == null) {
-                        // Section Header: Companion Contact List
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                        // v1.19: Repeater-Auswahl als vertikales Klappmenü nach unten (STYLE_GUIDE §2.10),
+                        // optisch und funktional wie das CLI-Klappmenü aus v1.18.
+                        val target = remoteAdmin.targetRepeater
+                        val focusManager = LocalFocusManager.current
+                        val passwordFocus = remember { FocusRequester() }
+                        val loginBringIntoView = remember { BringIntoViewRequester() }
+                        var focusPasswordAfterSelect by remember { mutableStateOf(false) }
+                        // Automatisch offen, solange noch kein Repeater gewählt ist (auch beim (Neu-)Einlesen der Kontakte)
+                        var repeaterMenuOpen by remember { mutableStateOf(target == null) }
+                        LaunchedEffect(target == null, isRefreshingContacts) { if (target == null) repeaterMenuOpen = true }
+                        BackHandler(enabled = repeaterMenuOpen) { repeaterMenuOpen = false }
+
+                        val filteredContacts = meshContacts.filter { ct ->
+                            val typeOk = !filterOnlyRepeaters || ct.isRepeater || ct.isRoomServer
+                            val pathOk = !filterOnlyKnownPaths || (ct.outPathLen in 0..63)
+                            val q = contactSearchQuery.trim()
+                            val searchOk = q.isEmpty() || ct.name.contains(q, ignoreCase = true) || ct.keyPrefix.contains(q, ignoreCase = true)
+                            typeOk && pathOk && searchOk
+                        }
+                        val savedPwKeys = remember(meshContacts, remoteAdmin.savedPassword) {
+                            meshContacts.filter { viewModel.hasSavedPassword(it.pubKeyHex) }.map { it.pubKeyHex }.toSet()
+                        }
+
+                        // Nach der Auswahl: Blick auf die Passwort-/Login-Zeile, ohne gespeichertes Passwort direkt mit Fokus
+                        LaunchedEffect(focusPasswordAfterSelect, target?.pubKeyHex) {
+                            if (focusPasswordAfterSelect && target != null) {
+                                focusPasswordAfterSelect = false
+                                delay(50)
+                                loginBringIntoView.bringIntoView()
+                                if (remoteAdmin.savedPassword.isEmpty()) runCatching { passwordFocus.requestFocus() }
+                            }
+                        }
+                        // Fester Login-Bereich ganz oben, IMMER sichtbar (auch ohne gewählten Repeater: Platzhalter, Feld/Button gesperrt),
+                        // damit sich bei der Auswahl kein Pixel verschiebt. Name, Key, Passwort und Login stehen fest zusammen.
+                        // Kein eigenes Status-Badge – der Login-Status steht oben in der Verbindungs-Statuskarte.
+                        Card(
+                            shape = BauhausCornerShape,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bringIntoViewRequester(loginBringIntoView)
+                                .border(1.dp, if (target == null) MaterialTheme.colorScheme.outline else if (remoteAdmin.isLoggedIn) Color(0xFF4CAF50) else bColors.cobalt, BauhausCornerShape),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                // Name + Public-Key stehen fest beim Passwortfeld
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Router, contentDescription = null, tint = if (target != null) bColors.signalRed else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        text = target?.name ?: tr("Kein Repeater gewählt"),
+                                        fontWeight = FontWeight.Bold, fontSize = 14.sp,
+                                        maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
+                                        color = if (target != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.weight(1f, fill = false)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = if (target == null) "" else "${target.keyPrefix}… • ${when (target.outPathLen) { 0 -> tr("Direkt (0 Hops)"); in 1..63 -> tr("{0} Hops", target.outPathLen); else -> tr("Flood (kein direkter Pfad)") }}",
+                                        fontFamily = FontFamily.Monospace, fontSize = 11.sp,
+                                        maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    OutlinedTextField(
+                                        shape = BauhausCornerShape,
+                                        value = if (target != null) remoteAdmin.savedPassword else "",
+                                        enabled = target != null,
+                                        onValueChange = { viewModel.setRemoteAdminPassword(it) },
+                                        modifier = Modifier.weight(1f).focusRequester(passwordFocus),
+                                        label = { Text(stringResource(R.string.conn_admin_password_label), fontSize = 11.sp, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis) },
+                                        singleLine = true,
+                                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Password, autoCorrect = false),
+                                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                                        trailingIcon = {
+                                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                                Icon(
+                                                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                            }
+                                        }
+                                    )
+
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    // Login-Button: Größe bleibt konstant (Spinner ersetzt nur das 16-dp-Icon, Text bleibt „Login“).
+                                    // Während des Versuchs nur blasser, aber weiter antippbar – verlorene LoRa-Pakete sofort erneut senden.
+                                    Button(shape = BauhausCornerShape, onClick = { focusManager.clearFocus(); viewModel.startRemoteLogin() },
+                                        modifier = Modifier.alpha(if (remoteAdmin.isLoggingIn) 0.65f else 1f),
+                                        colors = ButtonDefaults.buttonColors(containerColor = bColors.cobalt),
+                                        enabled = target != null
+                                    ) {
+                                        Box(Modifier.size(16.dp), contentAlignment = Alignment.Center) {
+                                            if (remoteAdmin.isLoggingIn) CircularProgressIndicator(modifier = Modifier.size(14.dp), color = Color.Black, strokeWidth = 2.dp)
+                                            else Icon(Icons.Default.Lock, contentDescription = null, tint = if (target != null) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                                        }
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(tr("Login"), color = if (target != null) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, maxLines = 1, softWrap = false)
+                                    }
+                                }
+                            }
+                        }
+
+                        // Kopfzeile + Filter-Chips (zwischen Login-Bereich und Suchfeld)
+                        Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(tr("Repeater-Auswahl ({0})", meshContacts.size), style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold)
                                 Text(tr("Companion Mesh-Kontakte"), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            RefreshButton(onClick = { viewModel.refreshMeshContacts() }, busy = isRefreshingContacts)
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FilterChip(shape = BauhausCornerShape, selected = filterOnlyRepeaters, onClick = { filterOnlyRepeaters = !filterOnlyRepeaters }, label = { Text(tr("Nur Repeater"), fontSize = 11.sp) })
-                            FilterChip(shape = BauhausCornerShape, selected = filterOnlyKnownPaths, onClick = { filterOnlyKnownPaths = !filterOnlyKnownPaths }, label = { Text(tr("Nur aktive Pfade"), fontSize = 11.sp) })
+                            FilterChip(shape = BauhausCornerShape, selected = filterOnlyRepeaters, onClick = { filterOnlyRepeaters = !filterOnlyRepeaters; repeaterMenuOpen = true }, label = { Text(tr("Nur Repeater"), fontSize = 11.sp) })
+                            FilterChip(shape = BauhausCornerShape, selected = filterOnlyKnownPaths, onClick = { filterOnlyKnownPaths = !filterOnlyKnownPaths; repeaterMenuOpen = true }, label = { Text(tr("Nur aktive Pfade"), fontSize = 11.sp) })
                         }
+
+                        // Suchfeld: Tippen öffnet die Liste, Eingabe filtert (Name oder Key); daneben rahmenloses ↻ (Kontakte neu einlesen)
+                        val selectorInteraction = remember { MutableInteractionSource() }
+                        LaunchedEffect(selectorInteraction) {
+                            selectorInteraction.interactions.collect { if (it is PressInteraction.Release) repeaterMenuOpen = true }
+                        }
+                        Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                         OutlinedTextField(
                             shape = BauhausCornerShape,
                             value = contactSearchQuery,
-                            onValueChange = { contactSearchQuery = it },
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            placeholder = { Text(tr("Repeater suchen (Name oder Key)..."), fontSize = 12.sp) },
+                            onValueChange = { contactSearchQuery = it; repeaterMenuOpen = true },
+                            modifier = Modifier.weight(1f),
+                            interactionSource = selectorInteraction,
+                            placeholder = { Text(tr("Repeater suchen (Name oder Key)..."), fontSize = 12.sp, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis) },
                             singleLine = true,
                             trailingIcon = {
                                 if (contactSearchQuery.isNotEmpty()) {
@@ -507,222 +630,87 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 }
                             }
                         )
+                        Spacer(Modifier.width(4.dp))
+                        InlineRefreshIcon(onClick = { repeaterMenuOpen = true; viewModel.refreshMeshContacts() }, busy = isRefreshingContacts, contentDescription = tr("Kontakte neu einlesen"))
+                        }
 
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        } else {
-                            val target = remoteAdmin.targetRepeater!!
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(tr("Repeater-Login"), style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold)
-                                Text(
-                                    text = tr("← Zurück"),
-                                    color = bColors.cobalt,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .clickable { viewModel.selectTargetRepeater(null) }
-                                        .padding(vertical = 4.dp, horizontal = 4.dp)
-                                )
-                            }
+                        if (repeaterMenuOpen) {
+                            val menuScroll = rememberScrollState()
+                            LaunchedEffect(contactSearchQuery) { menuScroll.scrollTo(0) }
                             Card(
+                                Modifier.fillMaxWidth().padding(top = 4.dp),
                                 shape = BauhausCornerShape,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .border(1.dp, if (remoteAdmin.isLoggedIn) Color(0xFF4CAF50) else bColors.cobalt, BauhausCornerShape),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                             ) {
-                                Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = Icons.Default.Router,
-                                                contentDescription = null,
-                                                tint = bColors.signalRed,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Column {
-                                                Text(
-                                                    text = target.name,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                                Text(
-                                                    text = "Key: ${target.keyPrefix}... • ${when (target.outPathLen) { 0 -> tr("Direkt (0 Hops)"); in 1..63 -> tr("{0} Hops", target.outPathLen); else -> tr("Flood (kein direkter Pfad)") }}",
-                                                    fontSize = 11.sp,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        }
-
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(BauhausCornerShape)
-                                                .background(if (remoteAdmin.isLoggedIn) bColors.signalRed.copy(alpha = 0.2f) else bColors.ochre.copy(alpha = 0.2f))
-                                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        ) {
+                              Box(Modifier.fillMaxWidth()) {
+                                Column(Modifier.fillMaxWidth().heightIn(max = 200.dp).hintedVerticalScroll(menuScroll, always = true, fadeColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                                    if (filteredContacts.isEmpty()) {
+                                        Row(Modifier.fillMaxWidth().heightIn(min = 40.dp).padding(start = 10.dp, end = 26.dp), verticalAlignment = Alignment.CenterVertically) {
                                             Text(
-                                                text = if (remoteAdmin.isLoggedIn) tr("Admin aktiv") else tr("Nicht eingeloggt"),
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = if (remoteAdmin.isLoggedIn) bColors.signalRed else bColors.ochre
+                                                text = if (isRefreshingContacts) tr("Lade...")
+                                                else if (filterOnlyRepeaters) tr("Keine Repeater in der Kontaktliste.")
+                                                else tr("Keine Kontakte empfangen."),
+                                                fontSize = 12.sp, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
                                     }
-
-                                    // Password Input & Login Action
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        OutlinedTextField(
-                                            shape = BauhausCornerShape,
-                                            value = remoteAdmin.savedPassword,
-                                            onValueChange = { viewModel.setRemoteAdminPassword(it) },
-                                            modifier = Modifier.weight(1f),
-                                            label = { Text(stringResource(R.string.conn_admin_password_label), fontSize = 11.sp, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis) },
-                                            singleLine = true,
-                                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Password, autoCorrect = false),
-                                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                                            trailingIcon = {
-                                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                                    Icon(
-                                                        imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                                        contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                        modifier = Modifier.size(18.dp)
-                                                    )
-                                                }
-                                            }
-                                        )
-
-                                        Spacer(modifier = Modifier.width(8.dp))
-
-                                        Button(shape = BauhausCornerShape, onClick = { viewModel.startRemoteLogin() },
-                                            colors = ButtonDefaults.buttonColors(containerColor = bColors.cobalt),
-                                            enabled = !remoteAdmin.isLoggingIn
-                                        ) {
-                                            if (remoteAdmin.isLoggingIn) {
-                                                CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.Black, strokeWidth = 2.dp)
-                                            } else {
-                                                Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Black, modifier = Modifier.size(16.dp))
-                                                Spacer(modifier = Modifier.width(4.dp))
-                                                Text(tr("Login"), color = Color.Black, fontSize = 12.sp)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-
-                        if (remoteAdmin.targetRepeater == null) {
-                        // Contact List
-                        val filteredContacts = meshContacts.filter { ct ->
-                            val typeOk = !filterOnlyRepeaters || ct.isRepeater || ct.isRoomServer
-                            val pathOk = !filterOnlyKnownPaths || (ct.outPathLen in 0..63)
-                            val q = contactSearchQuery.trim()
-                            val searchOk = q.isEmpty() || ct.name.contains(q, ignoreCase = true) || ct.keyPrefix.contains(q, ignoreCase = true)
-                            typeOk && pathOk && searchOk
-                        }
-
-                        if (filteredContacts.isEmpty()) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = if (isRefreshingContacts) tr("Lade...")
-                                    else if (filterOnlyRepeaters) tr("Keine Repeater in der Kontaktliste.")
-                                    else tr("Keine Kontakte empfangen."),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        } else {
-                            LazyColumn(modifier = Modifier.weight(1f)) {
-                                items(filteredContacts) { contact ->
-                                    val isSelected = remoteAdmin.targetRepeater?.pubKeyHex == contact.pubKeyHex
-                                    Card(
-                                        shape = BauhausCornerShape,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 3.dp)
-                                            .clickable { viewModel.selectTargetRepeater(contact) },
-                                        colors = CardDefaults.cardColors(
-                                            containerColor = if (isSelected) bColors.signalRed.copy(alpha=0.14f) else MaterialTheme.colorScheme.surfaceVariant
-                                        )
-                                    ) {
+                                    filteredContacts.forEachIndexed { i, contact ->
+                                        if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                                        val isSelected = target?.pubKeyHex == contact.pubKeyHex
                                         Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(10.dp),
+                                            Modifier.fillMaxWidth().heightIn(min = 40.dp)
+                                                .background(if (isSelected) bColors.signalRed.copy(alpha = 0.14f) else Color.Transparent)
+                                                .clickable {
+                                                    // gleicher Repeater: Sitzung nicht neu aufsetzen, nur schließen
+                                                    if (!isSelected) viewModel.selectTargetRepeater(contact)
+                                                    contactSearchQuery = ""
+                                                    repeaterMenuOpen = false
+                                                    focusManager.clearFocus()
+                                                    focusPasswordAfterSelect = true
+                                                }
+                                                .padding(start = 10.dp, end = 26.dp, top = 6.dp, bottom = 6.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Router,
-                                                contentDescription = null,
-                                                tint = if (contact.isRepeater) bColors.signalRed else bColors.cobalt
+                                            Text(
+                                                text = contact.name,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 13.sp,
+                                                maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
+                                                color = if (contact.isRepeater) MaterialTheme.colorScheme.onSurface else bColors.cobalt,
+                                                modifier = Modifier.weight(1f, fill = false)
                                             )
-                                            Spacer(modifier = Modifier.width(10.dp))
-                                            Column(modifier = Modifier.weight(1f)) {
-                                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    Text(
-                                                        text = contact.name,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.onSurface
-                                                    )
-                                                    Spacer(modifier = Modifier.width(6.dp))
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .clip(BauhausCornerShape)
-                                                            .background(if (contact.isRepeater) bColors.signalRed.copy(alpha = 0.2f) else bColors.cobalt.copy(alpha = 0.2f))
-                                                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                                                    ) {
-                                                        Text(
-                                                            text = contact.typeLabel,
-                                                            fontSize = 10.sp,
-                                                            color = if (contact.isRepeater) bColors.signalRed else bColors.cobalt
-                                                        )
-                                                    }
-                                                }
-                                                Text(
-                                                    text = "Key: ${contact.keyPrefix}... • ${when (contact.outPathLen) { 0 -> tr("Direkt (0 Hops)"); in 1..63 -> tr("{0} Hops", contact.outPathLen); else -> tr("Flood (unbekannt)") }}",
-                                                    fontSize = 11.sp,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-
-                                            if (isSelected) {
-                                                Icon(
-                                                    imageVector = Icons.Default.CheckCircle,
-                                                    contentDescription = tr("Ausgewählt"),
-                                                    tint = bColors.signalRed,
-                                                    modifier = Modifier.size(24.dp)
-                                                )
-                                            } else {
-                                                OutlinedButton(shape = BauhausCornerShape, onClick = { viewModel.selectTargetRepeater(contact) }
-                                                ) {
-                                                    Text(tr("Wählen"), fontSize = 11.sp)
-                                                }
+                                            Spacer(Modifier.width(10.dp))
+                                            Text(
+                                                text = "${contact.keyPrefix}…",
+                                                fontFamily = FontFamily.Monospace,
+                                                fontSize = 11.sp,
+                                                maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            if (contact.pubKeyHex in savedPwKeys) {
+                                                Spacer(Modifier.width(4.dp))
+                                                Icon(Icons.Default.Key, contentDescription = tr("Passwort gespeichert"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(12.dp))
                                             }
                                         }
                                     }
                                 }
+                                // ✕ oben rechts: Liste manuell schließen (Tippen ins Auswahlfeld öffnet sie wieder)
+                                Box(
+                                    Modifier.align(Alignment.TopEnd).padding(2.dp).size(22.dp).clip(BauhausCornerShape)
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .clickable { repeaterMenuOpen = false },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(Icons.Filled.Close, contentDescription = tr("Schließen"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                                }
+                              }
                             }
                         }
+
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
-                }
             }
         }
 

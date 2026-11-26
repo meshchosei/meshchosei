@@ -213,7 +213,7 @@ RefreshButton(
 - Während des Ladens ersetzt der Braille-Spinner das Icon. Der Text bleibt, der Button ist gesperrt.
 - Er steht rechts in der Kopfzeile der betroffenen Card oder Sektion.
 - Einsatzorte:
-  - **Verbindung:** USB-Geräte, Companion-Kontakte und „Neu einlesen“;
+  - **Verbindung:** „Neu einlesen“ (USB-Geräte, Companion-Kontakte und BLE-Scan seit v1.19 per `InlineRefreshIcon`, siehe unten);
   - **Routing & Adverts:** Regionen;
   - **Filter:** Status und Listen;
 - Nicht gemeint ist „Auffrischen“ im Schonmodus. Dieser Button verlängert den Timer und lädt nichts neu, er bleibt die Primäraktion des Screens.
@@ -223,7 +223,8 @@ RefreshButton(
 - Touch-Fläche 28 dp, eckig (`BauhausCornerShape`), Icon 16 dp in Kobalt.
 - Während der Abfrage ersetzt der Braille-Spinner das Icon, die Fläche ist gesperrt. Das Status-Overlay zeigt die Meldung (z. B. „Versorgung wird abgefragt…“).
 - Der Wert-Text nutzt `Modifier.weight(1f, fill = false)`, damit das Icon direkt am Wert klebt und bei langen Texten nicht aus der Zeile rutscht.
-- Einsatzort: **Hardware & Antenne → „Versorgung: …“** (`refreshPowerStatus`, `BusyKey.POWER`). Ganze Listen oder Karten laden weiterhin per `RefreshButton`.
+- Einsatzorte: **Hardware & Antenne → „Versorgung: …“** (`refreshPowerStatus`, `BusyKey.POWER`) und seit v1.19 im **Verbindungs-Screen** rechts in der jeweiligen Kopfzeile: Repeater-Auswahl (direkt rechts neben dem Suchfeld, Companion-Kontakte neu einlesen, öffnet zugleich das Klappmenü, §2.10), „Erkannte OTG-Geräte“ und BLE-Scan. Andere ganze Listen oder Karten laden weiterhin per `RefreshButton`.
+- **BLE-Scan (seit v1.19):** Starten per `InlineRefreshIcon` (↻, Kobalt). Während des Scans steht an derselben Stelle ein rahmenloses **Stop-Icon** (`Icons.Default.Stop`, 18 dp, Signalrot, Touch-Fläche 28 dp eckig) statt des Wortes „Stop“. Der Hinweistext lautet „Tippe oben auf ↻.“
 
 ### 2.5 Tastatur-Verhalten
 
@@ -284,22 +285,58 @@ RefreshButton(
 
 ---
 
-### 2.10 CLI-Autocomplete: vertikales Klappmenü (seit v1.18)
+### 2.10 Einheitliche vertikale Klappmenüs (seit v1.18, verallgemeinert in v1.19)
 
-- **Ort:** ein vertikales Klappmenü direkt **über** der CLI-Eingabezeile (`CliConsoleScreen`). Es klappt nach oben auf und verkleinert dabei das Log darüber. Keine horizontalen Chip-Scroller.
-- **Form:** `Card` mit `BauhausCornerShape` (2 dp), `BorderStroke(1.dp, outline)`, Grund `surfaceVariant`. Höchstens ca. 5 Zeilen sichtbar (`heightIn(max = 200.dp)`), darüber vertikal scrollbar mit `hintedVerticalScroll(always = true)`.
-- **Zeile:** mindestens 40 dp hoch, ganze Zeile antippbar, Trennlinie zwischen den Zeilen.
+Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmenü. Keine horizontalen Chip-Scroller, keine Material-`DropdownMenu`-Popups, keine schwebenden Overlays: das Menü liegt im Layout und schiebt bzw. verkleinert den Inhalt daneben.
+
+**Gemeinsame Regeln (für alle Klappmenüs):**
+
+- **Richtung je nach Lage des Auslösers:**
+  - **nach oben**, wenn der Auslöser eine Eingabezeile am **unteren** Bildschirmrand ist (CLI-Konsole). Das Menü steht direkt über der Zeile und verkleinert den Inhalt darüber (Log).
+  - **nach unten**, wenn der Auslöser ein **Auswahlfeld** im oberen Bereich ist (Repeater-Auswahl). Das Menü steht direkt unter dem Feld. Was beim Aufklappen fest bleiben muss (Login-Bereich), steht **über** dem Feld.
+- **Form:** `Card` mit `BauhausCornerShape` (2 dp), `BorderStroke(1.dp, outline)`, Grund `surfaceVariant`, 4–8 dp Abstand zum Auslöser. Höchstens ca. 5 Zeilen sichtbar (`heightIn(max = 200.dp)`), darüber vertikal scrollbar mit `hintedVerticalScroll(always = true, fadeColor = surfaceVariant)`. Ändert sich der Filtertext, springt die Liste nach oben (`scrollTo(0)`).
+- **Zeile:** mindestens 40 dp hoch, die **ganze Zeile** antippbar, `HorizontalDivider` (outline, 50 % Alpha) zwischen den Zeilen, Innenabstand `start = 10.dp, end = 26.dp`, vertikal 6 dp.
+  - links der Haupttext **fett** (Befehl bzw. Name), rechts kompakt der Zusatz in 11 sp, `onSurfaceVariant`;
+  - alle Texte einzeilig: `maxLines = 1, softWrap = false, overflow = Ellipsis` (`…`).
+- **Schließen:** kleines `✕` (Box 22 dp, Icon 14 dp, eckig, `Icons.Filled.Close`, 2 dp Abstand, Grund `surfaceVariant`) bündig oben rechts in der Ecke des Containers. Die 26 dp rechts in jeder Zeile halten es frei. Außerdem schließt System-Zurück (`BackHandler(enabled = menuOpen)`).
+- **Wiederöffnen:** Antippen bzw. Weitertippen im Auslöser öffnet das Menü jederzeit wieder.
+- **Leere Liste:** Ein Menü, das gezielt aufgeklappt wird (Auswahlfeld), zeigt eine einzelne gedämpfte 40-dp-Zeile („Lade…“, „Keine Repeater in der Kontaktliste.“). Ein Vorschlagsmenü (CLI) bleibt ohne Treffer zu.
+- **Antippen wählt nur aus** und schließt das Menü. Es wird nie automatisch etwas gesendet.
+- Begleitende Icons am Auslöser (Leeren `✕`, Auf-/Zu-Pfeil, ↻) sind ruhig und rahmenlos (`IconButton` bzw. `InlineRefreshIcon`, §2.4).
+
+#### 2.10.1 CLI-Autocomplete: nach oben (seit v1.18)
+
+- **Ort:** direkt **über** der CLI-Eingabezeile (`CliConsoleScreen`), verkleinert das Log darüber.
+- **Zeile:**
   - links der Befehl in **Monospace-Fett** 12 sp (Firmware-Syntax mit Platzhaltern, unübersetzt, höchstens ca. 210 dp breit);
   - rechts die Kurzbeschreibung aus der CLI-Hilfe über `tr()`, 11 sp, `onSurfaceVariant`;
-  - beide einzeilig: `maxLines = 1, softWrap = false, overflow = Ellipsis`.
   - Kritische Befehle (`reboot`, `poweroff`, `shutdown`, `clkreboot`, `erase`, `start ota`, `start dfu`, `filter RESET`, `set prv.key`) in Signalrot mit „⚠“.
 - **Öffnen:** ausschließlich, wenn mindestens **1 Zeichen** getippt ist und passende Befehle existieren. Bei leerem Feld öffnet es **nie**, auch nicht beim Fokussieren. Es gibt keinen eigenen Öffnen-Button neben dem Senden-Button.
 - **Sortierung (zweistufig alphabetisch):** zuerst alle Befehle, die mit der Eingabe **beginnen**, danach alle übrigen, die sie als Teilwort enthalten. Beide Gruppen sind jeweils alphabetisch nach Befehlsname sortiert. Beispiel `ver`: `ver`, dann `advert`, `advert.zerohop`, `get advert.interval`, `get bootloader.ver` …
-- **Schließen:** kleines `✕` (Box 22 dp, Icon 14 dp, eckig, `Icons.Filled.Close`, 2 dp Abstand) bündig oben rechts in der Ecke des Containers. Die Zeilen halten rechts 26 dp frei, damit das `✕` nichts verdeckt. Außerdem schließen System-Zurück (`BackHandler`) und Senden. Ohne weitere Treffer bleibt das Menü zu, z. B. wenn der einzige Treffer die Eingabe selbst ist (`get name`) oder sobald ein Wert eingetippt ist. Jede weitere Eingabe öffnet es wieder.
+- **Schließen:** zusätzlich zu `✕`/Zurück auch durch Senden. Ohne weitere Treffer bleibt das Menü zu, z. B. wenn der einzige Treffer die Eingabe selbst ist (`get name`) oder sobald ein Wert eingetippt ist. Jede weitere Eingabe öffnet es wieder.
 - **Datenbasis:** ausschließlich die firmware-geprüfte CLI-Hilfe (`cliHelpCategories` → `cliAutocompleteEntries`), seit v1.18 vollständig abgeglichen mit MeshCore/ZephCore `CommonCLI.cpp` (inkl. `get pwrmgt.*`, Diagnose, CAD, GPS, LEDs, Uplink). Neue Befehle kommen nur dort hinein, immer mit Übersetzung in EN/NL/FR (`CliHelpCompletenessTest`).
 - **Logik:** `CliAutocomplete` in `service/RepeaterProtocol.kt`, rein und unit-getestet (`CliAutocompleteTest`). Treffer = Befehl enthält die Eingabe; erst Präfix-Treffer, dann Teilwort-Treffer, je Gruppe alphabetisch (`partition { startsWith(query) }` + `sortedWith(compareBy { befehl.lowercase() })`), ohne Groß-/Kleinschreibung, ohne Duplikate.
 - **Capabilities:** `filter …` nur bei `supportsBlacklist`, `filter wl …`/`filter mode …` nur bei `supportsWhitelist`. Seriell-only-Befehle (`get prv.key`, `erase`, `log`, `stats-*`, `set freq`, `get acl`) nur bei direkter USB-Verbindung (`isDirectRepeater`).
 - **Antippen übernimmt nur:** Der Befehl kommt ohne Platzhalter ins Feld, der Cursor steht am Ende. Erwartet er einen Parameter (`<…>`/`[…]`), folgt ein Leerzeichen (`set dutycycle `, `region home `, `tempradio `). Gesendet wird **nie** automatisch, nur über den roten Senden-Button. `start ota` läuft weiterhin über den Bestätigungsdialog.
+
+#### 2.10.2 Repeater-Auswahl: nach unten (seit v1.19)
+
+- **Ort:** Verbindungs-Screen nach dem Verbinden mit einem Companion-Node (`ConnectionScreen`). Feste Reihenfolge von oben:
+  1. **Login-Bereich** (immer sichtbar, sobald der Companion verbunden ist): eckige Card mit Repeater-**Name** (fett) und **Public-Key-Präfix** + Hops (Monospace 11 sp) in einer Zeile, darunter Passwortfeld + Login-Button. Name, Key und Passwort stehen immer fest zusammen und verschieben sich weder beim Aufklappen der Liste noch bei der Auswahl um einen Pixel. Ohne gewählten Repeater: Platzhalter nur „Kein Repeater gewählt“ (gedämpft, ohne Key-Angabe), Passwortfeld und Login-Button gesperrt (`enabled = false`), Rahmen in `outline`.
+  2. Kopfzeile „Repeater-Auswahl (n)“ und Filter-Chips „Nur Repeater“/„Nur aktive Pfade“.
+  3. **Suchfeld** mit rahmenlosem ↻ (`InlineRefreshIcon`, Kontakte neu einlesen) direkt rechts daneben.
+  4. unmittelbar darunter das **Klappmenü** mit `✕` oben rechts.
+- **Suchfeld:** eckiges `OutlinedTextField`, Filter nach Name oder Key-Präfix, Platzhalter „Repeater suchen (Name oder Key)…“. **Kein** Auf-/Zu-Pfeil: Antippen (`PressInteraction.Release`) oder Tippen öffnet das Menü, geschlossen wird es nur über das `✕` oben rechts in der Liste, System-Zurück oder durch eine Auswahl (wie im CLI). Bei getipptem Text steht im Feld nur das Leeren-`✕` (leert den Filter, schließt nicht).
+- **Automatisches Öffnen:** solange kein Repeater gewählt ist, beim Verbinden, beim (Neu-)Einlesen der Kontakte (auch per ↻) und beim Umschalten der Filter-Chips. Nach `✕`/Zurück bleibt es zu, bis der Nutzer das Feld antippt oder ↻ drückt.
+- **Zeile:** links der Repeater-Name fett 13 sp (Room Server in Kobalt, `weight(1f, fill = false)`), rechts daneben das Public-Key-Präfix in Monospace 11 sp (`ABCDEF123456…`) und, falls ein Admin-Passwort gespeichert ist, ein dezentes Schlüssel-Icon (`Icons.Default.Key`, 12 dp, `onSurfaceVariant`). Der gewählte Repeater ist mit Signalrot 14 % hinterlegt.
+- **Übernehmen (Antippen einer Zeile):**
+  - Repeater (Name, Public-Key, ggf. gespeichertes Admin-Passwort) in den Login-Bereich oben übernehmen (`selectTargetRepeater`; derselbe Repeater setzt die Sitzung nicht neu auf);
+  - Liste **sofort schließen**;
+  - Suchfeld **leeren** (`""`), damit das nächste Antippen wieder die vollständige Liste zeigt;
+  - Login-Bereich per `BringIntoViewRequester` in den Blick holen; ohne gespeichertes Passwort bekommt das Passwortfeld den Fokus. Eingeloggt wird **nie** automatisch, nur über den Login-Button.
+- Der frühere Zwischenschritt „← Zurück“ zur Liste entfällt: Ein anderer Repeater wird über das Suchfeld gewählt.
+- **Login-Bereich:** 1-dp-Rahmen Kobalt, eingeloggt Grün, ohne Repeater `outline`. **Kein** eigenes Status-Badge („Admin aktiv“/„Nicht eingeloggt“): Der Login-Status steht ausschließlich oben in der Verbindungs-Statuskarte.
+- **Login-Button (Ausnahme zur Doppelklick-Sperre, §2.2):** Breite und Höhe bleiben konstant. Der Spinner (14 dp) ersetzt nur das Schloss-Icon in einer festen 16-dp-Box, der Text bleibt immer „Login“. Während eines Login-Versuchs ist der Button nur blasser (`alpha = 0.65f`), bleibt aber **anklickbar** (`enabled = true`): Geht über LoRa ein Paket verloren, kann der Nutzer sofort erneut senden (`startRemoteLogin` setzt den Timeout neu auf).
 
 ## 3. Kommunikations- & Protokoll-Architektur
 
@@ -394,7 +431,8 @@ RefreshButton(
 - Eingabefeld-Labels:
   - höchstens ~25 Zeichen, einzeilig, Grenzen in Klammern: „Admin password (max. 15)“ / „Mot de passe admin (15 max)“;
   - `softWrap = false` und `TextOverflow.Ellipsis` als Sicherheitsnetz, nicht als Normalfall.
-- Chips und Badges: ein bis zwei Wörter, 11 sp („Nur Repeater“, „ON“, „BLE · Mesh OTA“).
+- Chips und Badges: ein bis zwei Wörter, 11 sp („Nur Repeater“, „ON“, „BLE-OTA“).
+- Verbindungs-Tabs: einzeilig (`maxLines = 1, softWrap = false`). Seit v1.19 heißen die beiden Wege in allen Sprachen einheitlich **„USB-OTG“** und **„BLE-OTA“** (Tabs, Statuskarten-Badge, Hinweis „Wähle USB-OTG oder BLE-OTA“) statt „USB-Serial (OTG)“ / „BLE Companion (Mesh OTA)“.
 - **Button-Beschriftungen (verbindlich seit v1.11):** kurz und prägnant, **höchstens 1–2 Wörter und immer einzeilig** – in allen vier Sprachen („Akzeptieren“ / „Accept“ / „Accepteren“ / „Accepter“, „Abbrechen“, „Schließen“, „Speichern“). Im Code `maxLines = 1, softWrap = false`. Was erklärt werden muss, steht im Hinweistext über den Buttons, nicht auf dem Button. So passen zwei Dialog-Buttons auch in FR/NL auf 360 dp kompakt nebeneinander.
 - Snackbars: ein Satz, der Grund und nächsten Schritt nennt („Bitte zuerst den aktiven Paketfilter ausschalten.“).
 - Prüfmaßstab ist immer die **längste** Sprache, meist FR oder NL, auf 360 dp Breite.
