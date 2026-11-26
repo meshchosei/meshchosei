@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -170,21 +171,11 @@ fun DisclaimerDialog(
         },
         confirmButton = {
             if (!isInitialAcceptance) {
-                // Nachträgliches Ansehen ("Über & Lizenz"): nur ein breiter "Schließen"-Button
-                Button(onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = bColors.cobalt),
-                    shape = BauhausCornerShape
-                ) {
-                    Text(
-                        text = tr("Schließen"),
-                        maxLines = 1,
-                        softWrap = false,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                // Nachträgliches Ansehen ("Über & Lizenz"): nur ein zentriertes ✕ wie im UpdateDialog
+                androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                    androidx.compose.material3.IconButton(onClick = onDismiss) {
+                        Icon(Icons.Filled.Close, contentDescription = tr("Schließen"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp))
+                    }
                 }
             } else Row(
                 modifier = Modifier.fillMaxWidth(),

@@ -2,7 +2,6 @@ package com.meshcore.repeater.ui.screens
 
 import com.meshcore.repeater.ui.components.hintedVerticalScroll
 
-import com.meshcore.repeater.ui.components.RefreshButton
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -733,7 +732,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                     fontSize = 12.sp,
                     color = if (initialReadDone) MaterialTheme.colorScheme.onSurfaceVariant else bColors.ochre
                 )
-                RefreshButton(onClick = { viewModel.readBasicSetupFromNode() }, label = tr("Neu einlesen"))
+                InlineRefreshIcon(onClick = { viewModel.readBasicSetupFromNode() }, busy = readActive != null, contentDescription = tr("Neu einlesen"))
             }
             Spacer(modifier = Modifier.height(10.dp))
         }

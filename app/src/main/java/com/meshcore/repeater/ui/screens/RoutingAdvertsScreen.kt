@@ -3,7 +3,7 @@ package com.meshcore.repeater.ui.screens
 import com.meshcore.repeater.ui.components.hintedVerticalScroll
 
 import com.meshcore.repeater.ui.components.BauhausSwitch
-import com.meshcore.repeater.ui.components.RefreshButton
+import com.meshcore.repeater.ui.components.InlineRefreshIcon
 
 import com.meshcore.repeater.i18n.tr
 import com.meshcore.repeater.ui.components.LocalTourMode
@@ -169,10 +169,10 @@ private fun RegionsSection(viewModel: RepeaterViewModel, state: RegionState, bus
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(tr("KONFIGURIERTE REGIONEN"), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = bColors.cobalt, modifier = Modifier.weight(1f))
-                RefreshButton(onClick = { viewModel.refreshRegions() }, busy = busy)
+                InlineRefreshIcon(onClick = { viewModel.refreshRegions() }, busy = busy, contentDescription = tr("Aktualisieren"))
             }
             when (state.supported) {
-                null -> { Text(tr("Regionen noch nicht gelesen – \"Aktualisieren\" tippen."), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant); return@Column }
+                null -> { Text(tr("Regionen noch nicht gelesen – oben auf ↻ tippen."), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant); return@Column }
                 false -> { Text(tr("Diese Firmware unterstützt keine Regionen (Befehl \"region\" unbekannt)."), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant); return@Column }
                 true -> Unit
             }

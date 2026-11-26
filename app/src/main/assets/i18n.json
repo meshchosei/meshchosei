@@ -134,10 +134,10 @@
   "Back-up wordt geïnstalleerd: {0}…",
   "Installation de la sauvegarde : {0}…"
  ],
- "Backup installiert ({0} Befehle). Funk-/Key-Änderungen ggf. erst nach Neustart aktiv – danach \"Neu einlesen\".": [
-  "Backup installed ({0} commands). Radio/key changes may only take effect after a reboot – then use \"Re-read\".",
-  "Back-up geïnstalleerd ({0} opdrachten). Radio-/sleutelwijzigingen zijn mogelijk pas na een herstart actief – daarna \"Opnieuw inlezen\".",
-  "Sauvegarde installée ({0} commandes). Les changements radio/clé ne sont peut-être actifs qu'après un redémarrage – puis \"Relire\"."
+ "Backup installiert ({0} Befehle). Funk-/Key-Änderungen ggf. erst nach Neustart aktiv – danach mit ↻ neu einlesen.": [
+  "Backup installed ({0} commands). Radio/key changes may only take effect after a reboot – then re-read with ↻.",
+  "Back-up geïnstalleerd ({0} opdrachten). Radio-/sleutelwijzigingen zijn mogelijk pas na een herstart actief – daarna opnieuw inlezen met ↻.",
+  "Sauvegarde installée ({0} commandes). Les changements radio/clé ne sont peut-être actifs qu'après un redémarrage – puis relire avec ↻."
  ],
  "Backup installiert, {0} von {1} abgelehnt/ohne Antwort: {2}": [
   "Backup installed, {0} of {1} rejected/unanswered: {2}",
@@ -2454,10 +2454,10 @@
   "De firmware weigert regio's met subregio's (\"Err - not empty\").",
   "Le firmware refuse les régions qui ont des sous-régions (« Err - not empty »)."
  ],
- "Regionen noch nicht gelesen – \"Aktualisieren\" tippen.": [
-  "Regions not read yet – tap \"Refresh\".",
-  "Regio's nog niet gelezen – tik op \"Vernieuwen\".",
-  "Régions pas encore lues – appuyez sur « Actualiser »."
+ "Regionen noch nicht gelesen – oben auf ↻ tippen.": [
+  "Regions not read yet – tap ↻ above.",
+  "Regio's nog niet gelezen – tik bovenaan op ↻.",
+  "Régions pas encore lues – touchez ↻ en haut."
  ],
  "Regionen werden abgefragt…": [
   "Reading regions…",

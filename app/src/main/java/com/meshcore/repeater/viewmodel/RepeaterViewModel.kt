@@ -859,7 +859,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 if (r?.value == null) failed += label.trim()
             }
             _hasCompletedInitialRead.value = false
-            notifyUser(if (failed.isEmpty()) tr("Backup installiert ({0} Befehle). Funk-/Key-Änderungen ggf. erst nach Neustart aktiv – danach \"Neu einlesen\".", cmds.size)
+            notifyUser(if (failed.isEmpty()) tr("Backup installiert ({0} Befehle). Funk-/Key-Änderungen ggf. erst nach Neustart aktiv – danach mit ↻ neu einlesen.", cmds.size)
                        else tr("Backup installiert, {0} von {1} abgelehnt/ohne Antwort: {2}", failed.size, cmds.size, failed.take(6).joinToString(", ") + if (failed.size > 6) " …" else ""))
         }.invokeOnCompletion { clearBusy(BusyKey.BACKUP_INSTALL) }
     }

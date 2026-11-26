@@ -169,7 +169,7 @@ BusyButton(                                   // ui/components/BusyButton.kt
 
 **Hinzufügen als Abschlusszeile (seit v1.08):** In Listen mit Zeilen-Layout (z. B. Regionen) ist die Eingabe für einen neuen Eintrag die **letzte Zeile der Liste** und kein separater Block darunter. Sie hat dasselbe Zeilen-Layout (gleiche Paddings), einen 1-dp-Rahmen in Signalrot (`BorderStroke(1.dp, bColors.signalRed)`, `BauhausCornerShape`) und kompakte, 28 dp hohe Monospace-Felder (Regionen: Name ~70 % mit Platzhalter „Neue Region“, Parent ~30 %, vorbelegt `*`). Rechts sitzt an exakt der Position des Mülleimer-Icons (36-dp-Zelle) der eckige signalrote `+`-Button. Ungültige Eingaben färben das Feld rot (2-dp-Rahmen), der `+`-Button ist dann gedeckt (`SAVED_STATE_ALPHA`).
 
-**Ein Spinner pro Ladevorgang:** Während eine Liste neu geladen wird, dreht der Braille-Spinner **nur** im auslösenden `RefreshButton`. Andere Buttons derselben Karte (Hinzufügen, Listen-Schalter, Löschen) sind gesperrt, zeigen aber keinen eigenen Spinner.
+**Ein Spinner pro Ladevorgang:** Während eine Liste neu geladen wird, dreht der Braille-Spinner **nur** im auslösenden ↻ (`InlineRefreshIcon`). Andere Buttons derselben Karte (Hinzufügen, Listen-Schalter, Löschen) sind gesperrt, zeigen aber keinen eigenen Spinner.
 
 **Kompakte Listen-Schalter:** In dichten Listen (z. B. „KONFIGURIERTE REGIONEN“) stehen eckige Bauhaus-Schalter `[HOME] [DEF] [FLOOD]` statt runder Material-Switches. Sie haben `BauhausCornerShape` (2 dp), 28 dp Höhe, Monospace 10 sp fett und eine 1-dp-Outline. Aktiv sind sie vollflächig in ihrer Signalfarbe (HOME = Rot, DEF = Kobalt, FLOOD = Ocker). Während einer Übertragung sind sie gesperrt.
 
@@ -196,34 +196,31 @@ BauhausSwitch(
 - Barrierefreiheit: `toggleable(role = Role.Switch)`. TalkBack liest ihn wie einen normalen Schalter vor.
 - Für kompakte, beschriftete Mehrfach-Schalter in Listen gelten die Listen-Schalter aus §2.2, zum Beispiel `[HOME] [DEF] [FLOOD]`.
 
-### 2.4 „Aktualisieren“ / „Neu einlesen“: `RefreshButton`
+### 2.4 „Aktualisieren“ / „Neu einlesen“: ungerahmtes ↻ (`InlineRefreshIcon`, verbindlich seit v1.21)
 
-Jede Aktion, die Werte vom Repeater oder von Geräten neu lädt, ist **ein** einheitlicher `RefreshButton` (`ui/components/BauhausControls.kt`). Kleine blaue Klicktexte („Sync“), rahmenlose `TextButton`s oder reine Icon-Buttons gibt es dafür nicht mehr (einzige Ausnahme: `InlineRefreshIcon` für einen einzelnen Messwert, siehe unten).
+Jede Aktion, die Werte, Listen oder Status vom Repeater oder von Geräten neu lädt, ist **ein** ungerahmtes Aktualisieren-Icon `InlineRefreshIcon` (`ui/components/BauhausControls.kt`): `Icons.Default.Refresh` (↻), kein Rahmen, kein Text. Umrandete Buttons mit Text („Aktualisieren“, „Neu einlesen“), kleine blaue Klicktexte („Sync“) und rahmenlose `TextButton`s gibt es dafür nicht mehr.
 
 ```kotlin
-RefreshButton(
+InlineRefreshIcon(
     onClick = { viewModel.refreshRegions() },
-    busy = BusyKey.REGION in busy,          // optional: Braille-Spinner statt Icon, gesperrt
-    label = tr("Aktualisieren")             // Standard; kurz halten ("Neu einlesen", "Abfragen")
+    busy = BusyKey.REGION in busy,              // Braille-Spinner statt Icon, Fläche gesperrt
+    contentDescription = tr("Aktualisieren"),   // Screenreader („Neu einlesen“, „Kontakte neu einlesen“ …)
+    color = bColors.cobalt                      // Standard; Blacklist in Signalrot
 )
 ```
 
-- Kompakter `OutlinedButton` mit `shape = BauhausCornerShape`, 1-dp-Rahmen in der Akzentfarbe (Standard Kobalt) und mindestens 32 dp Höhe.
-- Inhalt: das Icon `Icons.Default.Refresh` (16 dp) und ein kurzer Text (12 sp, fett, einzeilig).
-- Während des Ladens ersetzt der Braille-Spinner das Icon. Der Text bleibt, der Button ist gesperrt.
-- Er steht rechts in der Kopfzeile der betroffenen Card oder Sektion.
+- Touch-Fläche 28 dp, eckig (`BauhausCornerShape`), Icon 16 dp, Standardfarbe Kobalt.
+- Während des Ladens ersetzt der Braille-Spinner das Icon, die Fläche ist gesperrt. Das Status-Overlay zeigt die Meldung (z. B. „Versorgung wird abgefragt…“).
+- **Ort:** rechts in der Kopfzeile der betroffenen Card oder Sektion bzw. direkt hinter dem neu abgefragten Wert (Wert-Text mit `Modifier.weight(1f, fill = false)`, Abstand ca. 6 dp, damit das Icon am Wert klebt).
+- Hinweistexte nennen das Symbol statt eines Button-Namens („oben auf ↻ tippen“, „danach mit ↻ neu einlesen“).
 - Einsatzorte:
-  - **Verbindung:** „Neu einlesen“ (USB-Geräte, Companion-Kontakte und BLE-Scan seit v1.19 per `InlineRefreshIcon`, siehe unten);
-  - **Routing & Adverts:** Regionen;
-  - **Filter:** Status und Listen;
+  - **Verbindung:** Statuszeile „✓ Alle Parameter eingelesen“ (Neu einlesen, seit v1.21), Repeater-Auswahl (direkt rechts neben dem Suchfeld, Companion-Kontakte neu einlesen, öffnet zugleich das Klappmenü, §2.10), „Erkannte OTG-Geräte“ und BLE-Scan;
+  - **Hardware & Antenne:** „Versorgung: …“ (`refreshPowerStatus`, `BusyKey.POWER`);
+  - **Routing & Adverts:** „Konfigurierte Regionen“ (seit v1.21);
+  - **Filter:** Kopfzeile der Blacklist- **und** der Whitelist-Ansicht (gemeinsamer Aufbau, Farbe je Ansicht Signalrot bzw. Kobalt, seit v1.21).
+- Der ältere `RefreshButton` (umrandet, mit Text) bleibt nur als Komponente erhalten und wird in keinem Screen mehr verwendet.
 - Nicht gemeint ist „Auffrischen“ im Schonmodus. Dieser Button verlängert den Timer und lädt nichts neu, er bleibt die Primäraktion des Screens.
 
-**Ausnahme: `InlineRefreshIcon` für einen einzelnen Messwert (seit v1.18).** Wenn genau **ein** angezeigter Wert an Ort und Stelle neu abgefragt wird, steht statt des `RefreshButton` ein rahmenloses `Icons.Default.Refresh` (↻) direkt hinter dem Wert.
-- Abstand etwa 6 dp: 4 dp Spacer plus Innenabstand der Touch-Fläche.
-- Touch-Fläche 28 dp, eckig (`BauhausCornerShape`), Icon 16 dp in Kobalt.
-- Während der Abfrage ersetzt der Braille-Spinner das Icon, die Fläche ist gesperrt. Das Status-Overlay zeigt die Meldung (z. B. „Versorgung wird abgefragt…“).
-- Der Wert-Text nutzt `Modifier.weight(1f, fill = false)`, damit das Icon direkt am Wert klebt und bei langen Texten nicht aus der Zeile rutscht.
-- Einsatzorte: **Hardware & Antenne → „Versorgung: …“** (`refreshPowerStatus`, `BusyKey.POWER`) und seit v1.19 im **Verbindungs-Screen** rechts in der jeweiligen Kopfzeile: Repeater-Auswahl (direkt rechts neben dem Suchfeld, Companion-Kontakte neu einlesen, öffnet zugleich das Klappmenü, §2.10), „Erkannte OTG-Geräte“ und BLE-Scan. Andere ganze Listen oder Karten laden weiterhin per `RefreshButton`.
 - **BLE-Scan (seit v1.19):** Starten per `InlineRefreshIcon` (↻, Kobalt). Während des Scans steht an derselben Stelle ein rahmenloses **Stop-Icon** (`Icons.Default.Stop`, 18 dp, Signalrot, Touch-Fläche 28 dp eckig) statt des Wortes „Stop“. Der Hinweistext lautet „Tippe oben auf ↻.“
 
 ### 2.5 Tastatur-Verhalten
@@ -344,6 +341,12 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
 - **Fehler:** kein Netz, Timeout, HTTP-Fehler, Rate-Limit, kaputtes JSON → komplett still: keine Meldung, kein Log, kein UI-Element.
 - **Vergleich:** numerisch `Major.Minor` (`1.20 > 1.19 > 1.2`), ein führendes `v` wird ignoriert. Ein Hinweis kommt nur bei einer **echt neueren** Version. Die Debug-APK vergleicht gegen die simulierte Version `1.00` und zeigt den Vermerk `[DEBUG-Test]`; die Release-APK vergleicht gegen `BuildConfig.VERSION_NAME`.
 - **Dialog statt Banner:** Der Verbindungs-Screen bleibt unverändert. Sobald eine neuere Version erkannt ist, der Hinweis in dieser Sitzung noch nicht geschlossen wurde und kein Haftungsausschluss-Dialog offen ist, zeigt `MainActivity` einen **zentrierten** `Dialog` (`ui/components/UpdateDialog.kt`): eckige `Surface` (`BauhausCornerShape`, 1-dp-Rahmen `outline`), oben mittig die Meldung „Neue Version vX.YZ verfügbar“ (16 sp fett, über `tr()`, in der Debug-APK darunter `[DEBUG-Test]`), darunter die Release-URL (`html_url`, Fallback `…/releases/latest`) in Kobalt, Monospace, unterstrichen, antippbar (`Intent.ACTION_VIEW`), unten horizontal zentriert ein `✕` (`IconButton`, `Icons.Filled.Close`). `✕`, System-Zurück und Tippen neben den Dialog schließen ihn für die laufende Sitzung. Im „Über & Lizenz“-Screen gibt es keinen Update-Hinweis.
+
+### 2.12 Info-Dialoge schließen: zentriertes `✕` (seit v1.21)
+
+- Reine Info-Dialoge ohne Entscheidung schließen mit **einem** zentrierten `✕` unten in der Mitte (`IconButton`, `Icons.Filled.Close`, 22 dp, `onSurfaceVariant`, `contentDescription = tr("Schließen")`), nicht mit einem Text-Button „Schließen“. System-Zurück und Tippen neben den Dialog schließen ebenfalls.
+- Einsatzorte: Update-Dialog (§2.11) und der **Haftungsausschluss beim erneuten Ansehen** aus „Über & Lizenz“ / Seitenmenü (`DisclaimerDialog(isInitialAcceptance = false)`).
+- Ausnahme: Beim **Erststart** bleibt der Haftungsausschluss ein Entscheidungsdialog mit den Text-Buttons „Abbrechen“ (beendet die App) und „Akzeptieren“; er ist dort nicht wegklickbar.
 
 ## 3. Kommunikations- & Protokoll-Architektur
 

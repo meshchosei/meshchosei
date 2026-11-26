@@ -5,7 +5,7 @@ import com.meshcore.repeater.ui.components.hintedVerticalScroll
 import com.meshcore.repeater.i18n.tr
 import com.meshcore.repeater.ui.components.BusyButton
 import com.meshcore.repeater.ui.components.BauhausSwitch
-import com.meshcore.repeater.ui.components.RefreshButton
+import com.meshcore.repeater.ui.components.InlineRefreshIcon
 import com.meshcore.repeater.viewmodel.BusyKey
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.LaunchedEffect
@@ -138,7 +138,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
         // =====================================================================
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Text(stringResource(if (isWlView) R.string.menu_whitelist else R.string.menu_blacklist).uppercase(), style = MaterialTheme.typography.titleMedium, color = if (isWlView) bColors.cobalt else bColors.signalRed, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            RefreshButton(onClick = { viewModel.refreshAllFiltersFromNode() }, busy = BusyKey.FILTER_REFRESH in busy, color = if (isWlView) bColors.cobalt else bColors.signalRed)
+            InlineRefreshIcon(onClick = { viewModel.refreshAllFiltersFromNode() }, busy = BusyKey.FILTER_REFRESH in busy, contentDescription = tr("Aktualisieren"), color = if (isWlView) bColors.cobalt else bColors.signalRed)
         }
         Spacer(modifier = Modifier.height(8.dp))
 
