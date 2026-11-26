@@ -233,6 +233,16 @@ InlineRefreshIcon(
 ### 2.6 Navigation & System-Zurück
 
 - Navigation läuft über einen Drawer (`AppDrawer`, `NavDrawerItem`). Startseite ist **CONNECTION**.
+- **Interaktiver Bauhaus-Drawer (seit v1.22, verbindlich):**
+  - Ersetzt `ModalNavigationDrawer`, bei dem das Menü im geschlossenen Zustand nur an der ~20-dp-Kante reagierte (Konflikt mit der System-Zurück-Geste) und leicht zurückschnappte.
+  - Technik: `BauhausModalDrawer` mit `rememberBauhausDrawerState()` in `ui/components/BauhausDrawer.kt`. Die Position ist ein `Animatable` von 0 (zu) bis 1 (offen), der Offset läuft von `-drawerWidth` bis `0`.
+  - Aussehen wie bisher: `ModalDrawerSheet` mit 316 dp links, daneben das Scrim (`DrawerDefaults.scrimColor`, Deckkraft wächst mit der Position). Tippen auf das Scrim schließt.
+  - Der State hat dieselbe Oberfläche wie Material `DrawerState` (`isOpen`, `isClosed`, `targetValue`, `open()`, `close()`). `isOpen` gilt schon während der Öffnen-Animation, damit Zurück sofort schließt.
+  - **Live-Tracking (`PointerEventPass.Initial`, ganze Fläche):** Eine waagerechte Geste ab 12 dp mit `|dx| > |dy| · 1,4` übernimmt der Drawer, solange er sich in diese Richtung bewegen kann. Das Menü folgt dann 1:1 dem Finger, und die Ereignisse werden konsumiert, damit Scroller und Buttons nichts abbekommen.
+  - **Einrasten beim Loslassen:** Ab 35 % Weg in Gestenrichtung, beim Öffnen wie beim Schließen, oder bei zügigem Wisch über 400 dp/s rastet das Menü ein. Darunter gleitet es in die Ausgangslage zurück (`DrawerGesture.settleOpen`).
+  - **Kein Konflikt:** Hat ein Kind-Element die Bewegung im `Main`-Pass schon konsumiert, bleibt der Drawer für diese Geste unbeteiligt. Das betrifft Slider, Slide-to-Confirm, die Karte und einen bereits laufenden vertikalen Scroll. Übernommen wird erst nach mindestens einem beobachteten `Final`-Pass, damit auch ein schneller Wisch zuerst beim Slider ankommt.
+  - **Schließen:** durch Scrim-Tippen, System-Zurück (`BackHandler`) oder interaktives Zuziehen nach links.
+  - Geprüft in `DrawerGestureTest`.
 - `BackHandler`, Reihenfolge verbindlich:
   ```kotlin
   BackHandler { when {
@@ -424,6 +434,17 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
   - Booleans als `true/false`, `"on"/"off"`, `1/0`; Zahlen-Variablen werden geprüft;
   - `null`/leere Werte und ungültige Schlüssel (Metadaten wie `comment`) werden nie gesendet; was im Template fehlt (`name`, `lat`, `lon`, `owner.info` …), wird nie überschrieben.
 - **Diff-Abgleich (`MeshCoreBackup.withoutUnchanged`):** Nach einem vollständigen Start-Scan werden `set`-Befehle übersprungen, deren Wert der Repeater schon hat (numerisch verglichen, `radio` je Teilwert). Regionen- und Filterbefehle bleiben unberührt. Geprüft in `RoutingRxGainTemplateTest`.
+
+### 3.5 Statistik-Anzeigen nur aus echten Firmware-Werten (seit v1.22)
+
+- **Nur anzeigen, was die Firmware ausgibt.** Zähler ohne Quelle in der Firmware (z. B. „durchgelassen“, „Drop-Rate“) werden nicht geschätzt, sondern weggelassen. Werte, die noch nicht gelesen wurden, zeigen „—“, nie `0`.
+- **Filter-Statistik:** Die Quelle ist ZephCore/MeshCore `FilterStats.h`.
+  - `filter` liefert `> Filter on|off: Blocked [ Hops: n | Rate: n | Channel: n | Hash: n | Malformed: n ]`, bei aktivem Dry-Run gefolgt von ` (dry-run)`.
+  - `filter stats air` liefert `> Filter: saved airtime <ms> ms (…)` oder `> Filter: no airtime saved yet`.
+  - `filter stats` ohne Thema ist nur Hilfetext.
+  - Ablehnungen im Whitelist-Modus zählt die Firmware in keiner Kategorie; sie zeigen sich nur in der gesparten Airtime. Die Whitelist-Ansicht sagt das in einem kurzen Hinweis.
+- **Aktualisierung:** Die Statistik wird beim Öffnen des Screens still gelesen (`refreshFilterStats`, sequentiell, mit Tag und Retry) und zusätzlich mit dem ↻ der Kopfzeile. Bei Gerätewechsel oder neuem Start-Scan werden die Zähler geleert, nach `filter RESET` auf 0 gesetzt.
+- **Parser:** Er ist tolerant gegen gekürzte Antworten (`..`): angekommene Felder zählen, fehlende Felder zählen 0. Andere Statistik-Themen (`Blocked n [1B:…`, `dropped n`) dürfen die Zusammenfassung nie überschreiben. Geprüft in `FilterStatisticsTest`.
 
 ## 4. Lokalisierung & Text-Disziplin
 

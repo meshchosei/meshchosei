@@ -76,6 +76,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.meshcore.repeater.R
+import com.meshcore.repeater.model.FilterCounters
 import com.meshcore.repeater.model.FilterMode
 import com.meshcore.repeater.ui.components.SlideToConfirm
 import com.meshcore.repeater.ui.theme.BauhausCornerShape
@@ -95,7 +96,8 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
     val busy by viewModel.busyActions.collectAsState()
     val initialReadDone by viewModel.hasCompletedInitialRead.collectAsState()
     // Einmalig beim Öffnen: Filter aktiv, aber Kanalliste leer (z. B. über LoRa abgeschnitten) -> automatisch nachladen
-    LaunchedEffect(view, initialReadDone) { if (initialReadDone) { viewModel.ensureFilterStatusKnown(); viewModel.ensureFilterChannelsLoaded(view) } }
+    // Statistik-Karte (v1.22): beim Öffnen still "filter" + "filter stats air" lesen (enthält auch den Ein/Aus-Status)
+    LaunchedEffect(view, initialReadDone) { if (initialReadDone) { viewModel.refreshFilterStats(); viewModel.ensureFilterChannelsLoaded(view) } }
     val scrollState = rememberScrollState()
 
     // Whitelist State
@@ -945,27 +947,39 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
             shape = BauhausCornerShape,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
         ) {
+            // v1.22: nur Werte, die die Firmware wirklich ausgibt ("filter" + "filter stats air"); "—" = noch nicht gelesen
+            val counters = stats.counters
+            fun count(v: Long?) = v?.toString() ?: "—"
             Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column {
-                        Text(stringResource(R.string.filter_stats_allowed), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${stats.allowedPackets}", fontWeight = FontWeight.Bold, color = bColors.successGreen, fontSize = 18.sp)
-                    }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Column {
                         Text(stringResource(R.string.filter_stats_dropped), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${stats.droppedPackets}", fontWeight = FontWeight.Bold, color = bColors.signalRed, fontSize = 18.sp)
+                        Text(count(counters?.total), fontWeight = FontWeight.Bold, color = bColors.signalRed, fontSize = 18.sp)
                     }
-                    Column {
-                        Text(stringResource(R.string.filter_stats_droprate), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("%.1f%%".format(stats.dropRatePercent), fontWeight = FontWeight.Bold, color = bColors.ochre, fontSize = 18.sp)
-                    }
-                    Column {
+                    Column(horizontalAlignment = Alignment.End) {
                         Text(stringResource(R.string.filter_stats_airtime), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("%.1f s".format(stats.savedAirtimeMs / 1000f), fontWeight = FontWeight.Bold, color = bColors.cobalt, fontSize = 18.sp)
+                        Text(FilterCounters.formatAirtime(stats.savedAirtimeMs), fontWeight = FontWeight.Bold, color = bColors.cobalt, fontSize = 18.sp)
                     }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    // Feldnamen exakt wie in der Firmware-Zeile "Blocked [ Hops | Rate | Channel | Hash | Malformed ]" (nicht übersetzt)
+                    listOf(
+                        "Hops" to counters?.hops, "Rate" to counters?.rate, "Channel" to counters?.channel,
+                        "Hash" to counters?.hash, "Malformed" to counters?.malformed
+                    ).forEach { (label, v) ->
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                            Text(count(v), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                        }
+                    }
+                }
+                if (isWlView) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        tr("Whitelist-Ablehnungen zählt die Firmware in keiner Kategorie – sie zeigen sich nur in der gesparten Airtime."),
+                        fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

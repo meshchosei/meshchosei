@@ -1,6 +1,7 @@
 package com.meshcore.repeater.service
 
 import com.meshcore.repeater.model.FilterMode
+import com.meshcore.repeater.model.FilterCounters
 import com.meshcore.repeater.model.FilterStats
 import com.meshcore.repeater.model.MeshContact
 import java.nio.charset.StandardCharsets
@@ -320,11 +321,36 @@ object RepeaterProtocol {
     private val FILTER_OFF_RE = Regex("""^filter:?\s+off\b""")
     private val MODE_RE = Regex("""\bmode:?\s+(whitelist|blacklist)\b""")
 
+    private val SUMMARY_RE = Regex("""^filter (?:on|off):\s*blocked\s*\[(.*)""")
+    private val SUMMARY_FIELD_RE = Regex("""\b(hops|rate|channel|hash|malformed):\s*(\d+)""")
+    private val AIR_RE = Regex("""^filter:\s*saved airtime\s+(\d+)\s*ms\b""")
+
+    /**
+     * Zähler aus der Zusammenfassung von "filter" (v1.22):
+     * "filter on: blocked [ hops: 326 | rate: 0 | channel: 0 | hash: 8097 | malformed: 0 ]" (+ " (dry-run)").
+     * Erwartet eine kleingeschriebene Zeile ohne ">". Fehlende Felder (z. B. gekürzte Antwort "..") zählen 0;
+     * ohne ein einziges Feld -> null (keine Zusammenfassung).
+     */
+    fun parseFilterCounters(lower: String): FilterCounters? {
+        val inner = SUMMARY_RE.find(lower)?.groupValues?.get(1) ?: return null
+        val f = SUMMARY_FIELD_RE.findAll(inner).associate { it.groupValues[1] to (it.groupValues[2].toLongOrNull() ?: 0L) }
+        if (f.isEmpty()) return null
+        return FilterCounters(f["hops"] ?: 0L, f["rate"] ?: 0L, f["channel"] ?: 0L, f["hash"] ?: 0L, f["malformed"] ?: 0L)
+    }
+
+    /** "filter stats air": "filter: saved airtime 214500 ms (3m 34s)" -> 214500, "filter: no airtime saved yet" -> 0. */
+    fun parseSavedAirtimeMs(lower: String): Long? = when {
+        lower.startsWith("filter: no airtime saved") -> 0L
+        else -> AIR_RE.find(lower)?.groupValues?.get(1)?.toLongOrNull()
+    }
+
         fun parseFilterStats(text: String, current: FilterStats): FilterStats {
         var updated = current
         val lines = text.lines()
         for (line in lines) {
             val lower = line.trim().removePrefix(">").trim().lowercase(Locale.ROOT)
+            parseFilterCounters(lower)?.let { updated = updated.copy(counters = it) }
+            parseSavedAirtimeMs(lower)?.let { updated = updated.copy(savedAirtimeMs = it) }
             when {
                 // Ein/Aus: "Filter on: Blocked [...]" (Status), "Filter: on" / "Filter: off" (Befehlsantwort)
                 // Zusammenfassung (FilterStat::formatSummary) hängt bei aktivem Dry-Run " (dry-run)" an
@@ -345,14 +371,6 @@ object RepeaterProtocol {
                 // Modus: exakt "mode whitelist" bzw. "mode blacklist" (nicht die Hilfe "filter mode [blacklist|whitelist]")
                 MODE_RE.find(lower) != null -> {
                     updated = updated.copy(mode = if (MODE_RE.find(lower)!!.groupValues[1] == "whitelist") FilterMode.WHITELIST else FilterMode.BLACKLIST)
-                }
-                lower.contains("allowed:") -> {
-                    val count = line.substringAfter("allowed:").trim().split(" ").firstOrNull()?.toLongOrNull()
-                    if (count != null) updated = updated.copy(allowedPackets = count)
-                }
-                lower.contains("dropped:") || lower.contains("blocked:") -> {
-                    val count = line.substringAfter(":").trim().split(" ").firstOrNull()?.toLongOrNull()
-                    if (count != null) updated = updated.copy(droppedPackets = count)
                 }
             }
         }

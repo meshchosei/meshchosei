@@ -140,9 +140,7 @@
 
     <!-- Filter Stats & Reset -->
     <string name="filter_stats_header">STATISTIQUES DU FILTRE &amp; REJETS</string>
-    <string name="filter_stats_allowed">Autorisés</string>
     <string name="filter_stats_dropped">Rejetés</string>
-    <string name="filter_stats_droprate">Taux de rejet</string>
     <string name="filter_stats_airtime">Temps d\'antenne économisé</string>
     <string name="filter_reset_header">ACTION CRITIQUE : RÉINITIALISATION COMPLÈTE DU FILTRE</string>
     <string name="filter_reset_desc">Remet à 0 toutes les règles, entrées de liste blanche et compteurs, puis désactive le filtre. Envoie \'filter RESET\'.</string>

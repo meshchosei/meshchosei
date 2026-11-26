@@ -140,9 +140,7 @@
 
     <!-- Filter Stats & Reset -->
     <string name="filter_stats_header">FILTERSTATISTIEKEN &amp; TREFFERS</string>
-    <string name="filter_stats_allowed">Doorgelaten</string>
     <string name="filter_stats_dropped">Verworpen</string>
-    <string name="filter_stats_droprate">Drop-rate</string>
     <string name="filter_stats_airtime">Airtime bespaard</string>
     <string name="filter_reset_header">KRITIEKE ACTIE: FILTER VOLLEDIG RESETTEN</string>
     <string name="filter_reset_desc">Zet alle regels, whitelistvermeldingen en trefferstellers op 0 en schakelt het filter uit. Verzendt \'filter RESET\'.</string>

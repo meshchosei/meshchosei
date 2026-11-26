@@ -4368,5 +4368,15 @@
   "{0} values are already set and will be skipped.",
   "{0} waarden zijn al ingesteld en worden overgeslagen.",
   "{0} valeurs sont déjà réglées et seront ignorées."
+ ],
+ "Filter-Statistiken werden abgefragt…": [
+  "Reading filter statistics…",
+  "Filterstatistieken worden opgevraagd…",
+  "Lecture des statistiques du filtre…"
+ ],
+ "Whitelist-Ablehnungen zählt die Firmware in keiner Kategorie – sie zeigen sich nur in der gesparten Airtime.": [
+  "The firmware does not count whitelist rejections in any category – they only show up in the saved airtime.",
+  "De firmware telt whitelist-weigeringen in geen enkele categorie – ze zijn alleen zichtbaar in de bespaarde airtime.",
+  "Le firmware ne compte les refus de la liste blanche dans aucune catégorie – ils n'apparaissent que dans le temps d'antenne économisé."
  ]
 }

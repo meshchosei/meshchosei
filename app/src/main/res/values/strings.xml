@@ -142,9 +142,7 @@
 
     <!-- Filter Stats & Reset -->
     <string name="filter_stats_header">FILTER STATISTICS &amp; DROPS</string>
-    <string name="filter_stats_allowed">Allowed</string>
     <string name="filter_stats_dropped">Dropped</string>
-    <string name="filter_stats_droprate">Drop rate</string>
     <string name="filter_stats_airtime">Airtime saved</string>
     <string name="filter_reset_header">CRITICAL ACTION: FULL FILTER RESET</string>
     <string name="filter_reset_desc">Resets all rules, whitelist entries and match counters to 0 and turns the filter off. Sends \'filter RESET\'.</string>

@@ -14,6 +14,7 @@ import com.meshcore.repeater.service.FilterListParser
 import com.meshcore.repeater.service.InputValidator
 import com.meshcore.repeater.service.MeshCoreBackup
 import com.meshcore.repeater.model.FilterStatusRules
+import com.meshcore.repeater.model.FilterCounters
 import com.meshcore.repeater.service.CliReplyTag
 import com.meshcore.repeater.service.QuerySpec
 import com.meshcore.repeater.service.RepeaterProtocol
@@ -255,7 +256,11 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     private fun updateFilterStatusKnown() {
         _filterStatusKnown.value = FilterStatusRules.isKnown(filterEnabledKnown, filterModeKnown, _deviceCapabilities.value.supportsWhitelist)
     }
-    private fun resetFilterStatusKnown() { filterEnabledKnown = false; filterModeKnown = false; _filterStatusKnown.value = false }
+    private fun resetFilterStatusKnown() {
+        filterEnabledKnown = false; filterModeKnown = false; _filterStatusKnown.value = false
+        // Zähler gehören zum Gerät: beim Gerätewechsel / neuen Start-Scan nicht die Werte des vorigen Repeaters zeigen (v1.22)
+        _filterStats.value = _filterStats.value.copy(counters = null, savedAirtimeMs = null)
+    }
 
     /**
      * Solange der Filterstatus unbekannt ist (z. B. LoRa-Antwort im Start-Scan verloren): beim Öffnen des
@@ -271,6 +276,30 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             sequentialQueryMutex.withLock {
                 for (q in FilterStatusRules.statusQueries(c.supportsBlacklist, c.supportsWhitelist)) {
+                    if (!isLinkUp()) break
+                    val tag = newRetryTag()
+                    for (attempt in 1..(if (_remoteAdminSession.value.targetRepeater != null) 2 else 1)) {
+                        if (runQuery(q, timeoutMs = filterListTimeoutMs(), fixedTag = tag) != null) break
+                    }
+                }
+            }
+        }.invokeOnCompletion { clearBusy(BusyKey.FILTER_STATUS) }
+    }
+
+    /**
+     * Karte „Filter-Statistiken & Treffer“ (v1.22): beim Öffnen von Blacklist/Whitelist still "filter"
+     * (+ "filter mode", solange unbekannt) und "filter stats air" lesen – streng nacheinander, mit Tag,
+     * langem LoRa-Fenster und einem Retry. Die Zähler übernimmt der Status-Parser aus der validierten Antwort.
+     */
+    fun refreshFilterStats() {
+        val c = _deviceCapabilities.value
+        if (!isLinkUp() || initialScanRunning || !c.detectionComplete || !_hasCompletedInitialRead.value) return
+        if (c.isCompanion && !_remoteAdminSession.value.isLoggedIn) return
+        val qs = FilterStatusRules.statsQueries(c.supportsBlacklist, c.supportsWhitelist, filterModeKnown)
+        if (qs.isEmpty() || !tryMarkBusy(BusyKey.FILTER_STATUS)) return
+        viewModelScope.launch {
+            sequentialQueryMutex.withLock {
+                for (q in qs) {
                     if (!isLinkUp()) break
                     val tag = newRetryTag()
                     for (attempt in 1..(if (_remoteAdminSession.value.targetRepeater != null) 2 else 1)) {
@@ -1714,7 +1743,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         startRead(cancelPrevious = false) {
             _activeReadStatusText.value = "Filter-Status wird abgefragt…"
             val c = _deviceCapabilities.value
-            runFilterListQueries(filterQueriesFor(c.supportsBlacklist, c.supportsWhitelist))
+            val qs = filterQueriesFor(c.supportsBlacklist, c.supportsWhitelist)
+            // ↻ im Filter-Screen aktualisiert auch die Statistik-Karte (v1.22)
+            runFilterListQueries(if (qs.isEmpty()) qs else qs + FilterStatusRules.CMD_STATS_AIR)
         }.invokeOnCompletion { clearBusy(BusyKey.FILTER_REFRESH) }
     }
     /** "filter RESET" (Großschreibung beabsichtigt); Listen werden erst nach Bestätigung geleert. */
@@ -1723,6 +1754,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             if (!ok) return@sendBusy notConfirmed(RepeaterProtocol.CMD_FILTER_RESET)
             _blockedChannels.value = emptyList(); _blockedPaths.value = emptyList(); _whitelistChannels.value = emptyList(); _whitelistPaths.value = emptyList()
             _senderRules.value = emptyList(); _textRules.value = emptyList(); _watchChannels.value = emptyList()
+            _filterStats.value = _filterStats.value.copy(counters = FilterCounters(), savedAirtimeMs = 0L)   // RESET löscht auch die Zähler
         }
     }
     // Hinzufügen/Löschen: Button arbeitet (Spinner), bis der Repeater bestätigt; erst dann wird die Liste geändert.

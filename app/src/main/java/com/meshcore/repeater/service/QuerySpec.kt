@@ -1,6 +1,7 @@
 package com.meshcore.repeater.service
 
 import com.meshcore.repeater.i18n.tr
+import com.meshcore.repeater.model.FilterStatusRules
 
 /**
  * Strenges Request-Response-Protokoll: Für jeden Abfragebefehl ein Format-Validator und ein Klartext
@@ -101,6 +102,8 @@ object QuerySpec {
         // Status-Zusammenfassung (FilterStat::formatSummary): "> Filter on: Blocked [ … ]" – nicht "Filter: on" (Befehlsantwort)
         "filter" -> { v -> Regex("""^filter (on|off)\b""", RegexOption.IGNORE_CASE).containsMatchIn(v) }
         "filter mode" -> { v -> v.contains("mode", true) }
+        // v1.22: gesparte Airtime; ältere Firmware ohne "air" antwortet mit der Hilfe "filter stats [ … ]" (kein Warten bis Timeout)
+        FilterStatusRules.CMD_STATS_AIR -> { v -> v.contains("airtime", true) || v.startsWith("filter stats [", true) }
         // Listen: nur das jeweilige Listenformat bzw. "None" annehmen – keine verspäteten Status-/OK-Zeilen
         "filter channel list", "filter wl channel list", "filter path list", "filter wl path list",
         "filter sender list", "filter text list", "filter watch list" -> { v -> FilterListParser.isValidListReply(cmd, v) }
@@ -142,6 +145,7 @@ object QuerySpec {
         "get radio.rxgain", "get radio.fem.rxgain" -> "Funkparameter werden abgefragt…"
         "get gps" -> "GPS-Status wird abgefragt…"
         "filter", "filter help" -> "Prüfe Geräte- & Filter-Funktionen…"
+        FilterStatusRules.CMD_STATS_AIR -> "Filter-Statistiken werden abgefragt…"
         "power" -> "Versorgung wird abgefragt…"
         "clock" -> "Telemetrie wird abgefragt…"
         "region", "region home", "region default" -> "Regionen werden abgefragt…"

@@ -56,20 +56,43 @@ data class FilterStats(
     val mode: FilterMode = FilterMode.BLACKLIST,
     val maxHops: Int = 7,
     val ageMinutes: Int = 0, // 0 = off, 1-10080
-    val allowedPackets: Long = 0L,
-    val droppedPackets: Long = 0L,
-    val savedAirtimeMs: Long = 0L,
-    val lastResetTime: String = "-"
+    /** Blockiert-Zähler aus "filter" (FilterStat::formatSummary); null = noch nicht gelesen. */
+    val counters: FilterCounters? = null,
+    /** Geschätzte gesparte Sendezeit aus "filter stats air" in ms; null = noch nicht gelesen / nicht unterstützt. */
+    val savedAirtimeMs: Long? = null
 ) {
     /** Tatsächlich wirksamer Modus: null = Filter ausgeschaltet ("OFF"). */
     val activeMode: FilterMode?
         get() = if (filterEnabled) mode else null
+}
 
-    val dropRatePercent: Float
-        get() {
-            val total = allowedPackets + droppedPackets
-            return if (total > 0) (droppedPackets.toFloat() / total) * 100f else 0f
+/**
+ * Zähler der Filter-Zusammenfassung (v1.22), Firmware ZephCore `app/FilterStats.h` / MeshCore
+ * `simple_repeater/FilterStats.h`: "> Filter on|off: Blocked [ Hops: n | Rate: n | Channel: n | Hash: n | Malformed: n ]".
+ * Einen Zähler für durchgelassene Pakete gibt die Firmware nicht aus; Whitelist-Ablehnungen zählt sie in keiner
+ * Kategorie (nur in der gesparten Airtime).
+ */
+data class FilterCounters(
+    val hops: Long = 0L,
+    val rate: Long = 0L,
+    val channel: Long = 0L,
+    val hash: Long = 0L,
+    val malformed: Long = 0L
+) {
+    val total: Long get() = hops + rate + channel + hash + malformed
+
+    companion object {
+        /** Gesparte Airtime lesbar: < 60 s mit einer Nachkommastelle („12.5 s“), sonst „3m 34s“ bzw. „2h 5m“. null -> „—“. */
+        fun formatAirtime(ms: Long?): String {
+            if (ms == null) return "—"
+            val secs = ms / 1000L
+            return when {
+                secs < 60L -> String.format(java.util.Locale.ROOT, "%.1f s", ms / 1000.0)
+                secs < 3600L -> "${secs / 60L}m ${secs % 60L}s"
+                else -> "${secs / 3600L}h ${(secs / 60L) % 60L}m"
+            }
         }
+    }
 }
 
 // === Theme & Localization Enums ===

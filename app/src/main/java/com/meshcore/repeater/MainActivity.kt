@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainAppContent(viewModel: RepeaterViewModel) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val drawerState = rememberBauhausDrawerState()   // interaktiver Bauhaus-Drawer (v1.22)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     // rememberSaveable: Display-Drehung wirft nicht auf den Startscreen zurück und bricht keine Setup-Tour ab
@@ -171,7 +171,8 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
 
     // Scroll-Hinweis: bei offenem (oder sich öffnendem) Seitenmenü nur im Menü, nicht im Hauptfenster dahinter
     val drawerOpen = drawerState.isOpen || drawerState.targetValue == DrawerValue.Open
-    ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
+    // Interaktiver Bauhaus-Drawer (v1.22): Aufziehen von überall 1:1 am Finger, Einrasten ab 35 % oder per Wisch
+    BauhausModalDrawer(state = drawerState, drawerContent = {
       CompositionLocalProvider(com.meshcore.repeater.ui.components.LocalSuppressScrollHint provides false) {
         AppDrawerHost(
             currentRoute = currentScreen, connectionState = connectionState, meshCareFlow = viewModel.meshCareState, filterStatsFlow = viewModel.filterStats,
