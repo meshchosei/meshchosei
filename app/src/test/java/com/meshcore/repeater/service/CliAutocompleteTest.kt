@@ -54,7 +54,7 @@ class CliAutocompleteTest {
         assertTrue(r.contains("get radio") && r.contains("set radio") && r.contains("tempradio"))
         assertTwoStageOrder("radio", r)
         val c = suggest("cl")
-        assertEquals(listOf("clear stats", "clkreboot", "clock", "clock sync"), c.take(4))
+        assertEquals(listOf("clear stats", "clkreboot", "clock", "clock mesh"), c.take(4))
         assertTwoStageOrder("cl", c)
         assertEquals(listOf("get dutycycle", "get gps duty", "get rxduty", "set dutycycle", "set gps duty", "set rxduty"), suggest("duty"))
         val g = suggest("gps")

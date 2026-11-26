@@ -3588,5 +3588,735 @@
   "New version {0} available",
   "Nieuwe versie {0} beschikbaar",
   "Nouvelle version {0} disponible"
+ ],
+ "11. jhuebert-Fork: Filter-Regeln, Battery, Power, Radio2, Ham, MeshClock, Fleet, Bot, OTA": [
+  "11. jhuebert fork: filter rules, battery, power, Radio2, ham, MeshClock, fleet, bot, OTA",
+  "11. jhuebert-fork: filterregels, batterij, energie, Radio2, ham, MeshClock, fleet, bot, OTA",
+  "11. Fork jhuebert : règles de filtre, batterie, énergie, Radio2, ham, MeshClock, flotte, bot, OTA"
+ ],
+ "Fügt eine Filterregel hinzu (z. B. type=advert, chan=#test, hops=…) (jhuebert)": [
+  "Adds a filter rule (e.g. type=advert, chan=#test, hops=…) (jhuebert)",
+  "Voegt een filterregel toe (bv. type=advert, chan=#test, hops=…) (jhuebert)",
+  "Ajoute une règle de filtre (ex. type=advert, chan=#test, hops=…) (jhuebert)"
+ ],
+ "Listet die Filterregeln ab Index (0 = erste Regel) (jhuebert)": [
+  "Lists the filter rules from an index (0 = first rule) (jhuebert)",
+  "Toont de filterregels vanaf een index (0 = eerste regel) (jhuebert)",
+  "Liste les règles de filtre à partir d'un index (0 = première) (jhuebert)"
+ ],
+ "Zeigt eine Filterregel mit Treffern und Airtime-Ersparnis (jhuebert)": [
+  "Shows one filter rule with hits and saved airtime (jhuebert)",
+  "Toont één filterregel met treffers en bespaarde airtime (jhuebert)",
+  "Affiche une règle avec ses hits et l'airtime économisé (jhuebert)"
+ ],
+ "Aktiviert eine einzelne Filterregel (jhuebert)": [
+  "Enables a single filter rule (jhuebert)",
+  "Schakelt één filterregel in (jhuebert)",
+  "Active une seule règle de filtre (jhuebert)"
+ ],
+ "Deaktiviert eine einzelne Filterregel (bleibt gespeichert) (jhuebert)": [
+  "Disables a single filter rule (kept) (jhuebert)",
+  "Schakelt één filterregel uit (blijft bewaard) (jhuebert)",
+  "Désactive une seule règle (conservée) (jhuebert)"
+ ],
+ "Verschiebt eine Filterregel an einen anderen Index (jhuebert)": [
+  "Moves a filter rule to another index (jhuebert)",
+  "Verplaatst een filterregel naar een andere index (jhuebert)",
+  "Déplace une règle de filtre vers un autre index (jhuebert)"
+ ],
+ "Löscht eine Filterregel (spätere rücken nach) (jhuebert)": [
+  "Deletes a filter rule (later rules shift down) (jhuebert)",
+  "Verwijdert een filterregel (latere schuiven op) (jhuebert)",
+  "Supprime une règle (les suivantes remontent) (jhuebert)"
+ ],
+ "Löscht alle Filterregeln (Kanäle bleiben) (jhuebert)": [
+  "Deletes all filter rules (channels are kept) (jhuebert)",
+  "Verwijdert alle filterregels (kanalen blijven) (jhuebert)",
+  "Supprime toutes les règles (canaux conservés) (jhuebert)"
+ ],
+ "Setzt die Filter-Zähler zurück (jhuebert)": [
+  "Resets the filter counters (jhuebert)",
+  "Zet de filtertellers terug (jhuebert)",
+  "Remet à zéro les compteurs du filtre (jhuebert)"
+ ],
+ "Listet die gespeicherten Filter-Kanäle (jhuebert)": [
+  "Lists the stored filter channels (jhuebert)",
+  "Toont de opgeslagen filterkanalen (jhuebert)",
+  "Liste les canaux de filtre enregistrés (jhuebert)"
+ ],
+ "Fügt einen Filter-Kanal hinzu (PSK optional bei #-Namen) (jhuebert)": [
+  "Adds a filter channel (PSK optional for # names) (jhuebert)",
+  "Voegt een filterkanaal toe (PSK optioneel bij #-namen) (jhuebert)",
+  "Ajoute un canal de filtre (PSK facultative pour #noms) (jhuebert)"
+ ],
+ "Entfernt einen Filter-Kanal (jhuebert)": [
+  "Removes a filter channel (jhuebert)",
+  "Verwijdert een filterkanaal (jhuebert)",
+  "Supprime un canal de filtre (jhuebert)"
+ ],
+ "Zeigt Advert-Ratelimit-Fenster und Cache (jhuebert)": [
+  "Shows the advert rate-limit window and cache (jhuebert)",
+  "Toont het advert-ratelimitvenster en de cache (jhuebert)",
+  "Affiche la fenêtre de limitation des adverts et le cache (jhuebert)"
+ ],
+ "Setzt das Advert-Ratelimit (0–720 h, 0 = aus) (jhuebert)": [
+  "Sets the advert rate limit (0–720 h, 0 = off) (jhuebert)",
+  "Stelt de advert-ratelimit in (0–720 u, 0 = uit) (jhuebert)",
+  "Règle la limitation des adverts (0–720 h, 0 = off) (jhuebert)"
+ ],
+ "Leert den Advert-Cache des Ratelimits (jhuebert)": [
+  "Empties the advert rate-limit cache (jhuebert)",
+  "Leegt de advert-cache van de ratelimit (jhuebert)",
+  "Vide le cache de limitation des adverts (jhuebert)"
+ ],
+ "Zeigt Akku-Schutz: Spannung, Schwellen, Zustand (jhuebert)": [
+  "Shows battery guard: voltage, thresholds, state (jhuebert)",
+  "Toont accubeveiliging: spanning, drempels, status (jhuebert)",
+  "Affiche la protection batterie : tension, seuils, état (jhuebert)"
+ ],
+ "Schaltet den Akku-Schutz aus (jhuebert)": [
+  "Turns the battery guard off (jhuebert)",
+  "Schakelt de accubeveiliging uit (jhuebert)",
+  "Désactive la protection batterie (jhuebert)"
+ ],
+ "Setzt Abschalt-/Wiederanlaufschwelle und aktiviert den Schutz (jhuebert)": [
+  "Sets suspend/resume thresholds and enables the guard (jhuebert)",
+  "Stelt uit-/hervattingsdrempel in en activeert de beveiliging (jhuebert)",
+  "Règle les seuils d'arrêt/reprise et active la protection (jhuebert)"
+ ],
+ "Zeigt den RX-Duty-Cycle (Stromsparen beim Empfang) (jhuebert)": [
+  "Shows the RX duty cycle (receive power saving) (jhuebert)",
+  "Toont de RX-duty-cycle (energiebesparing bij ontvangst) (jhuebert)",
+  "Affiche le duty-cycle RX (économie en réception) (jhuebert)"
+ ],
+ "Setzt das RX-Duty-Cycle-Profil (jhuebert)": [
+  "Sets the RX duty-cycle profile (jhuebert)",
+  "Stelt het RX-duty-cycleprofiel in (jhuebert)",
+  "Règle le profil de duty-cycle RX (jhuebert)"
+ ],
+ "Setzt die RX-Duty-Cycle-Stufe direkt (jhuebert)": [
+  "Sets the RX duty-cycle level directly (jhuebert)",
+  "Stelt het RX-duty-cycleniveau direct in (jhuebert)",
+  "Règle directement le niveau de duty-cycle RX (jhuebert)"
+ ],
+ "Zeigt die CPU-Taktbegrenzung (ESP32) (jhuebert)": [
+  "Shows the CPU clock cap (ESP32) (jhuebert)",
+  "Toont de CPU-klokbegrenzing (ESP32) (jhuebert)",
+  "Affiche la limite d'horloge CPU (ESP32) (jhuebert)"
+ ],
+ "Begrenzt den CPU-Takt in MHz (0 = Standard) (jhuebert)": [
+  "Caps the CPU clock in MHz (0 = default) (jhuebert)",
+  "Begrenst de CPU-klok in MHz (0 = standaard) (jhuebert)",
+  "Limite l'horloge CPU en MHz (0 = défaut) (jhuebert)"
+ ],
+ "Zeigt Status des zweiten Funk-Presets (jhuebert)": [
+  "Shows the second radio preset's status (jhuebert)",
+  "Toont de status van het tweede radiopreset (jhuebert)",
+  "Affiche l'état du second préréglage radio (jhuebert)"
+ ],
+ "Zeigt die Zeitaufteilung zwischen beiden Presets (jhuebert)": [
+  "Shows the time split between both presets (jhuebert)",
+  "Toont de tijdsverdeling tussen beide presets (jhuebert)",
+  "Affiche la répartition du temps entre les préréglages (jhuebert)"
+ ],
+ "Speichert das zweite Preset und schaltet Radio2 ein (jhuebert)": [
+  "Saves the second preset and turns radio2 on (jhuebert)",
+  "Slaat het tweede preset op en schakelt radio2 in (jhuebert)",
+  "Enregistre le second préréglage et active radio2 (jhuebert)"
+ ],
+ "Schaltet Radio2 aus (Preset bleibt) (jhuebert)": [
+  "Turns radio2 off (preset is kept) (jhuebert)",
+  "Schakelt radio2 uit (preset blijft) (jhuebert)",
+  "Désactive radio2 (préréglage conservé) (jhuebert)"
+ ],
+ "Zeigt/setzt die Weiterleitung: same|other|both|drop (jhuebert)": [
+  "Shows/sets forwarding: same|other|both|drop (jhuebert)",
+  "Toont/stelt doorsturen in: same|other|both|drop (jhuebert)",
+  "Affiche/règle le relais : same|other|both|drop (jhuebert)"
+ ],
+ "Zeigt/setzt, auf welchen Presets Adverts gesendet werden (jhuebert)": [
+  "Shows/sets on which presets adverts are sent (jhuebert)",
+  "Toont/stelt in op welke presets adverts gaan (jhuebert)",
+  "Affiche/règle sur quels préréglages partent les adverts (jhuebert)"
+ ],
+ "Zeigt den Amateurfunk-Modus (Rufzeichen, Leistung) (jhuebert)": [
+  "Shows ham mode (callsign, power) (jhuebert)",
+  "Toont de zendamateurmodus (roepnaam, vermogen) (jhuebert)",
+  "Affiche le mode radioamateur (indicatif, puissance) (jhuebert)"
+ ],
+ "Schaltet den Amateurfunk-Modus ein (jhuebert)": [
+  "Turns ham mode on (jhuebert)",
+  "Schakelt de zendamateurmodus in (jhuebert)",
+  "Active le mode radioamateur (jhuebert)"
+ ],
+ "Schaltet den Amateurfunk-Modus aus (jhuebert)": [
+  "Turns ham mode off (jhuebert)",
+  "Schakelt de zendamateurmodus uit (jhuebert)",
+  "Désactive le mode radioamateur (jhuebert)"
+ ],
+ "Zeigt/setzt das Rufzeichen (3–15 Zeichen) (jhuebert)": [
+  "Shows/sets the callsign (3–15 chars) (jhuebert)",
+  "Toont/stelt de roepnaam in (3–15 tekens) (jhuebert)",
+  "Affiche/règle l'indicatif (3–15 caractères) (jhuebert)"
+ ],
+ "Zeigt/setzt die Sendeleistung im Ham-Modus (−9…30 dBm) (jhuebert)": [
+  "Shows/sets the ham-mode TX power (−9…30 dBm) (jhuebert)",
+  "Toont/stelt het zendvermogen in hammodus in (−9…30 dBm) (jhuebert)",
+  "Affiche/règle la puissance en mode ham (−9…30 dBm) (jhuebert)"
+ ],
+ "Fügt einen öffentlichen Ham-Kanal hinzu (jhuebert)": [
+  "Adds a public ham channel (jhuebert)",
+  "Voegt een openbaar hamkanaal toe (jhuebert)",
+  "Ajoute un canal ham public (jhuebert)"
+ ],
+ "Entfernt einen Ham-Kanal (jhuebert)": [
+  "Removes a ham channel (jhuebert)",
+  "Verwijdert een hamkanaal (jhuebert)",
+  "Supprime un canal ham (jhuebert)"
+ ],
+ "Listet die Ham-Kanäle (jhuebert)": [
+  "Lists the ham channels (jhuebert)",
+  "Toont de hamkanalen (jhuebert)",
+  "Liste les canaux ham (jhuebert)"
+ ],
+ "Zeigt die Ham-Zähler (jhuebert)": [
+  "Shows the ham counters (jhuebert)",
+  "Toont de hamtellers (jhuebert)",
+  "Affiche les compteurs ham (jhuebert)"
+ ],
+ "Zeigt die Uhrzeit-Abstimmung über das Mesh (jhuebert)": [
+  "Shows mesh clock consensus (jhuebert)",
+  "Toont de klokafstemming via de mesh (jhuebert)",
+  "Affiche le consensus d'horloge via le mesh (jhuebert)"
+ ],
+ "Schaltet die Mesh-Uhrzeit-Abstimmung ein (jhuebert)": [
+  "Turns mesh clock consensus on (jhuebert)",
+  "Schakelt de mesh-klokafstemming in (jhuebert)",
+  "Active le consensus d'horloge mesh (jhuebert)"
+ ],
+ "Schaltet die Mesh-Uhrzeit-Abstimmung aus (jhuebert)": [
+  "Turns mesh clock consensus off (jhuebert)",
+  "Schakelt de mesh-klokafstemming uit (jhuebert)",
+  "Désactive le consensus d'horloge mesh (jhuebert)"
+ ],
+ "Setzt Quellenzahl und Mindestübereinstimmung (jhuebert)": [
+  "Sets source count and minimum agreement (jhuebert)",
+  "Stelt aantal bronnen en minimale overeenstemming in (jhuebert)",
+  "Règle le nombre de sources et l'accord minimal (jhuebert)"
+ ],
+ "Setzt Toleranz und Mindestabweichung in Sekunden (jhuebert)": [
+  "Sets tolerance and minimum difference in seconds (jhuebert)",
+  "Stelt tolerantie en minimale afwijking in seconden in (jhuebert)",
+  "Règle tolérance et écart minimal en secondes (jhuebert)"
+ ],
+ "Zeigt den Status der Flotten-Skripte (jhuebert)": [
+  "Shows the fleet-script status (jhuebert)",
+  "Toont de status van de vlootscripts (jhuebert)",
+  "Affiche l'état des scripts de flotte (jhuebert)"
+ ],
+ "Aktiviert die Flotten-Skripte (jhuebert)": [
+  "Enables fleet scripts (jhuebert)",
+  "Activeert de vlootscripts (jhuebert)",
+  "Active les scripts de flotte (jhuebert)"
+ ],
+ "Deaktiviert die Flotten-Skripte (Konfiguration bleibt) (jhuebert)": [
+  "Disables fleet scripts (config kept) (jhuebert)",
+  "Deactiveert de vlootscripts (configuratie blijft) (jhuebert)",
+  "Désactive les scripts de flotte (config conservée) (jhuebert)"
+ ],
+ "Setzt den Flotten-Kanal (16/32 Byte Hex) (jhuebert)": [
+  "Sets the fleet channel (16/32-byte hex) (jhuebert)",
+  "Stelt het vlootkanaal in (16/32 byte hex) (jhuebert)",
+  "Définit le canal de flotte (hex 16/32 octets) (jhuebert)"
+ ],
+ "Entfernt den Flotten-Kanal (jhuebert)": [
+  "Clears the fleet channel (jhuebert)",
+  "Verwijdert het vlootkanaal (jhuebert)",
+  "Supprime le canal de flotte (jhuebert)"
+ ],
+ "Fügt dem Repeater ein Flotten-Tag hinzu (jhuebert)": [
+  "Adds a fleet tag to the repeater (jhuebert)",
+  "Voegt een vloottag toe aan de repeater (jhuebert)",
+  "Ajoute une étiquette de flotte au répéteur (jhuebert)"
+ ],
+ "Entfernt ein Flotten-Tag (jhuebert)": [
+  "Removes a fleet tag (jhuebert)",
+  "Verwijdert een vloottag (jhuebert)",
+  "Supprime une étiquette de flotte (jhuebert)"
+ ],
+ "Listet die Flotten-Tags (jhuebert)": [
+  "Lists the fleet tags (jhuebert)",
+  "Toont de vloottags (jhuebert)",
+  "Liste les étiquettes de flotte (jhuebert)"
+ ],
+ "Löscht alle Flotten-Tags (jhuebert)": [
+  "Clears all fleet tags (jhuebert)",
+  "Verwijdert alle vloottags (jhuebert)",
+  "Supprime toutes les étiquettes de flotte (jhuebert)"
+ ],
+ "Zeigt/setzt das Antwortfenster für !ack (1–600 s) (jhuebert)": [
+  "Shows/sets the !ack reply window (1–600 s) (jhuebert)",
+  "Toont/stelt het !ack-antwoordvenster in (1–600 s) (jhuebert)",
+  "Affiche/règle la fenêtre de réponse !ack (1–600 s) (jhuebert)"
+ ],
+ "Zeigt gemerkte Job-Keys bzw. ob ein Job lief (jhuebert)": [
+  "Shows remembered job keys or whether a job ran (jhuebert)",
+  "Toont onthouden jobkeys of of een job liep (jhuebert)",
+  "Affiche les clés de job mémorisées ou si un job a tourné (jhuebert)"
+ ],
+ "Vergisst einen oder alle Job-Keys (erneuter Lauf) (jhuebert)": [
+  "Forgets one or all job keys (re-run) (jhuebert)",
+  "Vergeet één of alle jobkeys (opnieuw uitvoeren) (jhuebert)",
+  "Oublie une ou toutes les clés de job (relance) (jhuebert)"
+ ],
+ "Zeigt den Status des Antwort-Bots (jhuebert)": [
+  "Shows the reply bot's status (jhuebert)",
+  "Toont de status van de antwoordbot (jhuebert)",
+  "Affiche l'état du bot de réponse (jhuebert)"
+ ],
+ "Schaltet den Antwort-Bot ein (jhuebert)": [
+  "Turns the reply bot on (jhuebert)",
+  "Schakelt de antwoordbot in (jhuebert)",
+  "Active le bot de réponse (jhuebert)"
+ ],
+ "Schaltet den Antwort-Bot aus (jhuebert)": [
+  "Turns the reply bot off (jhuebert)",
+  "Schakelt de antwoordbot uit (jhuebert)",
+  "Désactive le bot de réponse (jhuebert)"
+ ],
+ "Setzt den Bot-Namen (leer = Knotenname) (jhuebert)": [
+  "Sets the bot name (empty = node name) (jhuebert)",
+  "Stelt de botnaam in (leeg = nodenaam) (jhuebert)",
+  "Définit le nom du bot (vide = nom du nœud) (jhuebert)"
+ ],
+ "Setzt den Bot-Kanal oder schaltet ihn ab (jhuebert)": [
+  "Sets the bot channel or turns it off (jhuebert)",
+  "Stelt het botkanaal in of schakelt het uit (jhuebert)",
+  "Définit le canal du bot ou le désactive (jhuebert)"
+ ],
+ "Zeigt Status und Fortschritt des OTA-Updates (jhuebert)": [
+  "Shows OTA update state and progress (jhuebert)",
+  "Toont status en voortgang van de OTA-update (jhuebert)",
+  "Affiche l'état et la progression de la mise à jour OTA (jhuebert)"
+ ],
+ "Zeigt den Fortschritt des Online-Downloads (jhuebert)": [
+  "Shows online download progress (jhuebert)",
+  "Toont de voortgang van de online download (jhuebert)",
+  "Affiche la progression du téléchargement en ligne (jhuebert)"
+ ],
+ "Legt die Firmware-Version für den Online-Download fest (jhuebert)": [
+  "Sets the firmware version for online download (jhuebert)",
+  "Stelt de firmwareversie voor online download in (jhuebert)",
+  "Définit la version pour le téléchargement en ligne (jhuebert)"
+ ],
+ "Legt die erwartete SHA-256-Prüfsumme fest (jhuebert)": [
+  "Sets the expected SHA-256 digest (jhuebert)",
+  "Stelt de verwachte SHA-256-hash in (jhuebert)",
+  "Définit l'empreinte SHA-256 attendue (jhuebert)"
+ ],
+ "Startet den Online-Firmware-Download (WiFi) (jhuebert)": [
+  "Starts the online firmware download (WiFi) (jhuebert)",
+  "Start de online firmwaredownload (WiFi) (jhuebert)",
+  "Lance le téléchargement en ligne (WiFi) (jhuebert)"
+ ],
+ "Bereitet ein LoRa-OTA-Image vor (jhuebert)": [
+  "Prepares a LoRa OTA image (jhuebert)",
+  "Bereidt een LoRa-OTA-image voor (jhuebert)",
+  "Prépare une image OTA LoRa (jhuebert)"
+ ],
+ "Aktiviert das geprüfte Image und startet neu (jhuebert)": [
+  "Activates the verified image and reboots (jhuebert)",
+  "Activeert de geverifieerde image en herstart (jhuebert)",
+  "Active l'image vérifiée et redémarre (jhuebert)"
+ ],
+ "Verwirft eine laufende OTA-Sitzung (jhuebert)": [
+  "Discards a running OTA session (jhuebert)",
+  "Verwerpt een lopende OTA-sessie (jhuebert)",
+  "Abandonne une session OTA en cours (jhuebert)"
+ ],
+ "Wechselt zurück auf die vorherige Firmware (jhuebert)": [
+  "Switches back to the previous firmware (jhuebert)",
+  "Schakelt terug naar de vorige firmware (jhuebert)",
+  "Revient au firmware précédent (jhuebert)"
+ ],
+ "12. jhuebert-Fork: MQTT-Observer & WLAN": [
+  "12. jhuebert fork: MQTT observer & Wi-Fi",
+  "12. jhuebert-fork: MQTT-observer & wifi",
+  "12. Fork jhuebert : observateur MQTT & Wi-Fi"
+ ],
+ "Zeigt WLAN-Verbindung, IP und RSSI (jhuebert Observer)": [
+  "Shows Wi-Fi connection, IP and RSSI (jhuebert Observer)",
+  "Toont wifiverbinding, IP en RSSI (jhuebert Observer)",
+  "Affiche la connexion Wi-Fi, l'IP et le RSSI (jhuebert Observer)"
+ ],
+ "Liest die WLAN-SSID aus (jhuebert Observer)": [
+  "Reads the Wi-Fi SSID (jhuebert Observer)",
+  "Leest de wifi-SSID (jhuebert Observer)",
+  "Lit le SSID Wi-Fi (jhuebert Observer)"
+ ],
+ "Setzt die WLAN-SSID (jhuebert Observer)": [
+  "Sets the Wi-Fi SSID (jhuebert Observer)",
+  "Stelt de wifi-SSID in (jhuebert Observer)",
+  "Définit le SSID Wi-Fi (jhuebert Observer)"
+ ],
+ "Liest das WLAN-Passwort im Klartext aus (jhuebert Observer)": [
+  "Reads the Wi-Fi password in clear text (jhuebert Observer)",
+  "Leest het wifiwachtwoord in klare tekst (jhuebert Observer)",
+  "Lit le mot de passe Wi-Fi en clair (jhuebert Observer)"
+ ],
+ "Setzt das WLAN-Passwort (jhuebert Observer)": [
+  "Sets the Wi-Fi password (jhuebert Observer)",
+  "Stelt het wifiwachtwoord in (jhuebert Observer)",
+  "Définit le mot de passe Wi-Fi (jhuebert Observer)"
+ ],
+ "Liest den WLAN-Stromsparmodus aus (jhuebert Observer)": [
+  "Reads the Wi-Fi power-save mode (jhuebert Observer)",
+  "Leest de wifi-energiebesparingsmodus (jhuebert Observer)",
+  "Lit le mode d'économie Wi-Fi (jhuebert Observer)"
+ ],
+ "Setzt den WLAN-Stromsparmodus (jhuebert Observer)": [
+  "Sets the Wi-Fi power-save mode (jhuebert Observer)",
+  "Stelt de wifi-energiebesparingsmodus in (jhuebert Observer)",
+  "Règle le mode d'économie Wi-Fi (jhuebert Observer)"
+ ],
+ "Zeigt die MQTT-Übersicht (Slots, WLAN, Zeit) (jhuebert Observer)": [
+  "Shows the MQTT overview (slots, Wi-Fi, time) (jhuebert Observer)",
+  "Toont het MQTT-overzicht (slots, wifi, tijd) (jhuebert Observer)",
+  "Affiche la vue MQTT (slots, Wi-Fi, heure) (jhuebert Observer)"
+ ],
+ "Liest den Standort-Code (IATA) aus (jhuebert Observer)": [
+  "Reads the location code (IATA) (jhuebert Observer)",
+  "Leest de locatiecode (IATA) (jhuebert Observer)",
+  "Lit le code de lieu (IATA) (jhuebert Observer)"
+ ],
+ "Setzt den Standort-Code (IATA, 3 Zeichen) (jhuebert Observer)": [
+  "Sets the location code (IATA, 3 chars) (jhuebert Observer)",
+  "Stelt de locatiecode in (IATA, 3 tekens) (jhuebert Observer)",
+  "Définit le code de lieu (IATA, 3 caractères) (jhuebert Observer)"
+ ],
+ "Setzt den Namen für Statusmeldungen (jhuebert Observer)": [
+  "Sets the name for status messages (jhuebert Observer)",
+  "Stelt de naam voor statusberichten in (jhuebert Observer)",
+  "Définit le nom des messages d'état (jhuebert Observer)"
+ ],
+ "Setzt den NTP-Server (none = pool.ntp.org) (jhuebert Observer)": [
+  "Sets the NTP server (none = pool.ntp.org) (jhuebert Observer)",
+  "Stelt de NTP-server in (none = pool.ntp.org) (jhuebert Observer)",
+  "Définit le serveur NTP (none = pool.ntp.org) (jhuebert Observer)"
+ ],
+ "Liest das Status-Intervall in Minuten aus (jhuebert Observer)": [
+  "Reads the status interval in minutes (jhuebert Observer)",
+  "Leest het statusinterval in minuten (jhuebert Observer)",
+  "Lit l'intervalle d'état en minutes (jhuebert Observer)"
+ ],
+ "Setzt das Status-Intervall in Minuten (jhuebert Observer)": [
+  "Sets the status interval in minutes (jhuebert Observer)",
+  "Stelt het statusinterval in minuten in (jhuebert Observer)",
+  "Règle l'intervalle d'état en minutes (jhuebert Observer)"
+ ],
+ "Schaltet die Paket-Erfassung ein/aus (jhuebert Observer)": [
+  "Turns packet capture on/off (jhuebert Observer)",
+  "Schakelt pakketregistratie aan/uit (jhuebert Observer)",
+  "Active/désactive la capture des paquets (jhuebert Observer)"
+ ],
+ "Schaltet Status-Meldungen ein/aus (jhuebert Observer)": [
+  "Turns status publishing on/off (jhuebert Observer)",
+  "Schakelt statusberichten aan/uit (jhuebert Observer)",
+  "Active/désactive la publication d'état (jhuebert Observer)"
+ ],
+ "Schaltet ausgewertete Pakete ein/aus (jhuebert Observer)": [
+  "Turns parsed-packet publishing on/off (jhuebert Observer)",
+  "Schakelt geanalyseerde pakketten aan/uit (jhuebert Observer)",
+  "Active/désactive les paquets analysés (jhuebert Observer)"
+ ],
+ "Schaltet Rohdaten-Frames ein/aus (jhuebert Observer)": [
+  "Turns raw-frame publishing on/off (jhuebert Observer)",
+  "Schakelt ruwe frames aan/uit (jhuebert Observer)",
+  "Active/désactive les trames brutes (jhuebert Observer)"
+ ],
+ "Legt fest, ob eigene Sendungen gemeldet werden (jhuebert Observer)": [
+  "Sets whether own transmissions are reported (jhuebert Observer)",
+  "Bepaalt of eigen uitzendingen gemeld worden (jhuebert Observer)",
+  "Définit si les émissions propres sont publiées (jhuebert Observer)"
+ ],
+ "Baut WLAN und MQTT-Verbindungen neu auf (jhuebert Observer)": [
+  "Rejoins Wi-Fi and reconnects MQTT (jhuebert Observer)",
+  "Bouwt wifi en MQTT-verbindingen opnieuw op (jhuebert Observer)",
+  "Reconnecte le Wi-Fi et le MQTT (jhuebert Observer)"
+ ],
+ "Zeigt den Zustand von Broker-Slot 1 (mqtt2 analog) (jhuebert Observer)": [
+  "Shows broker slot 1 state (mqtt2 likewise) (jhuebert Observer)",
+  "Toont de status van brokerslot 1 (mqtt2 idem) (jhuebert Observer)",
+  "Affiche l'état du slot 1 (mqtt2 idem) (jhuebert Observer)"
+ ],
+ "Zeigt letzte Broker-Fehler von Slot 1 (jhuebert Observer)": [
+  "Shows the last broker errors of slot 1 (jhuebert Observer)",
+  "Toont de laatste brokerfouten van slot 1 (jhuebert Observer)",
+  "Affiche les dernières erreurs du slot 1 (jhuebert Observer)"
+ ],
+ "Schaltet Broker-Slot 1 ein/aus (jhuebert Observer)": [
+  "Turns broker slot 1 on/off (jhuebert Observer)",
+  "Schakelt brokerslot 1 aan/uit (jhuebert Observer)",
+  "Active/désactive le slot 1 (jhuebert Observer)"
+ ],
+ "Setzt die Broker-Adresse von Slot 1 (jhuebert Observer)": [
+  "Sets the broker address of slot 1 (jhuebert Observer)",
+  "Stelt het brokeradres van slot 1 in (jhuebert Observer)",
+  "Définit l'adresse du broker du slot 1 (jhuebert Observer)"
+ ],
+ "Setzt den Broker-Port von Slot 1 (jhuebert Observer)": [
+  "Sets the broker port of slot 1 (jhuebert Observer)",
+  "Stelt de brokerpoort van slot 1 in (jhuebert Observer)",
+  "Définit le port du broker du slot 1 (jhuebert Observer)"
+ ],
+ "Setzt den Broker-Benutzer von Slot 1 (jhuebert Observer)": [
+  "Sets the broker user of slot 1 (jhuebert Observer)",
+  "Stelt de brokergebruiker van slot 1 in (jhuebert Observer)",
+  "Définit l'utilisateur du broker du slot 1 (jhuebert Observer)"
+ ],
+ "Setzt das Broker-Passwort von Slot 1 (jhuebert Observer)": [
+  "Sets the broker password of slot 1 (jhuebert Observer)",
+  "Stelt het brokerwachtwoord van slot 1 in (jhuebert Observer)",
+  "Définit le mot de passe du broker du slot 1 (jhuebert Observer)"
+ ],
+ "Setzt die Topic-Vorlage von Slot 1 (leer = Standard) (jhuebert Observer)": [
+  "Sets slot 1's topic template (empty = default) (jhuebert Observer)",
+  "Stelt de topicsjabloon van slot 1 in (leeg = standaard) (jhuebert Observer)",
+  "Définit le modèle de topic du slot 1 (vide = défaut) (jhuebert Observer)"
+ ],
+ "13. Sweden-Mesh LOU: Auto-Reply & Remote-Command": [
+  "13. Sweden-Mesh LOU: auto-reply & remote command",
+  "13. Sweden-Mesh LOU: auto-reply & remote command",
+  "13. Sweden-Mesh LOU : réponse auto & commande à distance"
+ ],
+ "Zeigt den Auto-Reply-Zustand in einer Zeile (Sweden-Mesh)": [
+  "Shows the auto-reply state in one line (Sweden-Mesh)",
+  "Toont de auto-replystatus op één regel (Sweden-Mesh)",
+  "Affiche l'état de la réponse auto sur une ligne (Sweden-Mesh)"
+ ],
+ "Antwortet auf „test“ im regionalen Test-Kanal (Sweden-Mesh)": [
+  "Answers „test“ on the regional test channel (Sweden-Mesh)",
+  "Antwoordt op „test“ in het regionale testkanaal (Sweden-Mesh)",
+  "Répond à « test » sur le canal de test régional (Sweden-Mesh)"
+ ],
+ "Zeigt die Kanäle, auf denen geantwortet wird (Sweden-Mesh)": [
+  "Shows the channels answered on (Sweden-Mesh)",
+  "Toont de kanalen waarop geantwoord wordt (Sweden-Mesh)",
+  "Affiche les canaux sur lesquels il répond (Sweden-Mesh)"
+ ],
+ "Liest die Antwort-Region aus (Sweden-Mesh)": [
+  "Reads the reply region (Sweden-Mesh)",
+  "Leest de antwoordregio (Sweden-Mesh)",
+  "Lit la région de réponse (Sweden-Mesh)"
+ ],
+ "Setzt Region und Test-Kanal #test-<name> (Sweden-Mesh)": [
+  "Sets the region and test channel #test-<name> (Sweden-Mesh)",
+  "Stelt regio en testkanaal #test-<name> in (Sweden-Mesh)",
+  "Définit la région et le canal #test-<name> (Sweden-Mesh)"
+ ],
+ "Liest die maximale Hop-Zahl für Antworten aus (Sweden-Mesh)": [
+  "Reads the max hop count for replies (Sweden-Mesh)",
+  "Leest het max. aantal hops voor antwoorden (Sweden-Mesh)",
+  "Lit le nombre max de sauts pour répondre (Sweden-Mesh)"
+ ],
+ "Setzt die maximale Hop-Zahl einer Anfrage (Sweden-Mesh)": [
+  "Sets the max hop count of a request (Sweden-Mesh)",
+  "Stelt het max. aantal hops van een verzoek in (Sweden-Mesh)",
+  "Règle le nombre max de sauts d'une requête (Sweden-Mesh)"
+ ],
+ "Liest aus, ob direkte Anfragen per Flood beantwortet werden (Sweden-Mesh)": [
+  "Reads whether direct requests get a flood reply (Sweden-Mesh)",
+  "Leest of directe verzoeken via flood beantwoord worden (Sweden-Mesh)",
+  "Lit si les requêtes directes sont répondues en flood (Sweden-Mesh)"
+ ],
+ "Beantwortet direkte Anfragen per Flood (off = 0 Hop) (Sweden-Mesh)": [
+  "Answers direct requests by flood (off = zero-hop) (Sweden-Mesh)",
+  "Beantwoordt directe verzoeken via flood (off = 0 hop) (Sweden-Mesh)",
+  "Répond aux requêtes directes en flood (off = 0 saut) (Sweden-Mesh)"
+ ],
+ "Liest den Antwort-Slot aus (0 = aus Key abgeleitet) (Sweden-Mesh)": [
+  "Reads the reply slot (0 = derived from key) (Sweden-Mesh)",
+  "Leest het antwoordslot (0 = afgeleid van sleutel) (Sweden-Mesh)",
+  "Lit le créneau de réponse (0 = dérivé de la clé) (Sweden-Mesh)"
+ ],
+ "Setzt den Antwort-Slot (0 = automatisch) (Sweden-Mesh)": [
+  "Sets the reply slot (0 = automatic) (Sweden-Mesh)",
+  "Stelt het antwoordslot in (0 = automatisch) (Sweden-Mesh)",
+  "Règle le créneau de réponse (0 = auto) (Sweden-Mesh)"
+ ],
+ "Liest die Anzahl der Antwort-Slots aus (Sweden-Mesh)": [
+  "Reads the number of reply slots (Sweden-Mesh)",
+  "Leest het aantal antwoordslots (Sweden-Mesh)",
+  "Lit le nombre de créneaux de réponse (Sweden-Mesh)"
+ ],
+ "Setzt die Anzahl der Antwort-Slots (Sweden-Mesh)": [
+  "Sets the number of reply slots (Sweden-Mesh)",
+  "Stelt het aantal antwoordslots in (Sweden-Mesh)",
+  "Règle le nombre de créneaux de réponse (Sweden-Mesh)"
+ ],
+ "Liest das Antwort-Zeitfenster aus (Sweden-Mesh)": [
+  "Reads the reply time window (Sweden-Mesh)",
+  "Leest het antwoordtijdvenster (Sweden-Mesh)",
+  "Lit la fenêtre de réponse (Sweden-Mesh)"
+ ],
+ "Setzt das Antwort-Zeitfenster in Sekunden (Sweden-Mesh)": [
+  "Sets the reply time window in seconds (Sweden-Mesh)",
+  "Stelt het antwoordtijdvenster in seconden in (Sweden-Mesh)",
+  "Règle la fenêtre de réponse en secondes (Sweden-Mesh)"
+ ],
+ "Liest aus, ob auch #test-<iata> beantwortet wird (Sweden-Mesh)": [
+  "Reads whether #test-<iata> is answered too (Sweden-Mesh)",
+  "Leest of ook #test-<iata> beantwoord wordt (Sweden-Mesh)",
+  "Lit si #test-<iata> est aussi répondu (Sweden-Mesh)"
+ ],
+ "Antwortet zusätzlich auf #test-<iata> (Sweden-Mesh)": [
+  "Also answers on #test-<iata> (Sweden-Mesh)",
+  "Antwoordt ook op #test-<iata> (Sweden-Mesh)",
+  "Répond aussi sur #test-<iata> (Sweden-Mesh)"
+ ],
+ "Liest den nationalen Test-Kanal aus (Sweden-Mesh)": [
+  "Reads the national test channel (Sweden-Mesh)",
+  "Leest het nationale testkanaal (Sweden-Mesh)",
+  "Lit le canal de test national (Sweden-Mesh)"
+ ],
+ "Setzt den nationalen Test-Kanal (#test-<land>) (Sweden-Mesh)": [
+  "Sets the national test channel (#test-<country>) (Sweden-Mesh)",
+  "Stelt het nationale testkanaal in (#test-<land>) (Sweden-Mesh)",
+  "Règle le canal de test national (#test-<pays>) (Sweden-Mesh)"
+ ],
+ "Liest die Antwortart aus (Sweden-Mesh)": [
+  "Reads the reply mode (Sweden-Mesh)",
+  "Leest de antwoordmodus (Sweden-Mesh)",
+  "Lit le mode de réponse (Sweden-Mesh)"
+ ],
+ "Setzt die Antwortart ohne Modus-Angabe (Sweden-Mesh)": [
+  "Sets the reply mode for requests without one (Sweden-Mesh)",
+  "Stelt de antwoordmodus in voor verzoeken zonder modus (Sweden-Mesh)",
+  "Règle le mode de réponse par défaut (Sweden-Mesh)"
+ ],
+ "Liest aus, ob private Tests beantwortet werden (Sweden-Mesh)": [
+  "Reads whether private tests are answered (Sweden-Mesh)",
+  "Leest of privétests beantwoord worden (Sweden-Mesh)",
+  "Lit si les tests privés sont répondus (Sweden-Mesh)"
+ ],
+ "Beantwortet private Test-Anfragen an diesen Repeater (Sweden-Mesh)": [
+  "Answers private test requests to this repeater (Sweden-Mesh)",
+  "Beantwoordt privétestverzoeken aan deze repeater (Sweden-Mesh)",
+  "Répond aux tests privés adressés à ce répéteur (Sweden-Mesh)"
+ ],
+ "Sendet eine Test-Anfrage in den Regions-Kanal (Sweden-Mesh)": [
+  "Sends a test request on the region channel (Sweden-Mesh)",
+  "Stuurt een testverzoek in het regiokanaal (Sweden-Mesh)",
+  "Envoie une requête de test sur le canal régional (Sweden-Mesh)"
+ ],
+ "Sendet eine private Test-Anfrage an einen Repeater (Sweden-Mesh)": [
+  "Sends a private test request to a repeater (Sweden-Mesh)",
+  "Stuurt een privétestverzoek naar een repeater (Sweden-Mesh)",
+  "Envoie une requête de test privée à un répéteur (Sweden-Mesh)"
+ ],
+ "Zeigt Zustand des Remote-Command und höchsten Zähler (Sweden-Mesh)": [
+  "Shows remote-command state and highest counter (Sweden-Mesh)",
+  "Toont de remote-commandstatus en hoogste teller (Sweden-Mesh)",
+  "Affiche l'état de la commande à distance et le compteur (Sweden-Mesh)"
+ ],
+ "Schaltet signierte Fernbefehle ein/aus (Sweden-Mesh)": [
+  "Turns signed remote commands on/off (Sweden-Mesh)",
+  "Schakelt ondertekende opdrachten op afstand aan/uit (Sweden-Mesh)",
+  "Active/désactive les commandes signées à distance (Sweden-Mesh)"
+ ],
+ "Liest den öffentlichen Befehls-Schlüssel aus (Sweden-Mesh)": [
+  "Reads the public command key (Sweden-Mesh)",
+  "Leest de publieke opdrachtsleutel (Sweden-Mesh)",
+  "Lit la clé publique de commande (Sweden-Mesh)"
+ ],
+ "Setzt den öffentlichen Befehls-Schlüssel (Ed25519) (Sweden-Mesh)": [
+  "Sets the public command key (Ed25519) (Sweden-Mesh)",
+  "Stelt de publieke opdrachtsleutel in (Ed25519) (Sweden-Mesh)",
+  "Définit la clé publique de commande (Ed25519) (Sweden-Mesh)"
+ ],
+ "Liest den MQTT-Slot für Fernbefehle aus (Sweden-Mesh)": [
+  "Reads the MQTT slot for remote commands (Sweden-Mesh)",
+  "Leest het MQTT-slot voor opdrachten op afstand (Sweden-Mesh)",
+  "Lit le slot MQTT des commandes à distance (Sweden-Mesh)"
+ ],
+ "Setzt den MQTT-Slot für Fernbefehle (Sweden-Mesh)": [
+  "Sets the MQTT slot for remote commands (Sweden-Mesh)",
+  "Stelt het MQTT-slot voor opdrachten op afstand in (Sweden-Mesh)",
+  "Définit le slot MQTT des commandes à distance (Sweden-Mesh)"
+ ],
+ "Liest aus, wann Fernbefehle über das Mesh gelten (Sweden-Mesh)": [
+  "Reads when remote commands over mesh apply (Sweden-Mesh)",
+  "Leest wanneer opdrachten via de mesh gelden (Sweden-Mesh)",
+  "Lit quand les commandes via le mesh s'appliquent (Sweden-Mesh)"
+ ],
+ "Legt fest, wann Fernbefehle über das Mesh gelten (Sweden-Mesh)": [
+  "Sets when remote commands over mesh apply (Sweden-Mesh)",
+  "Bepaalt wanneer opdrachten via de mesh gelden (Sweden-Mesh)",
+  "Définit quand les commandes via le mesh s'appliquent (Sweden-Mesh)"
+ ],
+ "Gibt die Entscheidungen auf der Konsole aus (nur USB) (Sweden-Mesh)": [
+  "Prints the decisions on the console (USB only) (Sweden-Mesh)",
+  "Toont de beslissingen op de console (alleen USB) (Sweden-Mesh)",
+  "Affiche les décisions sur la console (USB seul) (Sweden-Mesh)"
+ ],
+ "Prüft die Befehlskette Ende-zu-Ende (Sweden-Mesh)": [
+  "Checks the command path end to end (Sweden-Mesh)",
+  "Controleert de opdrachtketen van begin tot eind (Sweden-Mesh)",
+  "Vérifie la chaîne de commande de bout en bout (Sweden-Mesh)"
+ ],
+ "Liest die Weiterleitung von Fernbefehlen aus (Sweden-Mesh)": [
+  "Reads remote-command relaying (Sweden-Mesh)",
+  "Leest het doorsturen van opdrachten op afstand (Sweden-Mesh)",
+  "Lit le relais des commandes à distance (Sweden-Mesh)"
+ ],
+ "Leitet Fernbefehle per Funk weiter (own = eigener Key) (Sweden-Mesh)": [
+  "Relays remote commands over the air (own = own key) (Sweden-Mesh)",
+  "Stuurt opdrachten via radio door (own = eigen sleutel) (Sweden-Mesh)",
+  "Relaie les commandes par radio (own = propre clé) (Sweden-Mesh)"
+ ],
+ "Liest das Lebenszeichen-Intervall aus (Sweden-Mesh)": [
+  "Reads the alive-message interval (Sweden-Mesh)",
+  "Leest het levensteken-interval (Sweden-Mesh)",
+  "Lit l'intervalle du message de vie (Sweden-Mesh)"
+ ],
+ "Setzt das Lebenszeichen-Intervall in Minuten (Sweden-Mesh)": [
+  "Sets the alive-message interval in minutes (Sweden-Mesh)",
+  "Stelt het levensteken-interval in minuten in (Sweden-Mesh)",
+  "Règle l'intervalle du message de vie en minutes (Sweden-Mesh)"
+ ],
+ "Zeigt Akku, MCU-Temperatur und Sensoren in einer Zeile (Sweden-Mesh)": [
+  "Shows battery, MCU temperature and sensors in one line (Sweden-Mesh)",
+  "Toont accu, MCU-temperatuur en sensoren op één regel (Sweden-Mesh)",
+  "Affiche batterie, température MCU et capteurs (Sweden-Mesh)"
+ ],
+ "Prüft, ob ein neueres signiertes Image angeboten wird (Sweden-Mesh)": [
+  "Checks whether a newer signed image is offered (Sweden-Mesh)",
+  "Controleert of een nieuwere ondertekende image beschikbaar is (Sweden-Mesh)",
+  "Vérifie si une image signée plus récente existe (Sweden-Mesh)"
+ ],
+ "Lädt das signierte Image, prüft es und startet neu (Sweden-Mesh)": [
+  "Downloads the signed image, verifies it and reboots (Sweden-Mesh)",
+  "Downloadt de ondertekende image, controleert en herstart (Sweden-Mesh)",
+  "Télécharge l'image signée, la vérifie et redémarre (Sweden-Mesh)"
+ ],
+ "Zeigt/setzt den Release-Kanal für Updates (Sweden-Mesh)": [
+  "Shows/sets the release channel for updates (Sweden-Mesh)",
+  "Toont/stelt het releasekanaal voor updates in (Sweden-Mesh)",
+  "Affiche/règle le canal de publication (Sweden-Mesh)"
+ ],
+ "Liest aus, ob automatisch aktualisiert wird (Sweden-Mesh)": [
+  "Reads whether auto-update is on (Sweden-Mesh)",
+  "Leest of automatisch bijgewerkt wordt (Sweden-Mesh)",
+  "Lit si la mise à jour auto est active (Sweden-Mesh)"
+ ],
+ "Schaltet automatische signierte Updates ein/aus (Sweden-Mesh)": [
+  "Turns automatic signed updates on/off (Sweden-Mesh)",
+  "Schakelt automatische ondertekende updates aan/uit (Sweden-Mesh)",
+  "Active/désactive les mises à jour signées auto (Sweden-Mesh)"
+ ],
+ "Setzt das Prüfintervall für Updates in Stunden (Sweden-Mesh)": [
+  "Sets the update check interval in hours (Sweden-Mesh)",
+  "Stelt het controle-interval voor updates in uren in (Sweden-Mesh)",
+  "Règle l'intervalle de vérification en heures (Sweden-Mesh)"
  ]
 }

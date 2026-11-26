@@ -372,13 +372,16 @@ object CliAutocomplete {
      */
     data class Entry(val syntax: String, val insertText: String, val dangerous: Boolean = false, val description: String = "")
 
-    private val DANGEROUS = setOf("reboot", "poweroff", "shutdown", "clkreboot", "erase", "start ota", "start dfu", "filter reset", "set prv.key")
+    private val DANGEROUS = setOf("reboot", "poweroff", "shutdown", "clkreboot", "erase", "start ota", "start dfu", "filter reset", "set prv.key",
+        // Forks (v1.21): Firmware wechseln/zurückrollen, ganze Regelwerke löschen
+        "ota apply", "ota rollback", "ota update", "filter clear", "set cmd.pubkey")
 
     /**
      * Befehle, die die Firmware nur von der seriellen Konsole annimmt (`sender_timestamp == 0` in
      * MeshCore/ZephCore `CommonCLI.cpp` bzw. `get acl` in `simple_repeater`/`RepeaterMesh`).
      */
-    private val USB_ONLY = setOf("get prv.key", "erase", "log", "stats-core", "stats-radio", "stats-packets", "set freq", "get acl")
+    private val USB_ONLY = setOf("get prv.key", "erase", "log", "stats-core", "stats-radio", "stats-packets", "set freq", "get acl",
+        "set cmd.debug")  // Sweden-Mesh LOU: nur serielle Konsole
 
     /**
      * Text, der beim Antippen übernommen wird: der Befehl ohne Platzhalter. Erwartet er einen Parameter

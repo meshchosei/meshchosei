@@ -33,6 +33,10 @@
 | **MeshCore** (repeater, companion) | full: CLI variables, regions, remote admin via companion |
 | **ZephCore** (repeater, companion) | full, plus packet filters (blacklist/whitelist) and LED control |
 | **Dutch MeshCore** (filter) | blacklist filter commands (DMC) |
+| **jhuebert/MeshCore** (community fork) | CLI reference & autocomplete: rule-based packet filter, battery guard, power/RX duty cycle, Radio2, ham mode, MeshClock, fleet scripts, bot, LoRa/online OTA, MQTT observer |
+| **Sweden-Mesh LOU** (community fork) | CLI reference & autocomplete: auto-reply (`ar`), signed remote command (`rc`), signed pull OTA |
+
+meshchōsei also knows the extra CLI commands of popular community forks such as **jhuebert/MeshCore** and **Sweden-Mesh (LOU)**. They are marked with their origin in the CLI help and autocomplete; critical ones (e.g. `ota apply`, `filter clear`) are never retried automatically over LoRa.
 
 Built-in hardware profiles (transceiver, max TX power, typical pigtail loss): Heltec WiFi LoRa 32 V3/V3.2, RAK4631 WisBlock, Seeed XIAO nRF52840 / ESP32-S3 + Wio-SX1262, Seeed SenseCAP Solar Node P1/P1-Pro, Seeed Wio Tracker L1, LilyGO T-Beam / T-Beam Supreme, LilyGO LoRa32 T3-S3, Elecrow ThinkNode M1/M2, B&Q Station G2, plus a generic profile for any SX1262 board. Physically tested so far on the Seeed Wio Tracker L1; other boards are auto-detected or can be selected manually.
 
@@ -88,6 +92,10 @@ Alle Änderungen gelten erst als gespeichert, wenn der Repeater sie **bestätigt
 | **MeshCore** (Repeater, Companion) | vollständig: CLI-Variablen, Regionen, Remote-Admin über Companion |
 | **ZephCore** (Repeater, Companion) | vollständig, zusätzlich Paket-Filter (Blacklist/Whitelist) und LED-Steuerung |
 | **Dutch MeshCore** (Filter) | Blacklist-Filterbefehle (DMC) |
+| **jhuebert/MeshCore** (Community-Fork) | CLI-Hilfe & Autovervollständigung: regelbasierter Paket-Filter, Akku-Schutz, Power/RX-Duty-Cycle, Radio2, Ham-Modus, MeshClock, Fleet-Skripte, Bot, LoRa-/Online-OTA, MQTT-Observer |
+| **Sweden-Mesh LOU** (Community-Fork) | CLI-Hilfe & Autovervollständigung: Auto-Reply (`ar`), signierte Fernbefehle (`rc`), signierter Pull-OTA |
+
+meshchōsei kennt zusätzlich die CLI-Befehle beliebter Community-Forks wie **jhuebert/MeshCore** und **Sweden-Mesh (LOU)**. In CLI-Hilfe und Autovervollständigung tragen sie ihren Herkunftsvermerk; kritische Befehle (z. B. `ota apply`, `filter clear`) werden über LoRa nie automatisch wiederholt.
 
 Das Verhalten der App wird laufend gegen die Quelltexte von MeshCore und ZephCore geprüft. Wo eine Anforderung der Firmware widerspricht, folgt die App der Firmware.
 
