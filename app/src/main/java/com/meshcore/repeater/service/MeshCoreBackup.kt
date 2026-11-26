@@ -27,13 +27,17 @@ object MeshCoreBackup {
         VarDef("guest.password", VarType.STRING, Sensitivity.GUEST_PASSWORD), VarDef("lat", VarType.NUMBER), VarDef("lon", VarType.NUMBER),
         VarDef("int.thresh", VarType.INT), VarDef("agc.reset.interval", VarType.INT), VarDef("multi.acks", VarType.NUMERIC_STRING),
         VarDef("owner.info", VarType.STRING), VarDef("path.hash.mode", VarType.INT), VarDef("loop.detect", VarType.STRING),
-        VarDef("cad", VarType.BOOL), VarDef("radio.rxgain", VarType.BOOL), VarDef("prv.key", VarType.STRING, Sensitivity.PRIVATE_KEY)
+        VarDef("cad", VarType.BOOL), VarDef("radio.rxgain", VarType.BOOL), VarDef("radio.fem.rxgain", VarType.BOOL), VarDef("prv.key", VarType.STRING, Sensitivity.PRIVATE_KEY)
     )
     private val DEFS = VARS.associateBy { it.key }
 
     private val INT_RE = Regex("""^-?\d+$""")
     private val NUM_RE = Regex("""^-?\d+(\.\d+)?$""")
     private val RADIO_RE = Regex("""^\d+(\.\d+)?,\d+(\.\d+)?,\d+,\d+$""")
+    /** Gültiger Variablenname (verhindert beliebige "set …"-Befehle aus Metadaten-Feldern eines Templates). */
+    private val KEY_RE = Regex("""^[a-z0-9][a-z0-9_.]*$""")
+    /** Abschnitte, die kein Konfigurationswert sind (bei Templates ohne "vars"-Hülle). */
+    private val NON_VAR_SECTIONS = setOf("regions", "filter")
 
     /** "XXX"-Platzhalter (z. B. in geteilten Backups geschwärzte Passwörter/Keys). */
     fun isPlaceholder(v: Any?): Boolean = v is String && Regex("^[Xx]{3,}$").matches(v.trim())
@@ -259,36 +263,87 @@ object MeshCoreBackup {
         else -> v.toString()
     }
 
+    /** "radio" als Objekt {freq,bw,sf,cr} (Strings oder Zahlen) oder als String "869.618,62.5,8,8" -> [freq, bw, sf, cr]. */
+    fun radioValue(raw: Any?): List<String>? {
+        val parts = when (raw) {
+            is JSONObject -> listOf("freq", "bw", "sf", "cr").map { k -> raw.opt(k)?.let(::fmt)?.trim().orEmpty() }
+            is String -> raw.split(",").map { it.trim() }
+            else -> return null
+        }
+        return parts.takeIf { it.size == 4 && RADIO_RE.matches(it.joinToString(",")) }
+    }
+
+    /** Boolean aus true/false, "on"/"off", "true"/"false", 1/0 (Templates sind hier uneinheitlich). */
+    fun boolValue(raw: Any?): Boolean? = when (raw) {
+        is Boolean -> raw
+        is Number -> when (raw.toInt()) { 1 -> true; 0 -> false; else -> null }
+        is String -> when (raw.trim().lowercase()) { "on", "true", "1", "yes" -> true; "off", "false", "0", "no" -> false; else -> null }
+        else -> null
+    }
+
+    private fun sameValue(key: String, a: String, b: String): Boolean {
+        val x = a.trim(); val y = b.trim()
+        if (x.equals(y, ignoreCase = true)) return true
+        if (key == "radio") {
+            val p = x.split(","); val q = y.split(",")
+            return p.size == 4 && q.size == 4 && p.zip(q).all { (u, v) -> u.trim().toDoubleOrNull()?.let { it == v.trim().toDoubleOrNull() } == true }
+        }
+        val dx = x.toDoubleOrNull(); val dy = y.toDoubleOrNull()
+        return dx != null && dy != null && kotlin.math.abs(dx - dy) < 1e-6
+    }
+
+    /**
+     * Diff-Abgleich (v1.21): entfernt "set <key> <wert>"-Befehle, deren Wert der Repeater laut [current] (Start-Scan,
+     * Schlüssel = Backup-Variable, Wert wie im CLI) schon hat. Regionen-, Filter- und unbekannte Befehle bleiben.
+     * Liefert (zu sendende Befehle, Anzahl übersprungener).
+     */
+    fun withoutUnchanged(commands: List<String>, current: Map<String, String>): Pair<List<String>, Int> {
+        var skipped = 0
+        val out = commands.filter { c ->
+            if (!c.startsWith("set ")) return@filter true
+            val key = c.removePrefix("set ").substringBefore(' ')
+            val value = c.removePrefix("set ").substringAfter(' ', "")
+            val cur = current[key] ?: return@filter true
+            if (sameValue(key, value, cur)) { skipped++; false } else true
+        }
+        return out to skipped
+    }
+
     /** Wirft IllegalArgumentException bei ungültiger Datei. */
     fun parse(json: String): Plan {
         val root = try { JSONObject(json) } catch (e: Exception) { throw IllegalArgumentException(tr("Keine gültige JSON-Datei: {0}", e.message)) }
-        val vars = root.optJSONObject("vars") ?: throw IllegalArgumentException(tr("Abschnitt \"vars\" fehlt – kein MeshCore-Backup?"))
+        // Community-Templates (z. B. BSmesh) bringen teils nur einen Teil der Werte mit; ohne "vars"-Hülle zählen bekannte Schlüssel auf oberster Ebene
+        val vars = root.optJSONObject("vars")
+            ?: JSONObject().also { v -> root.keys().forEach { k -> if (k in DEFS && k !in NON_VAR_SECTIONS) v.put(k, root.opt(k)) } }.takeIf { it.length() > 0 }
+            ?: throw IllegalArgumentException(tr("Abschnitt \"vars\" fehlt – kein MeshCore-Backup?"))
         val items = mutableListOf<VarItem>()
         val keys = vars.keys().asSequence().toList().sortedBy { k -> VARS.indexOfFirst { it.key == k }.let { if (it < 0) Int.MAX_VALUE else it } }
         for (key in keys) {
             val raw = vars.opt(key)
             val def = DEFS[key]
             val sens = def?.sensitivity ?: Sensitivity.NONE
+            // im Template nicht gesetzt (null/leer): nicht senden, nichts überschreiben
+            if (raw == null || raw == JSONObject.NULL || (raw is String && raw.isBlank())) continue
             if (isPlaceholder(raw)) { items += VarItem(key, fmt(raw), null, ItemState.PLACEHOLDER, sens); continue }
             val (display, cmd) = when {
-                key == "radio" -> {
-                    val r = raw as? JSONObject
-                    val f = r?.opt("freq")?.let(::fmt); val bw = r?.opt("bw")?.let(::fmt); val sf = r?.opt("sf")?.let(::fmt); val cr = r?.opt("cr")?.let(::fmt)
-                    if (f.isNullOrBlank() || bw.isNullOrBlank() || sf.isNullOrBlank() || cr.isNullOrBlank()) "${fmt(raw)}" to null
-                    else "$f MHz, BW $bw, SF $sf, CR $cr" to "set radio $f,$bw,$sf,$cr"
-                }
+                !KEY_RE.matches(key) -> fmt(raw) to null
+                key == "radio" -> radioValue(raw)?.let { (f, bw, sf, cr) -> "$f MHz, BW $bw, SF $sf, CR $cr" to "set radio $f,$bw,$sf,$cr" } ?: (fmt(raw) to null)
+                def?.type == VarType.BOOL -> boolValue(raw)?.let { b -> (if (b) "an" else "aus") to "set $key ${if (b) "on" else "off"}" } ?: (fmt(raw) to null)
                 raw is Boolean -> (if (raw) "an" else "aus") to "set $key ${if (raw) "on" else "off"}"
-                raw is JSONObject || raw is JSONArray || raw == null || raw == JSONObject.NULL -> fmt(raw) to null
+                raw is JSONObject || raw is JSONArray -> fmt(raw) to null
+                (def?.type == VarType.INT || def?.type == VarType.NUMERIC_STRING) && !INT_RE.matches(fmt(raw).trim()) -> fmt(raw) to null
+                def?.type == VarType.NUMBER && !NUM_RE.matches(fmt(raw).trim()) -> fmt(raw) to null
                 else -> {
-                    val s = fmt(raw)
+                    val s = fmt(raw).trim()
                     val display = if (sens != Sensitivity.NONE && s.isNotEmpty()) "•".repeat(minOf(12, s.length)) else s
-                    display to "set $key $s".trimEnd().let { if (key == "guest.password") "set guest.password $s" else it }
+                    display to "set $key $s"
                 }
             }
             items += VarItem(key, display, cmd, if (cmd == null) ItemState.INVALID else ItemState.APPLY, sens)
         }
 
-        val regionsObj = root.optJSONObject("regions")
+        // "regions" als Objekt {default, home, list} oder direkt als Liste
+        val regionsObj = root.optJSONObject("regions") ?: root.optJSONArray("regions")?.let { JSONObject().put("list", it) }
         val regions = mutableListOf<RegionEntry>()
         var home: String? = null; var def: String? = null; var hasDefault = false
         if (regionsObj != null) {

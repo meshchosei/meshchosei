@@ -61,6 +61,13 @@ data class BasicSetupState(
     val directTxDelaySec: String = "adaptive",
     val rxDelaySec: String = "0",
     val multiAcks: Int = 1,
+    /** Hop-Limits (v1.21): flood.max, flood.max.unscoped, flood.max.advert (0–64); leer = nicht gelesen. */
+    val floodMax: String = "",
+    val floodMaxUnscoped: String = "",
+    val floodMaxAdvert: String = "",
+    /** RX-Gain (v1.21): radio.rxgain (Boosted LNA) / radio.fem.rxgain (FEM-Boards, ZephCore); null = Firmware liefert den Wert nicht. */
+    val rxGain: Boolean? = null,
+    val femRxGain: Boolean? = null,
     val isReading: Boolean = false
 )
 
@@ -70,7 +77,8 @@ data class BasicSetupState(
  */
 /** true, wenn der Funk-Entwurf (Funkparameter, TX, Duty-Cycle) vom bestätigten Stand abweicht. */
 fun BasicSetupState.radioDiffersFrom(b: BasicSetupState): Boolean =
-    freqMhz != b.freqMhz || bwKhz != b.bwKhz || sf != b.sf || cr != b.cr || txPowerDbm != b.txPowerDbm || dutyCyclePercent != b.dutyCyclePercent
+    freqMhz != b.freqMhz || bwKhz != b.bwKhz || sf != b.sf || cr != b.cr || txPowerDbm != b.txPowerDbm || dutyCyclePercent != b.dutyCyclePercent ||
+        rxGain != b.rxGain || femRxGain != b.femRxGain
 
 class SetupChange(val command: String, val commit: (BasicSetupState) -> BasicSetupState = { it })
 
@@ -827,15 +835,40 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         }.invokeOnCompletion { clearBusy(BusyKey.BACKUP_CREATE) }
     }
 
+    /**
+     * Aktueller, bestätigter Repeater-Stand (Start-Scan) im Format der Backup-Variablen – Basis für den Diff-Abgleich.
+     * Nur gelesene Werte; "adaptive" (ZephCore-Delays) zählt nicht als Wert.
+     */
+    private fun currentBackupValues(): Map<String, String> {
+        val b = _nodeBaseline.value
+        val m = linkedMapOf(
+            "name" to b.nodeName, "owner.info" to b.ownerInfo, "lat" to b.latitude, "lon" to b.longitude,
+            "radio" to listOf(b.freqMhz, b.bwKhz, b.sf, b.cr).joinToString(","), "tx" to b.txPowerDbm,
+            "repeat" to if (b.repeatEnabled) "on" else "off",
+            "path.hash.mode" to b.pathHashMode.toString(), "loop.detect" to b.loopDetect,
+            "advert.interval" to b.advertIntervalMin, "flood.advert.interval" to b.floodAdvertIntervalHours,
+            "txdelay" to b.txDelaySec, "direct.txdelay" to b.directTxDelaySec, "rxdelay" to b.rxDelaySec,
+            "multi.acks" to b.multiAcks.toString(),
+            "flood.max" to b.floodMax, "flood.max.unscoped" to b.floodMaxUnscoped, "flood.max.advert" to b.floodMaxAdvert
+        )
+        b.rxGain?.let { m["radio.rxgain"] = if (it) "on" else "off" }
+        b.femRxGain?.let { m["radio.fem.rxgain"] = if (it) "on" else "off" }
+        return m.filterValues { it.isNotBlank() && it != "adaptive" }
+    }
+
     /** Backup installieren: Befehle streng sequentiell senden, abgelehnte/unbeantwortete Befehle melden. */
     fun installBackup(planCmds: List<String>, filter: MeshCoreBackup.FilterBackup? = null) {
         if (!isLinkUp()) { notifyUser("Nicht verbunden."); return }
         if (planCmds.isEmpty() && filter == null) { notifyUser("Keine übertragbaren Einstellungen im Backup."); return }
+        // Diff-Abgleich (v1.21): Werte, die der Repeater laut Start-Scan schon hat, werden nicht erneut gesendet
+        val (toSend, unchanged) = MeshCoreBackup.withoutUnchanged(planCmds, if (_hasCompletedInitialRead.value) currentBackupValues() else emptyMap())
+        if (toSend.isEmpty() && filter == null) { notifyUser(tr("Alle {0} Werte des Backups sind bereits gesetzt – nichts zu senden.", unchanged)); return }
         if (!tryMarkBusy(BusyKey.BACKUP_INSTALL)) return
+        if (unchanged > 0) notifyUser(tr("{0} Werte sind bereits gesetzt und werden übersprungen.", unchanged))
         startRead(cancelPrevious = false) {
             // Funk/TX/Key bleiben am Ende (können die Verbindung beenden) – der Paketfilter kommt davor
             val isTail: (String) -> Boolean = { it.startsWith("set radio ") || it.startsWith("set tx ") || it.startsWith("set prv.key ") }
-            var cmds = planCmds.filterNot(isTail)
+            var cmds = toSend.filterNot(isTail)
             if (filter != null) {
                 val caps = _deviceCapabilities.value
                 if (!caps.supportsBlacklist) notifyUser("Paketfilter übersprungen – die Firmware dieses Repeaters hat keinen Filter.")
@@ -848,7 +881,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                     }
                 }
             }
-            cmds = cmds + planCmds.filter(isTail)
+            cmds = cmds + toSend.filter(isTail)
             val failed = mutableListOf<String>()
             for ((i, c) in cmds.withIndex()) {
                 if (!isLinkUp()) { failed += cmds.drop(i).map { it.substringAfter(' ').substringBefore(' ') }; break }
@@ -909,6 +942,11 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             "get direct.txdelay" -> _basicSetup.value = s.copy(directTxDelaySec = adaptiveOr(v))
             "get rxdelay" -> _basicSetup.value = s.copy(rxDelaySec = adaptiveOr(v))
             "get multi.acks" -> _basicSetup.value = s.copy(multiAcks = v.toInt())
+            "get flood.max" -> _basicSetup.value = s.copy(floodMax = v)
+            "get flood.max.unscoped" -> _basicSetup.value = s.copy(floodMaxUnscoped = v)
+            "get flood.max.advert" -> _basicSetup.value = s.copy(floodMaxAdvert = v)
+            "get radio.rxgain" -> _basicSetup.value = s.copy(rxGain = v.equals("on", true))
+            "get radio.fem.rxgain" -> _basicSetup.value = s.copy(femRxGain = v.equals("on", true))
             "get leds" -> {
                 val mode = v.lowercase().substringBefore(' ')
                 _basicSetup.value = s.copy(ledsMode = mode)
@@ -1006,7 +1044,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                     ok = runFilterListQueries(filterQueries, progressOffset = done, progressTotal = total)
                     done += filterQueries.size
                 }
-                // 4) Funk- & Routing-Parameter
+                // 4) Funk- & Routing-Parameter (optionale v1.21-Werte vorher leeren: ohne Antwort bleiben Feld/Schalter ausgeblendet)
+                _basicSetup.value = _basicSetup.value.copy(floodMax = "", floodMaxUnscoped = "", floodMaxAdvert = "", rxGain = null, femRxGain = null)
                 if (ok) ok = runReadSequence(BASIC_SETUP_QUERIES, phaseText = "Lese Funk- & Routing-Parameter…", progressOffset = done, progressTotal = total)
                 done += BASIC_SETUP_QUERIES.size
                 // 5) Regionen & Scope-Routing (region / region home / region default)
@@ -1477,6 +1516,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         if (radioChanged) changes.add(SetupChange(RepeaterProtocol.buildSetRadio(freq, bw, sf, cr)) { it.copy(freqMhz = s.freqMhz, bwKhz = s.bwKhz, sf = s.sf, cr = s.cr) })
         if (s.txPowerDbm != b.txPowerDbm) changes.add(SetupChange(RepeaterProtocol.buildSetTx(tx)) { it.copy(txPowerDbm = s.txPowerDbm) })
         if (s.dutyCyclePercent != b.dutyCyclePercent) changes.add(SetupChange("set dutycycle ${s.dutyCyclePercent.trim()}") { it.copy(dutyCyclePercent = s.dutyCyclePercent) })
+        if (s.rxGain != null && s.rxGain != b.rxGain) changes.add(SetupChange("set radio.rxgain ${if (s.rxGain) "on" else "off"}") { it.copy(rxGain = s.rxGain) })
+        if (s.femRxGain != null && s.femRxGain != b.femRxGain) changes.add(SetupChange("set radio.fem.rxgain ${if (s.femRxGain) "on" else "off"}") { it.copy(femRxGain = s.femRxGain) })
         if (changes.isEmpty()) return // still: keine Änderungen (z. B. "Weiter" in der Tour)
         if (!_radioConfig.value.isCompliant) notifyUser("Hinweis: ERP-Grenzwert mit aktueller Antenne überschritten (siehe Hardware & Antenne).")
         // Basis erst nach Bestätigung aktualisieren (nur bestätigte Befehle)
@@ -1777,7 +1818,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             "get public.key", "get name", "get owner.info", "get lat", "get lon",
             "get repeat", "get path.hash.mode", "get loop.detect",
             "get advert.interval", "get flood.advert.interval",
-            "get txdelay", "get direct.txdelay", "get rxdelay", "get multi.acks", "get leds"
+            "get txdelay", "get direct.txdelay", "get rxdelay", "get multi.acks", "get leds",
+            // v1.21: Hop-Limits und RX-Gain (Firmware ohne Variable antwortet mit Fehler -> Feld/Schalter bleibt ausgeblendet)
+            "get flood.max", "get flood.max.unscoped", "get flood.max.advert", "get radio.rxgain", "get radio.fem.rxgain"
         )
         /** Start-Scan-Schritte für "region", "region home", "region default". */
         const val REGION_STEPS = 3

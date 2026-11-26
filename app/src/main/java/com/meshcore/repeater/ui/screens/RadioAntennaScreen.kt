@@ -165,6 +165,14 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
                         modifier = Modifier.weight(1f), singleLine = true
                     )
                 }
+                // RX-Gain (v1.21): nur wenn die Firmware radio.rxgain bzw. radio.fem.rxgain im Start-Scan geliefert hat
+                if (setup.rxGain != null || setup.femRxGain != null) HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+                setup.rxGain?.let { on ->
+                    RxGainRow(tr("RX-Gain (LNA-Verstärkung)"), "radio.rxgain", on) { v -> edit { it.copy(rxGain = v) } }
+                }
+                setup.femRxGain?.let { on ->
+                    RxGainRow(tr("FEM-RX-Gain (externer LNA)"), "radio.fem.rxgain", on) { v -> edit { it.copy(femRxGain = v) } }
+                }
                 Text(
                     text = if (config.isCompliant) tr("Empfohlener TX mit aktueller Antenne: max. {0} dBm (Antenne unter Hardware & Antenne).", viewModel.recommendedTxDbm(config))
                            else tr("Hinweis: {0} dBm überschreitet mit der eingestellten Antenne das ERP-Limit – empfohlen max. {1} dBm.", setup.txPowerDbm, viewModel.recommendedTxDbm(config)),
@@ -189,5 +197,17 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
                 Text(text = tr("Speichern"), color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
+    }
+}
+
+/** Eckiger Bauhaus-Schalter für eine RX-Gain-Variable (Titel + Firmware-Name in Monospace). */
+@Composable
+private fun RxGainRow(title: String, variable: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(title, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text(variable, fontSize = 10.sp, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        com.meshcore.repeater.ui.components.BauhausSwitch(checked = checked, onCheckedChange = onChange)
     }
 }

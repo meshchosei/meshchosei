@@ -380,6 +380,11 @@ object CliAutocomplete {
      * Befehle, die die Firmware nur von der seriellen Konsole annimmt (`sender_timestamp == 0` in
      * MeshCore/ZephCore `CommonCLI.cpp` bzw. `get acl` in `simple_repeater`/`RepeaterMesh`).
      */
+    /** Regelbefehle des jhuebert-Filters (FILTER.md), unabhängig von der ZephCore-Filtererkennung (v1.21). */
+    val JHUEBERT_FILTER = setOf("filter add", "filter list", "filter get", "filter enable", "filter disable", "filter move", "filter del",
+        "filter clear", "filter stats reset", "filter chan list", "filter chan add", "filter chan del", "filter ratelimit",
+        "filter ratelimit advert", "filter ratelimit clear")
+
     private val USB_ONLY = setOf("get prv.key", "erase", "log", "stats-core", "stats-radio", "stats-packets", "set freq", "get acl",
         "set cmd.debug")  // Sweden-Mesh LOU: nur serielle Konsole
 
@@ -406,6 +411,8 @@ object CliAutocomplete {
      */
     fun isAvailable(e: Entry, supportsBlacklist: Boolean, supportsWhitelist: Boolean, usbDirect: Boolean): Boolean {
         val cmd = e.insertText.trim().lowercase(Locale.ROOT)
+        // jhuebert-Fork: Regelbefehle immer anbieten – die ZephCore-Erkennung per "filter help" greift dort nicht
+        if (cmd in JHUEBERT_FILTER) return true
         if (cmd == "filter" || cmd.startsWith("filter ")) {
             val needsWl = cmd.startsWith("filter wl") || cmd.startsWith("filter mode")
             return if (needsWl) supportsWhitelist else supportsBlacklist

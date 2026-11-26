@@ -4318,5 +4318,55 @@
   "Sets the update check interval in hours (Sweden-Mesh)",
   "Stelt het controle-interval voor updates in uren in (Sweden-Mesh)",
   "Règle l'intervalle de vérification en heures (Sweden-Mesh)"
+ ],
+ "Hop-Limits für Flood-Pakete (0–64):": [
+  "Hop limits for flood packets (0–64):",
+  "Hoplimieten voor floodpakketten (0–64):",
+  "Limites de sauts des paquets flood (0–64) :"
+ ],
+ "Allgemein": [
+  "General",
+  "Algemeen",
+  "Général"
+ ],
+ "Ohne Region": [
+  "Unscoped",
+  "Zonder regio",
+  "Sans région"
+ ],
+ "Adverts": [
+  "Adverts",
+  "Adverts",
+  "Adverts"
+ ],
+ "Sende-/Empfangsverzögerung (Faktor):": [
+  "TX/RX delay (factor):",
+  "Zend-/ontvangstvertraging (factor):",
+  "Délai d'émission/réception (facteur) :"
+ ],
+ "„adaptive“: Die Firmware (ZephCore) regelt diese Verzögerung selbst.": [
+  "“adaptive”: the firmware (ZephCore) manages this delay itself.",
+  "„adaptive”: de firmware (ZephCore) regelt deze vertraging zelf.",
+  "« adaptive » : le firmware (ZephCore) gère ce délai lui-même."
+ ],
+ "RX-Gain (LNA-Verstärkung)": [
+  "RX gain (LNA boost)",
+  "RX-gain (LNA-versterking)",
+  "Gain RX (amplification LNA)"
+ ],
+ "FEM-RX-Gain (externer LNA)": [
+  "FEM RX gain (external LNA)",
+  "FEM-RX-gain (externe LNA)",
+  "Gain RX FEM (LNA externe)"
+ ],
+ "Alle {0} Werte des Backups sind bereits gesetzt – nichts zu senden.": [
+  "All {0} backup values are already set – nothing to send.",
+  "Alle {0} back-upwaarden zijn al ingesteld – niets te verzenden.",
+  "Les {0} valeurs de la sauvegarde sont déjà réglées – rien à envoyer."
+ ],
+ "{0} Werte sind bereits gesetzt und werden übersprungen.": [
+  "{0} values are already set and will be skipped.",
+  "{0} waarden zijn al ingesteld en worden overgeslagen.",
+  "{0} valeurs sont déjà réglées et seront ignorées."
  ]
 }

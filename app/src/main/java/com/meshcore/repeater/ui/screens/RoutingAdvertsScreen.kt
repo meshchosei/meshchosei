@@ -68,7 +68,14 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
             if (setup.loopDetect.isNotBlank() && setup.loopDetect != baseline.loopDetect) add(SetupChange("set loop.detect ${setup.loopDetect.trim()}") { it.copy(loopDetect = setup.loopDetect) })
             if (setup.advertIntervalMin.isNotBlank() && setup.advertIntervalMin != baseline.advertIntervalMin) add(SetupChange("set advert.interval ${setup.advertIntervalMin.trim()}") { it.copy(advertIntervalMin = setup.advertIntervalMin) })
             if (setup.floodAdvertIntervalHours.isNotBlank() && setup.floodAdvertIntervalHours != baseline.floodAdvertIntervalHours) add(SetupChange("set flood.advert.interval ${setup.floodAdvertIntervalHours.trim()}") { it.copy(floodAdvertIntervalHours = setup.floodAdvertIntervalHours) })
-            if (setup.txDelaySec.isNotBlank() && setup.txDelaySec != baseline.txDelaySec && setup.txDelaySec != "adaptive") add(SetupChange("set txdelay ${setup.txDelaySec.trim()}") { it.copy(txDelaySec = setup.txDelaySec) })
+            // Timing (MeshCore: txdelay/direct.txdelay 0–2, rxdelay 0–20; ZephCore: "adaptive", nicht setzbar)
+            if (RoutingLimits.delayOk(setup.txDelaySec, 2.0) && setup.txDelaySec != baseline.txDelaySec) add(SetupChange("set txdelay ${setup.txDelaySec.trim()}") { it.copy(txDelaySec = setup.txDelaySec) })
+            if (RoutingLimits.delayOk(setup.directTxDelaySec, 2.0) && setup.directTxDelaySec != baseline.directTxDelaySec) add(SetupChange("set direct.txdelay ${setup.directTxDelaySec.trim()}") { it.copy(directTxDelaySec = setup.directTxDelaySec) })
+            if (RoutingLimits.delayOk(setup.rxDelaySec, 20.0) && setup.rxDelaySec != baseline.rxDelaySec) add(SetupChange("set rxdelay ${setup.rxDelaySec.trim()}") { it.copy(rxDelaySec = setup.rxDelaySec) })
+            // Hop-Limits 0–64 (MeshCore/ZephCore CommonCLI: "Error, max 64")
+            if (RoutingLimits.hopsOk(setup.floodMax) && setup.floodMax != baseline.floodMax) add(SetupChange("set flood.max ${setup.floodMax.trim()}") { it.copy(floodMax = setup.floodMax) })
+            if (RoutingLimits.hopsOk(setup.floodMaxUnscoped) && setup.floodMaxUnscoped != baseline.floodMaxUnscoped) add(SetupChange("set flood.max.unscoped ${setup.floodMaxUnscoped.trim()}") { it.copy(floodMaxUnscoped = setup.floodMaxUnscoped) })
+            if (RoutingLimits.hopsOk(setup.floodMaxAdvert) && setup.floodMaxAdvert != baseline.floodMaxAdvert) add(SetupChange("set flood.max.advert ${setup.floodMaxAdvert.trim()}") { it.copy(floodMaxAdvert = setup.floodMaxAdvert) })
             if (setup.multiAcks != baseline.multiAcks) add(SetupChange("set multi.acks ${setup.multiAcks}") { it.copy(multiAcks = setup.multiAcks) })
         }
     }
@@ -102,6 +109,26 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
                     OutlinedTextField(value = setup.advertIntervalMin, onValueChange = { viewModel.updateBasicSetupDraft(setup.copy(advertIntervalMin = it)) }, label = { Text(tr("Advert (Min)"), fontSize = 11.sp) }, modifier = Modifier.weight(1f), singleLine = true, shape = BauhausCornerShape)
                     OutlinedTextField(value = setup.floodAdvertIntervalHours, onValueChange = { viewModel.updateBasicSetupDraft(setup.copy(floodAdvertIntervalHours = it)) }, label = { Text(tr("Flood-Adv (Std)"), fontSize = 11.sp) }, modifier = Modifier.weight(1f), singleLine = true, shape = BauhausCornerShape)
                 }
+                // Hop-Limits (v1.21): nur Felder, die die Firmware im Start-Scan geliefert hat
+                if (baseline.floodMax.isNotEmpty() || baseline.floodMaxUnscoped.isNotEmpty() || baseline.floodMaxAdvert.isNotEmpty()) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+                    Text(tr("Hop-Limits für Flood-Pakete (0–64):"), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (baseline.floodMax.isNotEmpty()) HopField(tr("Allgemein"), setup.floodMax, Modifier.weight(1f)) { viewModel.updateBasicSetupDraft(setup.copy(floodMax = it)) }
+                        if (baseline.floodMaxUnscoped.isNotEmpty()) HopField(tr("Ohne Region"), setup.floodMaxUnscoped, Modifier.weight(1f)) { viewModel.updateBasicSetupDraft(setup.copy(floodMaxUnscoped = it)) }
+                        if (baseline.floodMaxAdvert.isNotEmpty()) HopField(tr("Adverts"), setup.floodMaxAdvert, Modifier.weight(1f)) { viewModel.updateBasicSetupDraft(setup.copy(floodMaxAdvert = it)) }
+                    }
+                }
+                // Timing-Delays (v1.21): MeshCore-Faktoren; ZephCore regelt sie adaptiv (Feld gesperrt)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+                Text(tr("Sende-/Empfangsverzögerung (Faktor):"), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    DelayField("txdelay", setup.txDelaySec, 2.0, Modifier.weight(1f)) { viewModel.updateBasicSetupDraft(setup.copy(txDelaySec = it)) }
+                    DelayField("direct.txdelay", setup.directTxDelaySec, 2.0, Modifier.weight(1f)) { viewModel.updateBasicSetupDraft(setup.copy(directTxDelaySec = it)) }
+                    DelayField("rxdelay", setup.rxDelaySec, 20.0, Modifier.weight(1f)) { viewModel.updateBasicSetupDraft(setup.copy(rxDelaySec = it)) }
+                }
+                if (listOf(setup.txDelaySec, setup.directTxDelaySec, setup.rxDelaySec).any { it == "adaptive" })
+                    Text(tr("„adaptive“: Die Firmware (ZephCore) regelt diese Verzögerung selbst."), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(tr("Mehrfache Empfangsbestätigungen (multi.acks = 1)"), fontSize = 12.sp)
                     BauhausSwitch(checked = setup.multiAcks == 1, onCheckedChange = { viewModel.updateBasicSetupDraft(setup.copy(multiAcks = if (it) 1 else 0)) })
@@ -149,6 +176,37 @@ fun RoutingAdvertsScreen(viewModel: RepeaterViewModel) {
             dismissButton = { OutlinedButton(shape = BauhausCornerShape, onClick = { showRebootConfirm = false }) { Text(tr("Abbrechen")) } }
         )
     }
+}
+
+/** Grenzen der Routing-Felder (MeshCore/ZephCore CommonCLI); rein, unit-getestet in RoutingLimitsTest. */
+object RoutingLimits {
+    const val MAX_HOPS = 64
+    fun hopsOk(v: String): Boolean = v.trim().toIntOrNull()?.let { it in 0..MAX_HOPS } == true
+    /** "adaptive" (ZephCore) ist lesbar, aber nicht setzbar. */
+    fun delayOk(v: String, max: Double): Boolean = v.trim() != "adaptive" && v.trim().toDoubleOrNull()?.let { it in 0.0..max } == true
+}
+
+@Composable
+private fun HopField(label: String, value: String, modifier: Modifier, onChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = value, isError = !RoutingLimits.hopsOk(value),
+        onValueChange = { raw -> if (raw.length <= 2 && raw.all { it.isDigit() }) onChange(raw) },
+        label = { Text(label, fontSize = 11.sp, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis) },
+        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+        modifier = modifier, singleLine = true, shape = BauhausCornerShape
+    )
+}
+
+@Composable
+private fun DelayField(label: String, value: String, max: Double, modifier: Modifier, onChange: (String) -> Unit) {
+    val adaptive = value == "adaptive"
+    OutlinedTextField(
+        value = value, enabled = !adaptive, isError = !adaptive && !RoutingLimits.delayOk(value, max),
+        onValueChange = { raw -> val v = raw.replace(',', '.'); if (v.length <= 5 && v.count { it == '.' } <= 1 && v.all { it.isDigit() || it == '.' }) onChange(v) },
+        label = { Text(label, fontSize = 11.sp, fontFamily = FontFamily.Monospace, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis) },
+        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
+        modifier = modifier, singleLine = true, shape = BauhausCornerShape
+    )
 }
 
 /**

@@ -314,7 +314,7 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
 - **Datenbasis:** ausschließlich die firmware-geprüfte CLI-Hilfe (`cliHelpCategories` → `cliAutocompleteEntries`), seit v1.18 vollständig abgeglichen mit MeshCore/ZephCore `CommonCLI.cpp` (inkl. `get pwrmgt.*`, Diagnose, CAD, GPS, LEDs, Uplink). Neue Befehle kommen nur dort hinein, immer mit Übersetzung in EN/NL/FR (`CliHelpCompletenessTest`).
 - **Community-Forks (seit v1.21):** eigene Kategorien am Ende der CLI-Hilfe – „11. jhuebert-Fork: …“, „12. jhuebert-Fork: MQTT-Observer & WLAN“, „13. Sweden-Mesh LOU: Auto-Reply & Remote-Command“. Jede Kurzbeschreibung endet mit dem Herkunftsvermerk `(jhuebert)`, `(jhuebert Observer)` bzw. `(Sweden-Mesh)` in allen vier Sprachen. Ein Fork-Befehl wird nur aufgenommen, wenn es ihn im Bestand (MeshCore/ZephCore) nicht gibt; gleichnamige Befehle mit abweichender Fork-Bedeutung (`filter`, `filter on/off`, `filter stats`, `powersaving`, `time`, `start ota`) stehen nur einmal in ihrer Stock-Kategorie. Nicht-idempotente oder kritische Fork-Befehle (`ota apply/abort/rollback/stage/update`, `ota fetch start`, `filter add/del/move/clear`, `fleet forget …`, `trigger …`, `set cmd.pubkey`, `cmd ping`, `mqtt recover` …) stehen in `ManualCliRetry`. Geprüft in `ForkCliCommandsTest` (keine Duplikate, Herkunftsvermerk, Retry-/USB-/⚠-Regeln, zweistufige Sortierung).
 - **Logik:** `CliAutocomplete` in `service/RepeaterProtocol.kt`, rein und unit-getestet (`CliAutocompleteTest`). Treffer = Befehl enthält die Eingabe; erst Präfix-Treffer, dann Teilwort-Treffer, je Gruppe alphabetisch (`partition { startsWith(query) }` + `sortedWith(compareBy { befehl.lowercase() })`), ohne Groß-/Kleinschreibung, ohne Duplikate.
-- **Capabilities:** `filter …` nur bei `supportsBlacklist`, `filter wl …`/`filter mode …` nur bei `supportsWhitelist`. Seriell-only-Befehle (`get prv.key`, `erase`, `log`, `stats-*`, `set freq`, `get acl`, seit v1.21 `set cmd.debug`) nur bei direkter USB-Verbindung (`isDirectRepeater`). Die Filter-Regeln der jhuebert-Fork (`filter add/list/get/…`) folgen derselben `filter …`-Regel.
+- **Capabilities:** `filter …` nur bei `supportsBlacklist`, `filter wl …`/`filter mode …` nur bei `supportsWhitelist`. Seriell-only-Befehle (`get prv.key`, `erase`, `log`, `stats-*`, `set freq`, `get acl`, seit v1.21 `set cmd.debug`) nur bei direkter USB-Verbindung (`isDirectRepeater`). Ausnahme: Die Regelbefehle der jhuebert-Fork (`CliAutocomplete.JHUEBERT_FILTER`: `filter add/list/get/enable/disable/move/del/clear`, `filter chan …`, `filter ratelimit …`, `filter stats reset`) sind immer durchsuchbar, weil ein jhuebert-Repeater auf `filter help` anders antwortet als ZephCore.
 - **Antippen übernimmt nur:** Der Befehl kommt ohne Platzhalter ins Feld, der Cursor steht am Ende. Erwartet er einen Parameter (`<…>`/`[…]`), folgt ein Leerzeichen (`set dutycycle `, `region home `, `tempradio `). Gesendet wird **nie** automatisch, nur über den roten Senden-Button. `start ota` läuft weiterhin über den Bestätigungsdialog.
 
 #### 2.10.2 Repeater-Auswahl: nach unten (seit v1.19)
@@ -411,6 +411,18 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
 - Login gilt **nur** nach dem Push `0x85` (LOGIN_SUCCESS) für den richtigen Pubkey-Präfix. `0x86` oder ein Timeout bedeuten Fehlschlag.
 
 ---
+
+### 3.4 Optionale Firmware-Variablen & Backup-Import (seit v1.21)
+
+- **Start-Scan:** liest zusätzlich `flood.max`, `flood.max.unscoped`, `flood.max.advert`, `radio.rxgain` und `radio.fem.rxgain`. Vor dem Lesen werden diese Werte geleert. Antwortet die Firmware mit Fehler (`??:`/`unknown`/`Err`), bleibt das Feld bzw. der Schalter **ausgeblendet** – eine Fehlerantwort zählt nicht als LoRa-Timeout.
+- **Routing & Adverts:** Hop-Limits als Zahlenfelder 0–64 (`RoutingLimits.hopsOk`), Timing-Delays `txdelay`/`direct.txdelay` (0–2) und `rxdelay` (0–20) als Dezimalfelder (`RoutingLimits.delayOk`). ZephCore meldet die Delays als `adaptive`: Das Feld ist dann gesperrt und wird nie gesendet. Alles läuft über den gemeinsamen „Speichern“-Button der Karte (nur geänderte, gültige Werte).
+- **Funk & Region:** eckiger `BauhausSwitch` „RX-Gain (LNA-Verstärkung)“ (`radio.rxgain`) bzw. „FEM-RX-Gain (externer LNA)“ (`radio.fem.rxgain`), Teil des Funk-Speicherns (`radioDiffersFrom`).
+- **Backup-/Template-Import (`MeshCoreBackup.parse`):** tolerant für Community-Templates (z. B. BSmesh):
+  - `regions` und `filter` sind optional, `regions` auch direkt als Liste; ohne `vars`-Hülle zählen bekannte Variablen auf oberster Ebene;
+  - `radio` als Objekt `{freq,bw,sf,cr}` (Strings oder Zahlen) oder als String `"869.618,62.5,8,8"`;
+  - Booleans als `true/false`, `"on"/"off"`, `1/0`; Zahlen-Variablen werden geprüft;
+  - `null`/leere Werte und ungültige Schlüssel (Metadaten wie `comment`) werden nie gesendet; was im Template fehlt (`name`, `lat`, `lon`, `owner.info` …), wird nie überschrieben.
+- **Diff-Abgleich (`MeshCoreBackup.withoutUnchanged`):** Nach einem vollständigen Start-Scan werden `set`-Befehle übersprungen, deren Wert der Repeater schon hat (numerisch verglichen, `radio` je Teilwert). Regionen- und Filterbefehle bleiben unberührt. Geprüft in `RoutingRxGainTemplateTest`.
 
 ## 4. Lokalisierung & Text-Disziplin
 

@@ -87,7 +87,8 @@ class CliAutocompleteTest {
 
     @Test fun filterCommandsRequireCapabilities() {
         val none = available(bl = false, wl = false)
-        assertTrue(none.none { it.insertText.startsWith("filter") })
+        // v1.21: nur die jhuebert-Regelbefehle bleiben ohne erkannten ZephCore-Filter sichtbar
+        assertTrue(none.filter { it.insertText.startsWith("filter") }.all { it.insertText.trim() in CliAutocomplete.JHUEBERT_FILTER })
         val blOnly = available(bl = true, wl = false)
         assertTrue(blOnly.any { it.insertText == "filter on" })
         assertTrue(blOnly.none { it.insertText.startsWith("filter wl") || it.insertText.startsWith("filter mode") })
