@@ -110,7 +110,7 @@
     <!-- Whitelist Controls -->
     <string name="filter_wl_channel_header">LISTE BLANCHE DES CANAUX AUTORISÉS</string>
     <string name="filter_wl_presets_title">Sélection rapide des canaux courants :</string>
-    <string name="filter_wl_channel_input_hint">Nom du canal (p. ex. #regional ou Public)</string>
+    <string name="filter_wl_channel_input_hint">Canal, p. ex. regional ou Public</string>
     <string name="filter_wl_channels_count">Canaux autorisés (%d) :</string>
     <string name="filter_wl_path_header">LISTE BLANCHE DES PRÉFIXES DE CHEMIN (2-8 HEX)</string>
     <string name="filter_wl_path_input_hint">Préfixe hex du chemin (p. ex. a1b2)</string>
@@ -119,7 +119,7 @@
 
     <!-- Blacklist Controls (Filter.cpp) -->
     <string name="filter_bl_channel_header">CANAUX BLOQUÉS (filter channel add/remove)</string>
-    <string name="filter_bl_channel_input_hint">Nom du canal à bloquer (p. ex. #spam)</string>
+    <string name="filter_bl_channel_input_hint">Canal à bloquer, p. ex. spam</string>
     <string name="filter_bl_channels_count">Canaux bloqués (%d) :</string>
     <string name="filter_bl_path_header">PRÉFIXES DE CHEMIN BLOQUÉS (filter path add/remove)</string>
     <string name="filter_bl_path_input_hint">Préfixe de chemin perturbateur (2-8 chiffres hex)</string>
@@ -135,8 +135,8 @@
     <string name="filter_watch_input_hint">Nom du canal surveillé (p. ex. #urgence)</string>
     <string name="filter_watch_count">Canaux surveillés (%d) :</string>
     <string name="filter_params_header">LIMITE D\'ÂGE &amp; DE SAUTS (filter age / hops)</string>
-    <string name="filter_age_label">Âge max. des messages (minutes, 0=désactivé) :</string>
-    <string name="filter_hops_label">Sauts max. autorisés (0-64) :</string>
+    <string name="filter_age_label">Âge max. des messages (en minutes)</string>
+    <string name="filter_hops_label">Sauts max. autorisés</string>
 
     <!-- Filter Stats & Reset -->
     <string name="filter_stats_header">STATISTIQUES DU FILTRE &amp; REJETS</string>

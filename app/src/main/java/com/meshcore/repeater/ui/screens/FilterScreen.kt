@@ -3,7 +3,10 @@ package com.meshcore.repeater.ui.screens
 import com.meshcore.repeater.ui.components.hintedVerticalScroll
 
 import com.meshcore.repeater.i18n.tr
-import com.meshcore.repeater.ui.components.BusyButton
+import com.meshcore.repeater.ui.components.DeleteBusyIconButton
+import com.meshcore.repeater.ui.components.FixedBusyIconButton
+import com.meshcore.repeater.ui.components.FineSlider
+import com.meshcore.repeater.ui.components.PublicBlockConfirmDialog
 import com.meshcore.repeater.ui.components.BauhausSwitch
 import com.meshcore.repeater.ui.components.InlineRefreshIcon
 import com.meshcore.repeater.viewmodel.BusyKey
@@ -66,6 +69,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextOverflow
+import com.meshcore.repeater.model.ChannelNameRules
+import com.meshcore.repeater.model.ListBusyRules
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -127,6 +133,28 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
 
     val presetWlChannels = listOf("Public", "#mesh-de", "#notfunk", "#test")
     val presetBlChannels = listOf("#spam-bot", "#crypto-ad", "#test-flood")
+    // v1.23: welche Listenzeile gerade gelöscht wird (Braille-Punkte nur dort) und Public-Sperre zur Bestätigung
+    var deletingId by remember { mutableStateOf<String?>(null) }
+    // Nach Ende des Löschens (oder wenn nichts gesendet wurde) Markierung lösen, damit „+“ beim nächsten Hinzufügen wieder dreht
+    LaunchedEffect(busy, deletingId) {
+        val id = deletingId ?: return@LaunchedEffect
+        if (ListBusyRules.keyOf(id) !in viewModel.busyActions.value) deletingId = null
+    }
+    var confirmPublicBlock by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
+    /** Blacklist: Name normalisieren (#-Präfix, „Public“); „Public“ erst nach Bestätigung sperren. */
+    fun requestBlacklistChannel(raw: String, onSent: () -> Unit) {
+        val n = ChannelNameRules.normalize(raw, whitelist = false)
+        if (n.isEmpty()) return
+        if (ChannelNameRules.needsPublicBlockConfirm(n, blacklist = true)) confirmPublicBlock = n to onSent
+        else if (viewModel.addBlockedChannel(n)) onSent()
+    }
+    confirmPublicBlock?.let { (name, onSent) ->
+        PublicBlockConfirmDialog(
+            channel = name,
+            onConfirm = { confirmPublicBlock = null; if (viewModel.addBlockedChannel(name)) onSent() },
+            onDismiss = { confirmPublicBlock = null }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -333,18 +361,16 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             value = newWlChannelInput,
                             onValueChange = { newWlChannelInput = it },
                             modifier = Modifier.weight(1f),
-                            placeholder = { Text(stringResource(R.string.filter_wl_channel_input_hint), fontSize = 13.sp) },
+                            placeholder = { Text(stringResource(R.string.filter_wl_channel_input_hint), fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                             singleLine = true,
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        BusyButton(busy = BusyKey.WL_CHANNEL in busy, containerColor = bColors.cobalt, contentColor = Color.White, contentPadding = PaddingValues(horizontal = 12.dp),
+                        FixedBusyIconButton(busy = ListBusyRules.addButtonBusy(BusyKey.WL_CHANNEL in busy, deletingId, BusyKey.WL_CHANNEL), containerColor = bColors.cobalt, contentColor = Color.White, icon = Icons.Default.Add, contentDescription = stringResource(R.string.action_add),
                             onClick = {
                                 if (viewModel.addWhitelistChannel(newWlChannelInput)) newWlChannelInput = ""
                             }
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.White)
-                        }
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -375,9 +401,9 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                                     Text(tr("Hash: {0}", ch.hashHex), fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
-                            IconButton(enabled = BusyKey.WL_CHANNEL !in busy, onClick = { viewModel.removeWhitelistChannel(ch) }) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
-                            }
+                            DeleteBusyIconButton(busy = ListBusyRules.rowDeleteBusy(BusyKey.WL_CHANNEL in busy, deletingId, BusyKey.WL_CHANNEL, ch.name), enabled = BusyKey.WL_CHANNEL !in busy,
+                                onClick = { deletingId = ListBusyRules.tag(BusyKey.WL_CHANNEL, ch.name); viewModel.removeWhitelistChannel(ch) },
+                                icon = Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
                         }
                     }
                 }
@@ -410,18 +436,16 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             value = newWlPathInput,
                             onValueChange = { newWlPathInput = it },
                             modifier = Modifier.weight(1f),
-                            placeholder = { Text(stringResource(R.string.filter_wl_path_input_hint), fontSize = 13.sp) },
+                            placeholder = { Text(stringResource(R.string.filter_wl_path_input_hint), fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                             singleLine = true,
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        BusyButton(busy = BusyKey.WL_PATH in busy, containerColor = bColors.cobalt, contentColor = Color.White, contentPadding = PaddingValues(horizontal = 12.dp),
+                        FixedBusyIconButton(busy = ListBusyRules.addButtonBusy(BusyKey.WL_PATH in busy, deletingId, BusyKey.WL_PATH), containerColor = bColors.cobalt, contentColor = Color.White, icon = Icons.Default.Add, contentDescription = stringResource(R.string.action_add),
                             onClick = {
                                 if (viewModel.addWhitelistPath(newWlPathInput, newWlPathComment)) { newWlPathInput = ""; newWlPathComment = "" }
                             }
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.White)
-                        }
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -457,9 +481,9 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                                     Text(p.comment, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
-                            IconButton(enabled = BusyKey.WL_PATH !in busy, onClick = { viewModel.removeWhitelistPath(p) }) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
-                            }
+                            DeleteBusyIconButton(busy = ListBusyRules.rowDeleteBusy(BusyKey.WL_PATH in busy, deletingId, BusyKey.WL_PATH, p.prefixHex), enabled = BusyKey.WL_PATH !in busy,
+                                onClick = { deletingId = ListBusyRules.tag(BusyKey.WL_PATH, p.prefixHex); viewModel.removeWhitelistPath(p) },
+                                icon = Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
                         }
                     }
                 }
@@ -501,7 +525,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                         presetBlChannels.forEach { ch ->
                             SuggestionChip(
                                 enabled = BusyKey.BL_CHANNEL !in busy,
-                                onClick = { viewModel.addBlockedChannel(ch) },
+                                onClick = { requestBlacklistChannel(ch) {} },
                                 label = { Text(ch, fontSize = 12.sp) },
                                 colors = SuggestionChipDefaults.suggestionChipColors(
                                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -523,18 +547,16 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             value = newBlChannelInput,
                             onValueChange = { newBlChannelInput = it },
                             modifier = Modifier.weight(1f),
-                            placeholder = { Text(stringResource(R.string.filter_bl_channel_input_hint), fontSize = 13.sp) },
+                            placeholder = { Text(stringResource(R.string.filter_bl_channel_input_hint), fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                             singleLine = true,
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        BusyButton(busy = BusyKey.BL_CHANNEL in busy, containerColor = bColors.signalRed, contentColor = Color.White, contentPadding = PaddingValues(horizontal = 12.dp),
+                        FixedBusyIconButton(busy = ListBusyRules.addButtonBusy(BusyKey.BL_CHANNEL in busy, deletingId, BusyKey.BL_CHANNEL), containerColor = bColors.signalRed, contentColor = Color.White, icon = Icons.Default.Add, contentDescription = stringResource(R.string.action_add),
                             onClick = {
-                                if (viewModel.addBlockedChannel(newBlChannelInput)) newBlChannelInput = ""
+                                requestBlacklistChannel(newBlChannelInput) { newBlChannelInput = "" }
                             }
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.White)
-                        }
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -560,9 +582,9 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(ch.name, fontWeight = FontWeight.Bold, color = bColors.signalRed)
-                            IconButton(enabled = BusyKey.BL_CHANNEL !in busy, onClick = { viewModel.removeBlockedChannel(ch.name) }) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
-                            }
+                            DeleteBusyIconButton(busy = ListBusyRules.rowDeleteBusy(BusyKey.BL_CHANNEL in busy, deletingId, BusyKey.BL_CHANNEL, ch.name), enabled = BusyKey.BL_CHANNEL !in busy,
+                                onClick = { deletingId = ListBusyRules.tag(BusyKey.BL_CHANNEL, ch.name); viewModel.removeBlockedChannel(ch.name) },
+                                icon = Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
                         }
                     }
                 }
@@ -595,18 +617,16 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             value = newBlPathInput,
                             onValueChange = { newBlPathInput = it },
                             modifier = Modifier.weight(1f),
-                            placeholder = { Text(stringResource(R.string.filter_bl_path_input_hint), fontSize = 13.sp) },
+                            placeholder = { Text(stringResource(R.string.filter_bl_path_input_hint), fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                             singleLine = true,
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        BusyButton(busy = BusyKey.BL_PATH in busy, containerColor = bColors.signalRed, contentColor = Color.White, contentPadding = PaddingValues(horizontal = 12.dp),
+                        FixedBusyIconButton(busy = ListBusyRules.addButtonBusy(BusyKey.BL_PATH in busy, deletingId, BusyKey.BL_PATH), containerColor = bColors.signalRed, contentColor = Color.White, icon = Icons.Default.Add, contentDescription = stringResource(R.string.action_add),
                             onClick = {
                                 if (viewModel.addBlockedPath(newBlPathInput, newBlPathComment)) { newBlPathInput = ""; newBlPathComment = "" }
                             }
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.White)
-                        }
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -642,9 +662,9 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                                     Text(p.comment, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
-                            IconButton(enabled = BusyKey.BL_PATH !in busy, onClick = { viewModel.removeBlockedPath(p.prefixHex) }) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
-                            }
+                            DeleteBusyIconButton(busy = ListBusyRules.rowDeleteBusy(BusyKey.BL_PATH in busy, deletingId, BusyKey.BL_PATH, p.prefixHex), enabled = BusyKey.BL_PATH !in busy,
+                                onClick = { deletingId = ListBusyRules.tag(BusyKey.BL_PATH, p.prefixHex); viewModel.removeBlockedPath(p.prefixHex) },
+                                icon = Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
                         }
                     }
                 }
@@ -701,7 +721,7 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                         value = newRulePattern,
                         onValueChange = { newRulePattern = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text(stringResource(R.string.filter_pattern_hint), fontSize = 13.sp) },
+                        placeholder = { Text(stringResource(R.string.filter_pattern_hint), fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                         singleLine = true,
                         shape = BauhausCornerShape
                     )
@@ -731,16 +751,14 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             singleLine = true,
                             shape = BauhausCornerShape
                         )
-                        BusyButton(busy = BusyKey.RULE in busy, containerColor = bColors.ochre, contentColor = Color.Black, contentPadding = PaddingValues(horizontal = 12.dp),
+                        FixedBusyIconButton(busy = ListBusyRules.addButtonBusy(BusyKey.RULE in busy, deletingId, BusyKey.RULE), containerColor = bColors.ochre, contentColor = Color.Black, icon = Icons.Default.Add, contentDescription = stringResource(R.string.action_add),
                             onClick = {
                                 val s = newRuleTimeout.toIntOrNull() ?: 0
                                 val p = (newRuleProb.toIntOrNull() ?: 100).coerceIn(1, 100)
                                 val sent = if (ruleTypeTab == 0) viewModel.addSenderRule(newRulePattern, s, p) else viewModel.addTextRule(newRulePattern, s, p)
                                 if (sent) newRulePattern = ""
                             }
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.Black)
-                        }
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -766,12 +784,10 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            IconButton(enabled = BusyKey.RULE !in busy, onClick = {
-                                if (ruleTypeTab == 0) viewModel.removeSenderRule(r.pattern)
-                                else viewModel.removeTextRule(r.pattern)
-                            }) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
-                            }
+                            DeleteBusyIconButton(busy = ListBusyRules.rowDeleteBusy(BusyKey.RULE in busy, deletingId, BusyKey.RULE, r.pattern), enabled = BusyKey.RULE !in busy,
+                                onClick = { deletingId = ListBusyRules.tag(BusyKey.RULE, r.pattern); if (ruleTypeTab == 0) viewModel.removeSenderRule(r.pattern)
+                                else viewModel.removeTextRule(r.pattern) },
+                                icon = Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
                         }
                     }
                 }
@@ -811,18 +827,16 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                             value = newWatchInput,
                             onValueChange = { newWatchInput = it },
                             modifier = Modifier.weight(1f),
-                            placeholder = { Text(stringResource(R.string.filter_watch_input_hint), fontSize = 13.sp) },
+                            placeholder = { Text(stringResource(R.string.filter_watch_input_hint), fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                             singleLine = true,
                             shape = BauhausCornerShape
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        BusyButton(busy = BusyKey.WATCH in busy, containerColor = bColors.cobalt, contentColor = Color.White, contentPadding = PaddingValues(horizontal = 12.dp),
+                        FixedBusyIconButton(busy = ListBusyRules.addButtonBusy(BusyKey.WATCH in busy, deletingId, BusyKey.WATCH), containerColor = bColors.cobalt, contentColor = Color.White, icon = Icons.Default.Add, contentDescription = stringResource(R.string.action_add),
                             onClick = {
                                 if (viewModel.addWatchChannel(newWatchInput)) newWatchInput = ""
                             }
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add), tint = Color.White)
-                        }
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
@@ -852,9 +866,9 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(w.name, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                             }
-                            IconButton(enabled = BusyKey.WATCH !in busy, onClick = { viewModel.removeWatchChannel(w.name) }) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
-                            }
+                            DeleteBusyIconButton(busy = ListBusyRules.rowDeleteBusy(BusyKey.WATCH in busy, deletingId, BusyKey.WATCH, w.name), enabled = BusyKey.WATCH !in busy,
+                                onClick = { deletingId = ListBusyRules.tag(BusyKey.WATCH, w.name); viewModel.removeWatchChannel(w.name) },
+                                icon = Icons.Default.Delete, contentDescription = stringResource(R.string.action_delete), tint = bColors.signalRed)
                         }
                     }
                 }
@@ -879,49 +893,27 @@ fun FilterScreen(viewModel: RepeaterViewModel, view: FilterMode = FilterMode.BLA
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "${stringResource(R.string.filter_age_label)} ${if (stats.ageMinutes == 0) tr("AUS") else tr("{0} Min.", stats.ageMinutes)}",
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 13.sp
-                    )
-                    // Nach der Antwort (busy endet) springt der Slider auf den bestätigten Wert zurück
-                    val ageBusy = BusyKey.FILTER_AGE in busy
-                    var ageSliderVal by remember(stats.ageMinutes, ageBusy) { mutableFloatStateOf(stats.ageMinutes.toFloat()) }
-                    Slider(
-                        value = ageSliderVal,
-                        enabled = !ageBusy,
-                        onValueChange = { ageSliderVal = it },
-                        onValueChangeFinished = { viewModel.setFilterAge(ageSliderVal.toInt()) },
-                        valueRange = 0f..120f,
-                        steps = 23,
-                        colors = SliderDefaults.colors(
-                            thumbColor = bColors.cobalt,
-                            activeTrackColor = bColors.cobalt
-                        )
+                    // v1.23: lokaler Slider-Zustand, Senden erst beim Loslassen bzw. nach -/+ (FineSlider)
+                    FineSlider(
+                        label = stringResource(R.string.filter_age_label),
+                        persisted = stats.ageMinutes,
+                        min = 0, max = 120, step = 5, fineMax = 10080,   // Firmware: 1–10080 Min. oder off
+                        busy = BusyKey.FILTER_AGE in busy,
+                        color = bColors.cobalt,
+                        onCommit = { viewModel.setFilterAge(it) },
+                        valueText = { if (it == 0) tr("AUS") else it.toString() }   // Einheit steht im Titel
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Text(
-                        text = "${stringResource(R.string.filter_hops_label)} ${stats.maxHops}",
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 13.sp
-                    )
-                    val hopsBusy = BusyKey.FILTER_HOPS in busy
-                    var hopsSliderVal by remember(stats.maxHops, hopsBusy) { mutableFloatStateOf(stats.maxHops.toFloat()) }
-                    Slider(
-                        value = hopsSliderVal,
-                        enabled = !hopsBusy,
-                        onValueChange = { hopsSliderVal = it },
-                        onValueChangeFinished = { viewModel.setFilterMaxHops(hopsSliderVal.toInt()) },
-                        valueRange = 1f..15f,
-                        steps = 13,
-                        colors = SliderDefaults.colors(
-                            thumbColor = bColors.cobalt,
-                            activeTrackColor = bColors.cobalt
-                        )
+                    FineSlider(
+                        label = stringResource(R.string.filter_hops_label),
+                        persisted = stats.maxHops,
+                        min = 1, max = 15, step = 1, fineMax = 64,   // Firmware: 0–64
+                        busy = BusyKey.FILTER_HOPS in busy,
+                        color = bColors.cobalt,
+                        onCommit = { viewModel.setFilterMaxHops(it) },
+                        valueText = { it.toString() }
                     )
                 }
             }

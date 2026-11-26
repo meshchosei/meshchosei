@@ -24,6 +24,15 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.composed
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
@@ -68,6 +77,28 @@ class BauhausDrawerState(initiallyOpen: Boolean = false) {
     }
 }
 
+/**
+ * Reservierte Flächen (v1.23): Slider, Slide-to-Confirm und Karte melden ihre Bounds (Root-Koordinaten). Setzt der
+ * Finger bei geschlossenem Menü dort auf, übernimmt der Drawer die Geste garantiert nicht – schon ab dem Down-Event,
+ * unabhängig davon, wann das Kind konsumiert.
+ */
+class DrawerGestureExclusions {
+    private val rects = HashMap<Any, Rect>()
+    internal fun put(key: Any, r: Rect) { rects[key] = r }
+    internal fun remove(key: Any) { rects.remove(key) }
+    fun contains(p: Offset): Boolean = rects.values.any { it.contains(p) }
+}
+
+val LocalDrawerGestureExclusions = staticCompositionLocalOf<DrawerGestureExclusions?> { null }
+
+/** Fläche dieses Elements für die Drawer-Geste reservieren (z. B. Slider-Zeile). */
+fun Modifier.excludeFromDrawerGesture(): Modifier = composed {
+    val reg = LocalDrawerGestureExclusions.current ?: return@composed this
+    val key = remember { Any() }
+    DisposableEffect(reg) { onDispose { reg.remove(key) } }
+    onGloballyPositioned { reg.put(key, it.boundsInRoot()) }
+}
+
 @Composable
 fun rememberBauhausDrawerState(): BauhausDrawerState = rememberSaveable(saver = BauhausDrawerState.Saver) { BauhausDrawerState() }
 
@@ -89,15 +120,19 @@ fun BauhausModalDrawer(
     val scope = rememberCoroutineScope()
     var widthPx by remember { mutableFloatStateOf(0f) }
     val scrimColor = DrawerDefaults.scrimColor
+    val exclusions = remember { DrawerGestureExclusions() }
+    var originInRoot by remember { mutableStateOf(Offset.Zero) }
 
     Box(
         modifier
             .fillMaxSize()
+            .onGloballyPositioned { originInRoot = it.positionInRoot() }
             .pointerInput(state) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
                     val startFraction = state.fraction.value
                     val startOpen = startFraction >= 0.5f
+                    val excluded = exclusions.contains(down.position + originInRoot)
                     var childConsumed = false
                     var claimed = false
                     var observed = false   // erst nach einem beobachteten Main-Pass übernehmen (schneller Wisch auf Slider)
@@ -117,7 +152,7 @@ fun BauhausModalDrawer(
                             }
                             break
                         }
-                        if (!claimed && observed && DrawerGesture.shouldClaim(dx, dy, density, startFraction, childConsumed)) claimed = true
+                        if (!claimed && observed && DrawerGesture.shouldClaim(dx, dy, density, startFraction, childConsumed, excluded)) claimed = true
                         if (claimed) {
                             change.consume()   // Kinder (Scroller, Buttons) bekommen die Geste nicht mehr
                             val f = DrawerGesture.fractionFor(startFraction, dx, widthPx)
@@ -133,7 +168,7 @@ fun BauhausModalDrawer(
                 }
             }
     ) {
-        content()
+        CompositionLocalProvider(LocalDrawerGestureExclusions provides exclusions) { content() }
         val f = state.fraction.value
         if (f > 0f) {
             Box(

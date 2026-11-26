@@ -20,8 +20,11 @@ object DrawerGesture {
      * Übernimmt der Drawer die Geste? Nur waagerecht ab dem Slop und nur in eine Richtung, in die er sich
      * bewegen kann (nach rechts, solange nicht ganz offen; nach links, solange nicht ganz zu).
      * [childConsumed]: ein Kind (Slider, Slide-to-Confirm, Karte, vertikaler Scroller) hat die Geste schon -> nie.
+     * [startedInExcludedArea]: Finger setzte in einer reservierten Fläche auf (v1.23) -> bei geschlossenem Menü nie.
      */
-    fun shouldClaim(dx: Float, dy: Float, density: Float, fraction: Float, childConsumed: Boolean): Boolean {
+    fun shouldClaim(dx: Float, dy: Float, density: Float, fraction: Float, childConsumed: Boolean, startedInExcludedArea: Boolean = false): Boolean {
+        // Geste begann auf einem Slider o. Ä. (excludeFromDrawerGesture), solange das Menü zu ist -> nie aufziehen
+        if (startedInExcludedArea && fraction <= 0f) return false
         if (childConsumed) return false
         if (abs(dx) < SLOP_DP * density || abs(dx) <= abs(dy) * HORIZONTAL_RATIO) return false
         return (dx > 0f && fraction < 1f) || (dx < 0f && fraction > 0f)

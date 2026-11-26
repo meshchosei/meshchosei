@@ -1,6 +1,9 @@
 package com.meshcore.repeater
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import com.meshcore.repeater.ui.components.DrawerGesture
+import com.meshcore.repeater.ui.components.DrawerGestureExclusions
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -54,5 +57,23 @@ class DrawerGestureTest {
         assertEquals(0.35f, DrawerGesture.SNAP_FRACTION, 0.0001f)
         assertEquals(1.4f, DrawerGesture.HORIZONTAL_RATIO, 0.0001f)
         assertEquals(12f, DrawerGesture.SLOP_DP, 0.0001f)
+    }
+
+    /** v1.23: Geste beginnt auf einem Slider (reservierte Fläche) -> Menü bleibt garantiert zu, auch bei klarer Waagerechten. */
+    @Test fun excludedAreaNeverOpensDrawer() {
+        assertFalse(DrawerGesture.shouldClaim(200f * d, 0f, d, fraction = 0f, childConsumed = false, startedInExcludedArea = true))
+        assertTrue("außerhalb weiterhin", DrawerGesture.shouldClaim(200f * d, 0f, d, 0f, false, startedInExcludedArea = false))
+        assertTrue("offenes Menü lässt sich über allem zuziehen", DrawerGesture.shouldClaim(-50f * d, 0f, d, 1f, false, startedInExcludedArea = true))
+    }
+
+    @Test fun exclusionRegistryHitTest() {
+        val reg = DrawerGestureExclusions()
+        val key = Any()
+        assertFalse(reg.contains(Offset(50f, 50f)))
+        reg.put(key, Rect(0f, 100f, 1080f, 220f))   // Slider-Zeile
+        assertTrue(reg.contains(Offset(540f, 150f)))
+        assertFalse(reg.contains(Offset(540f, 300f)))
+        reg.remove(key)
+        assertFalse(reg.contains(Offset(540f, 150f)))
     }
 }

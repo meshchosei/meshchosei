@@ -15,6 +15,7 @@ import com.meshcore.repeater.service.InputValidator
 import com.meshcore.repeater.service.MeshCoreBackup
 import com.meshcore.repeater.model.FilterStatusRules
 import com.meshcore.repeater.model.FilterCounters
+import com.meshcore.repeater.model.ChannelNameRules
 import com.meshcore.repeater.service.CliReplyTag
 import com.meshcore.repeater.service.QuerySpec
 import com.meshcore.repeater.service.RepeaterProtocol
@@ -1694,13 +1695,14 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     }
     /** Optimistisch sofort umschalten; Status-Antworten der nächsten 1,5 s überschreiben den Modus nicht. */
     fun setFilterMode(mode: FilterMode) { _filterStats.value = _filterStats.value.copy(mode = mode); sendCommand(if (mode == FilterMode.WHITELIST) RepeaterProtocol.CMD_FILTER_MODE_WHITELIST else RepeaterProtocol.CMD_FILTER_MODE_BLACKLIST) }
-    fun setFilterMaxHops(hops: Int) {
+    /** true = gesendet (Regler wartet auf Bestätigung), false = nicht gesendet (Regler springt zurück). */
+    fun setFilterMaxHops(hops: Int): Boolean {
         val cmd = RepeaterProtocol.buildFilterHops(0, hops)
-        sendBusy(BusyKey.FILTER_HOPS, cmd) { ok -> if (ok) _filterStats.value = _filterStats.value.copy(maxHops = hops) else notConfirmed(cmd) }
+        return sendBusy(BusyKey.FILTER_HOPS, cmd) { ok -> if (ok) _filterStats.value = _filterStats.value.copy(maxHops = hops) else notConfirmed(cmd) }
     }
-    fun setFilterAge(mins: Int) {
+    fun setFilterAge(mins: Int): Boolean {
         val cmd = RepeaterProtocol.buildFilterAge(mins)
-        sendBusy(BusyKey.FILTER_AGE, cmd) { ok -> if (ok) _filterStats.value = _filterStats.value.copy(ageMinutes = mins.coerceAtLeast(0)) else notConfirmed(cmd) }
+        return sendBusy(BusyKey.FILTER_AGE, cmd) { ok -> if (ok) _filterStats.value = _filterStats.value.copy(ageMinutes = mins.coerceAtLeast(0)) else notConfirmed(cmd) }
     }
     private var lastFilterQuery = ""
     fun updateBasicSetupDraft(updated: BasicSetupState) { _basicSetup.value = updated }
@@ -1762,7 +1764,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     private fun notConfirmed(what: String) = notifyUser(tr("\"{0}\" vom Repeater nicht bestätigt.", what))
 
     fun addWhitelistChannel(name: String, isPreset: Boolean = false): Boolean {
-        val n = name.trim(); if (n.isEmpty()) return false
+        val n = ChannelNameRules.normalize(name, whitelist = true); if (n.isEmpty()) return false   // v1.23: #-Präfix, „Public“
         return sendBusy(BusyKey.WL_CHANNEL, RepeaterProtocol.buildWlChannelAdd(n)) { ok ->
             if (!ok) return@sendBusy notConfirmed(n)
             rememberChannelName(n)
@@ -1787,8 +1789,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     fun removeWhitelistPath(p: WhitelistPath): Boolean = sendBusy(BusyKey.WL_PATH, RepeaterProtocol.buildWlPathDel(p.prefixHex)) { ok ->
         if (ok) _whitelistPaths.value = _whitelistPaths.value.filterNot { it.prefixHex == p.prefixHex } else notConfirmed(p.prefixHex)
     }
+    /** Public-Bestätigung erfolgt vorher im Screen (PublicBlockConfirmDialog). */
     fun addBlockedChannel(name: String): Boolean {
-        val n = name.trim(); if (n.isEmpty()) return false
+        val n = ChannelNameRules.normalize(name, whitelist = false); if (n.isEmpty()) return false   // v1.23: #-Präfix, „Public“
         return sendBusy(BusyKey.BL_CHANNEL, RepeaterProtocol.buildChannelAdd(n)) { ok ->
             if (!ok) return@sendBusy notConfirmed(n)
             rememberChannelName(n)

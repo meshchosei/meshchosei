@@ -110,7 +110,7 @@
     <!-- Whitelist Controls -->
     <string name="filter_wl_channel_header">WHITELIST KANAL-FREIGABEN</string>
     <string name="filter_wl_presets_title">Schnell-Auswahl gängiger Kanäle:</string>
-    <string name="filter_wl_channel_input_hint">Kanalname (z.B. #regional oder Public)</string>
+    <string name="filter_wl_channel_input_hint">Kanal, z. B. regional oder Public</string>
     <string name="filter_wl_channels_count">Freigegebene Kanäle (%d):</string>
     <string name="filter_wl_path_header">WHITELIST PFAD-PRÄFIXE (2-8 HEX)</string>
     <string name="filter_wl_path_input_hint">Pfad-Hex-Präfix (z.B. a1b2)</string>
@@ -119,7 +119,7 @@
 
     <!-- Blacklist Controls (Filter.cpp) -->
     <string name="filter_bl_channel_header">GESPERRTE KANÄLE (filter channel add/remove)</string>
-    <string name="filter_bl_channel_input_hint">Zu sperrender Kanalname (z.B. #spam)</string>
+    <string name="filter_bl_channel_input_hint">Kanal sperren, z. B. spam</string>
     <string name="filter_bl_channels_count">Gesperrte Kanäle (%d):</string>
     <string name="filter_bl_path_header">GESPERRTE PFAD-PRÄFIXE (filter path add/remove)</string>
     <string name="filter_bl_path_input_hint">Störer-Pfadpräfix (2-8 Hex-Stellen)</string>
@@ -135,8 +135,8 @@
     <string name="filter_watch_input_hint">Watch-Kanalname (z.B. #notfunk)</string>
     <string name="filter_watch_count">Überwachte Kanäle (%d):</string>
     <string name="filter_params_header">ALTERSGRENZE &amp; HOP-LIMIT (filter age / hops)</string>
-    <string name="filter_age_label">Max. Nachrichtenalter (Minuten, 0=aus):</string>
-    <string name="filter_hops_label">Max. erlaubte Hops (0-64):</string>
+    <string name="filter_age_label">Max. Nachrichtenalter (in Minuten)</string>
+    <string name="filter_hops_label">Max. erlaubte Hops</string>
 
     <!-- Filter Stats & Reset -->
     <string name="filter_stats_header">FILTER-STATISTIKEN &amp; TREFFER</string>

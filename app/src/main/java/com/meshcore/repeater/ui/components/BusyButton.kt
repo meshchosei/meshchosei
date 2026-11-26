@@ -1,6 +1,17 @@
 package com.meshcore.repeater.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -104,4 +115,44 @@ fun BusyOutlinedButton(
         border = border ?: BorderStroke(1.dp, color),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = color, disabledContentColor = if (busy) color else color.copy(alpha = 0.4f))
     ) { BusyContent(busy, color, busyText, fontSize = fontSize, idle = content) }
+}
+
+/** Feste Größe des Hinzufügen-Buttons neben einem Eingabefeld (= Höhe eines OutlinedTextField), v1.23. */
+val FixedActionButtonSize: Dp = 56.dp
+
+/**
+ * Quadratischer Icon-Button mit Arbeitszustand (v1.23, STYLE_GUIDE §2.2): Größe ändert sich NIE – statt eines
+ * Textwechsels („Speichere…“) zeigt er im Arbeitszustand nur die Braille-Punkte. Gesperrt, solange [busy].
+ */
+@Composable
+fun FixedBusyIconButton(
+    busy: Boolean,
+    onClick: () -> Unit,
+    containerColor: Color,
+    icon: ImageVector,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    contentColor: Color = Color.White,
+    enabled: Boolean = true
+) {
+    Box(
+        modifier
+            .size(FixedActionButtonSize)
+            .clip(BauhausCornerShape)
+            .background(if (enabled || busy) containerColor else containerColor.copy(alpha = SAVED_STATE_ALPHA))
+            .clickable(enabled = enabled && !busy, role = Role.Button, onClickLabel = contentDescription) { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        if (busy) BrailleSpinner(contentColor, fontSize = 20.sp)
+        else Icon(icon, contentDescription = contentDescription, tint = contentColor)
+    }
+}
+
+/** Löschen-Button einer Listenzeile (48 dp, unverändert groß): während des Löschens dieser Zeile Braille-Punkte statt Icon. */
+@Composable
+fun DeleteBusyIconButton(busy: Boolean, enabled: Boolean, onClick: () -> Unit, icon: ImageVector, contentDescription: String, tint: Color) {
+    IconButton(enabled = enabled && !busy, onClick = onClick) {
+        if (busy) BrailleSpinner(tint, fontSize = 18.sp)
+        else Icon(icon, contentDescription = contentDescription, tint = tint)
+    }
 }

@@ -169,6 +169,23 @@ BusyButton(                                   // ui/components/BusyButton.kt
 
 **Hinzufügen als Abschlusszeile (seit v1.08):** In Listen mit Zeilen-Layout (z. B. Regionen) ist die Eingabe für einen neuen Eintrag die **letzte Zeile der Liste** und kein separater Block darunter. Sie hat dasselbe Zeilen-Layout (gleiche Paddings), einen 1-dp-Rahmen in Signalrot (`BorderStroke(1.dp, bColors.signalRed)`, `BauhausCornerShape`) und kompakte, 28 dp hohe Monospace-Felder (Regionen: Name ~70 % mit Platzhalter „Neue Region“, Parent ~30 %, vorbelegt `*`). Rechts sitzt an exakt der Position des Mülleimer-Icons (36-dp-Zelle) der eckige signalrote `+`-Button. Ungültige Eingaben färben das Feld rot (2-dp-Rahmen), der `+`-Button ist dann gedeckt (`SAVED_STATE_ALPHA`).
 
+**Feste Größe für Hinzufügen- und Löschen-Buttons (seit v1.23, verbindlich):**
+
+- Ein Icon-Button neben einem Eingabefeld (`+` in Blacklist/Whitelist, Pfade, Regeln, Watch) ändert seine Größe **nie**. Umgesetzt mit `FixedBusyIconButton`, quadratisch `FixedActionButtonSize` = 56 dp, so hoch wie ein `OutlinedTextField`.
+- Im Arbeitszustand ersetzen die Braille-Punkte das Icon. Ein Textwechsel zu „Speichere…“ ist hier verboten, weil er das Feld zusammendrückt und den Platzhalter umbrechen lässt.
+- **Löschen in Listenzeilen:** `DeleteBusyIconButton` (48 dp). Die Braille-Punkte erscheinen nur in der Zeile, die gerade gelöscht wird (`deletingId`). Die übrigen Löschen-Icons der Liste sind gesperrt.
+- **Spinner sauber getrennt (`ListBusyRules`):** Hinzufügen und Löschen teilen sich je Liste einen `BusyKey`. Der `+`-Button dreht nur beim Hinzufügen. Beim Löschen bleibt er ruhig als `+` stehen, gesperrt, aber ohne Spinner. Nach Ende des Löschens wird die Markierung gelöst.
+- **Platzhalter** in Eingabezeilen sind einzeilig (`singleLine = true`, Platzhalter `maxLines = 1` mit Ellipse) und kompakt formuliert, z. B. „Kanal, z. B. regional oder Public“.
+
+**Kanal-Eingabe im Paket-Filter (seit v1.23):**
+
+- Die Eingabe wird vor dem Senden normalisiert (`ChannelNameRules.normalize`):
+  - getrimmt;
+  - `public` in beliebiger Schreibweise wird exakt zu `Public` (die Firmware prüft `strcmp(name, "Public")`);
+  - sonst wird `#` vorangestellt, falls es fehlt (`test` → `#test`);
+  - in der Whitelist bleibt ein zweistelliger Hex-Hash (`d9`, `0xD9`) ein Hash, wie es die Firmware erwartet.
+- **Public-Schutz:** Im Blacklist-Modus erscheint vor dem Sperren von `Public`/`#Public` (beliebige Schreibweise) ein zentrierter Bauhaus-Bestätigungsdialog (`PublicBlockConfirmDialog`: „Abbrechen“ und signalrotes „Sperren“, kein zusätzliches ✕, Zurück und Tippen daneben brechen ab). Erst danach wird der Befehl gesendet. In der Whitelist wird `Public` ohne Warnung freigegeben. Geprüft in `ChannelNameRulesTest`.
+
 **Ein Spinner pro Ladevorgang:** Während eine Liste neu geladen wird, dreht der Braille-Spinner **nur** im auslösenden ↻ (`InlineRefreshIcon`). Andere Buttons derselben Karte (Hinzufügen, Listen-Schalter, Löschen) sind gesperrt, zeigen aber keinen eigenen Spinner.
 
 **Kompakte Listen-Schalter:** In dichten Listen (z. B. „KONFIGURIERTE REGIONEN“) stehen eckige Bauhaus-Schalter `[HOME] [DEF] [FLOOD]` statt runder Material-Switches. Sie haben `BauhausCornerShape` (2 dp), 28 dp Höhe, Monospace 10 sp fett und eine 1-dp-Outline. Aktiv sind sie vollflächig in ihrer Signalfarbe (HOME = Rot, DEF = Kobalt, FLOOD = Ocker). Während einer Übertragung sind sie gesperrt.
@@ -195,6 +212,24 @@ BauhausSwitch(
   - **Einzige Ausnahme ist Ocker** für den Warnzustand „Dry-Run (nur protokollieren)“ im Filter-Screen.
 - Barrierefreiheit: `toggleable(role = Role.Switch)`. TalkBack liest ihn wie einen normalen Schalter vor.
 - Für kompakte, beschriftete Mehrfach-Schalter in Listen gelten die Listen-Schalter aus §2.2, zum Beispiel `[HOME] [DEF] [FLOOD]`.
+
+### 2.3.1 Regler: lokaler Zustand + `onValueChangeFinished` + `-`/`+` (seit v1.23, verbindlich)
+
+- **Komponente:** `FineSlider` in `ui/components/FineSlider.kt`. Im Einsatz für das Max. Nachrichtenalter und die Max. Hops im Paket-Filter.
+- **Lokaler Zustand:** Während des Ziehens ändert `onValueChange` **nur** den lokalen Wert. Es gibt keinen Befehl, kein Neu-Laden und kein Überschreiben durch den Wert vom Repeater.
+- **Senden:** einmalig beim Loslassen (`onValueChangeFinished`). Nach `-`/`+` wird ~0,7 s nach dem letzten Tipp gesendet, mehrere Tipps ergeben einen Befehl.
+- **Kein Zurückspringen:** Solange gesendet wird (`busy`), überschreibt der alte Wert den lokalen nicht. Danach gilt der bestätigte Wert, bei Fehler also wieder der alte. Wurde nichts gesendet (`onCommit` liefert `false`), springt der Regler sofort zurück.
+  - **Verboten:** `remember(persisted, busy) { … }`. Das setzte den Regler beim Senden auf den alten Wert zurück (Ursache vor v1.23).
+- **Raster:**
+  - Der Slider ist stufenlos (`steps` nicht gesetzt). Gerundet wird selbst mit `SliderValueRules.snap`, per `roundToInt()` statt `toInt()`, damit nichts verspringt.
+  - Grobraster: Alter 5 Min. (0–120), Hops 1 (1–15).
+- **Layout (ruhig):**
+  - Oben stehen nur der Titel links und der reine Zahlenwert rechts. Der Wert hat eine feste Breite (64 dp, rechtsbündig, Monospace), damit sich bei 1- bis 5-stelligen Zahlen nichts verschiebt.
+  - Darunter steht die Zeile `−  [Slider]  +`. `−` und `+` sind rahmenlos und haben eine feste 40-dp-Touch-Fläche. Sie ändern den Wert um 1 und reichen bis zur Firmware-Grenze, also über das Slider-Ende hinaus (Alter bis 10080 Min., Hops bis 64).
+  - Umrandete Kästchen neben dem Wert gibt es nicht.
+- **Einheit im Titel**, nicht am Wert, z. B. „Max. Nachrichtenalter (in Minuten)“. Der Wert zeigt nur die Zahl, bei 0 „AUS“.
+- **Drawer-Schutz:** Die ganze Slider-Zeile trägt `Modifier.excludeFromDrawerGesture()` (siehe §2.6).
+- **Labels** nennen keinen Wertebereich, die Grenzen erzwingen Slider und Knöpfe. Geprüft in `SliderValueRulesTest`.
 
 ### 2.4 „Aktualisieren“ / „Neu einlesen“: ungerahmtes ↻ (`InlineRefreshIcon`, verbindlich seit v1.21)
 
@@ -242,6 +277,11 @@ InlineRefreshIcon(
   - **Einrasten beim Loslassen:** Ab 35 % Weg in Gestenrichtung, beim Öffnen wie beim Schließen, oder bei zügigem Wisch über 400 dp/s rastet das Menü ein. Darunter gleitet es in die Ausgangslage zurück (`DrawerGesture.settleOpen`).
   - **Kein Konflikt:** Hat ein Kind-Element die Bewegung im `Main`-Pass schon konsumiert, bleibt der Drawer für diese Geste unbeteiligt. Das betrifft Slider, Slide-to-Confirm, die Karte und einen bereits laufenden vertikalen Scroll. Übernommen wird erst nach mindestens einem beobachteten `Final`-Pass, damit auch ein schneller Wisch zuerst beim Slider ankommt.
   - **Schließen:** durch Scrim-Tippen, System-Zurück (`BackHandler`) oder interaktives Zuziehen nach links.
+  - **Reservierte Flächen (seit v1.23):**
+    - Elemente mit eigener waagerechter Geste melden ihre Bounds mit `Modifier.excludeFromDrawerGesture()` an (Registry `LocalDrawerGestureExclusions`, Root-Koordinaten).
+    - Setzt der Finger bei geschlossenem Menü in so einer Fläche auf, übernimmt der Drawer die Geste nie. Das gilt schon ab dem Down-Event im `Initial`-Pass, unabhängig davon, wann das Kind konsumiert.
+    - Pflicht für: `FineSlider`-Zeilen, `SlideToConfirm` und die Karte (`OsmTileMap`). Jeder neue Slider bzw. jede neue horizontale Drag-Fläche bekommt den Modifier.
+    - Ein offenes Menü lässt sich weiterhin über allem zuziehen.
   - Geprüft in `DrawerGestureTest`.
 - `BackHandler`, Reihenfolge verbindlich:
   ```kotlin

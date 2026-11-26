@@ -112,7 +112,7 @@
     <!-- Whitelist Controls -->
     <string name="filter_wl_channel_header">WHITELIST CHANNEL ALLOWLIST</string>
     <string name="filter_wl_presets_title">Quick select popular channels:</string>
-    <string name="filter_wl_channel_input_hint">Channel name (e.g. #regional or Public)</string>
+    <string name="filter_wl_channel_input_hint">Channel, e.g. regional or Public</string>
     <string name="filter_wl_channels_count">Allowed channels (%d):</string>
     <string name="filter_wl_path_header">WHITELIST PATH PREFIXES (2-8 HEX)</string>
     <string name="filter_wl_path_input_hint">Path hex prefix (e.g. a1b2)</string>
@@ -121,7 +121,7 @@
 
     <!-- Blacklist Controls (Filter.cpp) -->
     <string name="filter_bl_channel_header">BLOCKED CHANNELS (filter channel add/remove)</string>
-    <string name="filter_bl_channel_input_hint">Channel name to block (e.g. #spam)</string>
+    <string name="filter_bl_channel_input_hint">Channel to block, e.g. spam</string>
     <string name="filter_bl_channels_count">Blocked channels (%d):</string>
     <string name="filter_bl_path_header">BLOCKED PATH PREFIXES (filter path add/remove)</string>
     <string name="filter_bl_path_input_hint">Rogue path prefix (2-8 hex digits)</string>
@@ -137,8 +137,8 @@
     <string name="filter_watch_input_hint">Watch channel name (e.g. #emergency)</string>
     <string name="filter_watch_count">Watched channels (%d):</string>
     <string name="filter_params_header">AGE &amp; HOP LIMIT (filter age / hops)</string>
-    <string name="filter_age_label">Max message age (minutes, 0=off):</string>
-    <string name="filter_hops_label">Max allowed hops (0-64):</string>
+    <string name="filter_age_label">Max. message age (in minutes)</string>
+    <string name="filter_hops_label">Max allowed hops</string>
 
     <!-- Filter Stats & Reset -->
     <string name="filter_stats_header">FILTER STATISTICS &amp; DROPS</string>

@@ -168,6 +168,7 @@ fun OsmTileMap(
         Canvas(
             Modifier
                 .fillMaxSize()
+                .excludeFromDrawerGesture()   // v1.23: Karte verschieben zieht nie das Seitenmenü auf
                 .onSizeChanged { size = it }
                 .pointerInput(tilePx) {
                     detectDragGestures(

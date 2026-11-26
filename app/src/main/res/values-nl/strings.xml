@@ -110,7 +110,7 @@
     <!-- Whitelist Controls -->
     <string name="filter_wl_channel_header">WHITELIST TOEGESTANE KANALEN</string>
     <string name="filter_wl_presets_title">Snelkeuze populaire kanalen:</string>
-    <string name="filter_wl_channel_input_hint">Kanaalnaam (bijv. #regional of Public)</string>
+    <string name="filter_wl_channel_input_hint">Kanaal, bijv. regional of Public</string>
     <string name="filter_wl_channels_count">Toegestane kanalen (%d):</string>
     <string name="filter_wl_path_header">WHITELIST PADPREFIXEN (2-8 HEX)</string>
     <string name="filter_wl_path_input_hint">Hex-padprefix (bijv. a1b2)</string>
@@ -119,7 +119,7 @@
 
     <!-- Blacklist Controls (Filter.cpp) -->
     <string name="filter_bl_channel_header">GEBLOKKEERDE KANALEN (filter channel add/remove)</string>
-    <string name="filter_bl_channel_input_hint">Te blokkeren kanaalnaam (bijv. #spam)</string>
+    <string name="filter_bl_channel_input_hint">Kanaal blokkeren, bijv. spam</string>
     <string name="filter_bl_channels_count">Geblokkeerde kanalen (%d):</string>
     <string name="filter_bl_path_header">GEBLOKKEERDE PADPREFIXEN (filter path add/remove)</string>
     <string name="filter_bl_path_input_hint">Padprefix van stoorzender (2-8 hex-tekens)</string>
@@ -135,8 +135,8 @@
     <string name="filter_watch_input_hint">Naam watch-kanaal (bijv. #nood)</string>
     <string name="filter_watch_count">Gevolgde kanalen (%d):</string>
     <string name="filter_params_header">LEEFTIJDSGRENS &amp; HOPLIMIET (filter age / hops)</string>
-    <string name="filter_age_label">Max. berichtleeftijd (minuten, 0=uit):</string>
-    <string name="filter_hops_label">Max. toegestane hops (0-64):</string>
+    <string name="filter_age_label">Max. berichtleeftijd (in minuten)</string>
+    <string name="filter_hops_label">Max. toegestane hops</string>
 
     <!-- Filter Stats & Reset -->
     <string name="filter_stats_header">FILTERSTATISTIEKEN &amp; TREFFERS</string>

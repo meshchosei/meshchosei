@@ -57,6 +57,7 @@ fun SlideToConfirm(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
+            .excludeFromDrawerGesture()   // v1.23: Wischen auf der Schiene zieht nie das Seitenmenü auf
             .clip(BauhausCornerShape)
             .background(trackColor)
     ) {

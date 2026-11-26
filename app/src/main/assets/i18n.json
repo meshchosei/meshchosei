@@ -4378,5 +4378,20 @@
   "The firmware does not count whitelist rejections in any category – they only show up in the saved airtime.",
   "De firmware telt whitelist-weigeringen in geen enkele categorie – ze zijn alleen zichtbaar in de bespaarde airtime.",
   "Le firmware ne compte les refus de la liste blanche dans aucune catégorie – ils n'apparaissent que dans le temps d'antenne économisé."
+ ],
+ "{0} wirklich sperren?": [
+  "Really block {0}?",
+  "{0} echt blokkeren?",
+  "Vraiment bloquer {0} ?"
+ ],
+ "Das Sperren von Public blockiert den gesamten offenen Hauptkanal: Dieser Repeater leitet dann keine Public-Nachrichten mehr weiter.": [
+  "Blocking Public blocks the entire open main channel: this repeater will no longer forward any Public messages.",
+  "Public blokkeren blokkeert het volledige open hoofdkanaal: deze repeater stuurt dan geen Public-berichten meer door.",
+  "Bloquer Public bloque tout le canal principal ouvert : ce répéteur ne relaiera plus aucun message Public."
+ ],
+ "Sperren": [
+  "Block",
+  "Blokkeren",
+  "Bloquer"
  ]
 }
