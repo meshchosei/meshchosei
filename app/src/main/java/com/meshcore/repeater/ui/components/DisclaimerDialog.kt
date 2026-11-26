@@ -174,7 +174,7 @@ fun DisclaimerDialog(
                 // Nachträgliches Ansehen ("Über & Lizenz"): nur ein zentriertes ✕ wie im UpdateDialog
                 androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth(), contentAlignment = androidx.compose.ui.Alignment.Center) {
                     androidx.compose.material3.IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = tr("Schließen"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp))
+                        Icon(Icons.Filled.Close, contentDescription = tr("Schließen"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(CloseIconSize))
                     }
                 }
             } else Row(

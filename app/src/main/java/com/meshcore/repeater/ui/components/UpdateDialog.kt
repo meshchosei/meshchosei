@@ -77,7 +77,7 @@ fun UpdateDialog(update: UpdateCheck.ReleaseInfo, debugTest: Boolean, onDismiss:
                 )
                 Spacer(Modifier.height(8.dp))
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Filled.Close, contentDescription = tr("Schließen"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp))
+                    Icon(Icons.Filled.Close, contentDescription = tr("Schließen"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(CloseIconSize))
                 }
             }
         }

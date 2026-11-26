@@ -1,5 +1,6 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.CloseIconSize
 import com.meshcore.repeater.ui.components.hintedVerticalScroll
 
 import androidx.activity.compose.BackHandler
@@ -702,7 +703,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                         .clickable { repeaterMenuOpen = false },
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(Icons.Filled.Close, contentDescription = tr("Schließen"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                                    Icon(Icons.Filled.Close, contentDescription = tr("Schließen"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(CloseIconSize))
                                 }
                               }
                             }

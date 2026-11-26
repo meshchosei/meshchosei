@@ -126,3 +126,9 @@ fun InlineRefreshIcon(
         else Icon(Icons.Default.Refresh, contentDescription = contentDescription, tint = if (enabled) color else color.copy(alpha = 0.4f), modifier = Modifier.size(16.dp))
     }
 }
+
+/**
+ * Einheitliche Icon-Größe für jedes Schließen-✕ (`Icons.Filled.Close`, v1.21, STYLE_GUIDE §2.12): Klappmenüs,
+ * Update-Dialog und Haftungsausschluss. Die antippbare Fläche darum bleibt je nach Ort größer (22 dp Box bzw. IconButton).
+ */
+val CloseIconSize = 16.dp

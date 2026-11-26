@@ -1,5 +1,6 @@
 package com.meshcore.repeater.ui.screens
 
+import com.meshcore.repeater.ui.components.CloseIconSize
 import com.meshcore.repeater.i18n.tr
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -179,7 +180,7 @@ fun CliConsoleScreen(viewModel: RepeaterViewModel) {
                                 .clickable { menuDismissed = true },
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Filled.Close, contentDescription = tr("Schließen"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                            Icon(Icons.Filled.Close, contentDescription = tr("Schließen"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(CloseIconSize))
                         }
                       }
                     }
