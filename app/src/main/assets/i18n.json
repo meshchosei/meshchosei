@@ -3583,5 +3583,10 @@
   "No repeater selected",
   "Geen repeater gekozen",
   "Aucun répéteur choisi"
+ ],
+ "Neue Version {0} verfügbar": [
+  "New version {0} available",
+  "Nieuwe versie {0} beschikbaar",
+  "Nouvelle version {0} disponible"
  ]
 }

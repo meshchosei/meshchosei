@@ -338,6 +338,13 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
 - **Login-Bereich:** 1-dp-Rahmen Kobalt, eingeloggt Grün, ohne Repeater `outline`. **Kein** eigenes Status-Badge („Admin aktiv“/„Nicht eingeloggt“): Der Login-Status steht ausschließlich oben in der Verbindungs-Statuskarte.
 - **Login-Button (Ausnahme zur Doppelklick-Sperre, §2.2):** Breite und Höhe bleiben konstant. Der Spinner (14 dp) ersetzt nur das Schloss-Icon in einer festen 16-dp-Box, der Text bleibt immer „Login“. Während eines Login-Versuchs ist der Button nur blasser (`alpha = 0.65f`), bleibt aber **anklickbar** (`enabled = true`): Geht über LoRa ein Paket verloren, kann der Nutzer sofort erneut senden (`startRemoteLogin` setzt den Timeout neu auf).
 
+### 2.11 Update-Hinweis (seit v1.20)
+
+- **Abruf:** einmal beim Start im `RepeaterViewModel` (läuft beim ersten Zugriff in `MainActivity.onCreate` an) auf `Dispatchers.IO`, blockiert den Start nie. `GET https://api.github.com/repos/meshchosei/meshchosei/releases/latest`, `Accept: application/vnd.github+json`, Connect-/Read-Timeout je 3 s. Ausgewertet werden nur `tag_name` und `html_url` (`service/UpdateCheck.kt`, unit-getestet in `UpdateCheckTest`).
+- **Fehler:** kein Netz, Timeout, HTTP-Fehler, Rate-Limit, kaputtes JSON → komplett still: keine Meldung, kein Log, kein UI-Element.
+- **Vergleich:** numerisch `Major.Minor` (`1.20 > 1.19 > 1.2`), ein führendes `v` wird ignoriert. Ein Hinweis kommt nur bei einer **echt neueren** Version. Die Debug-APK vergleicht gegen die simulierte Version `1.00` und zeigt den Vermerk `[DEBUG-Test]`; die Release-APK vergleicht gegen `BuildConfig.VERSION_NAME`.
+- **Dialog statt Banner:** Der Verbindungs-Screen bleibt unverändert. Sobald eine neuere Version erkannt ist, der Hinweis in dieser Sitzung noch nicht geschlossen wurde und kein Haftungsausschluss-Dialog offen ist, zeigt `MainActivity` einen **zentrierten** `Dialog` (`ui/components/UpdateDialog.kt`): eckige `Surface` (`BauhausCornerShape`, 1-dp-Rahmen `outline`), oben mittig die Meldung „Neue Version vX.YZ verfügbar“ (16 sp fett, über `tr()`, in der Debug-APK darunter `[DEBUG-Test]`), darunter die Release-URL (`html_url`, Fallback `…/releases/latest`) in Kobalt, Monospace, unterstrichen, antippbar (`Intent.ACTION_VIEW`), unten horizontal zentriert ein `✕` (`IconButton`, `Icons.Filled.Close`). `✕`, System-Zurück und Tippen neben den Dialog schließen ihn für die laufende Sitzung. Im „Über & Lizenz“-Screen gibt es keinen Update-Hinweis.
+
 ## 3. Kommunikations- & Protokoll-Architektur
 
 ### 3.1 Streng sequentielles Request-Response

@@ -143,6 +143,11 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
     val act = androidx.compose.ui.platform.LocalContext.current.findActivity()
     if (showDisclaimerForced) { DisclaimerDialog(isInitialAcceptance = true, onAccept = { viewModel.acceptDisclaimer(); showDisclaimerForced = false }, onDismiss = { act?.finishAffinity() }) }
     if (showDisclaimerInfo) { DisclaimerDialog(isInitialAcceptance = false, onDismiss = { showDisclaimerInfo = false }) }
+    // Update-Hinweis (v1.19): zentrierter Dialog, erst wenn kein Haftungsausschluss mehr offen ist
+    val availableUpdate by viewModel.availableUpdate.collectAsState()
+    availableUpdate?.let { upd ->
+        if (!showDisclaimerForced && !showDisclaimerInfo) UpdateDialog(upd, debugTest = viewModel.updateCheckIsDebugTest, onDismiss = { viewModel.dismissUpdateHint() })
+    }
 
     BackHandler {
         when {

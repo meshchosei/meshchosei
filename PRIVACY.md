@@ -1,6 +1,6 @@
 # Datenschutz – meshchōsei
 
-Stand: 2026-11-25 (Version 1.14)
+Stand: 2026-11-26 (Version 1.20)
 
 meshchōsei betreibt **keine eigenen Server**, enthält **kein Tracking**, keine Werbung und keine Analyse-Bibliotheken. Die App erhebt keine Nutzungsdaten.
 
@@ -21,7 +21,15 @@ meshchōsei betreibt **keine eigenen Server**, enthält **kein Tracking**, keine
 
 - Die Standortkarte lädt Kartenkacheln von `tile.openstreetmap.org` (OpenStreetMap Foundation), aber nur, wenn du die Karte öffnest.
 - Dabei werden technisch bedingt deine **IP-Adresse**, ein allgemeiner App-User-Agent (ohne persönliche Angaben) und die angezeigten Kachelkoordinaten an diesen Server übertragen. Es gilt die [Datenschutzerklärung der OSMF](https://osmfoundation.org/wiki/Privacy_Policy).
-- Die Kacheln werden nur im Arbeitsspeicher zwischengespeichert. Das ist der einzige Internetzugriff der App (Berechtigung `INTERNET`).
+- Die Kacheln werden nur im Arbeitsspeicher zwischengespeichert.
+
+## 4. Versions-Check beim Start (seit Version 1.20)
+
+- Beim Start fragt die App **einmal** im Hintergrund die öffentliche GitHub-API ab (`https://api.github.com/repos/meshchosei/meshchosei/releases/latest`), um zu prüfen, ob eine neuere Version veröffentlicht wurde. Ausgewertet werden nur die Versionsnummer (`tag_name`) und der Link zur Release-Seite (`html_url`).
+- Der Abruf ist **anonym**: Es gibt kein Konto, keine Kennung und keine Geräte- oder Nutzungsdaten. Technisch bedingt sieht GitHub deine **IP-Adresse** und einen allgemeinen User-Agent (`meshchosei-update-check (Android)`). Es gilt die [Datenschutzerklärung von GitHub](https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement).
+- Ohne Internet oder bei Fehlern passiert nichts: kein Hinweis, keine Meldung. Ist eine neuere Version verfügbar, zeigt der Verbindungs-Screen einen Hinweis. Die Release-Seite öffnet sich nur, wenn du ihn antippst.
+
+Kartenkacheln und Versions-Check sind die einzigen Internetzugriffe der App (Berechtigung `INTERNET`).
 
 ## Kontakt & Quellcode
 

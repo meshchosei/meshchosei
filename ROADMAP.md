@@ -1,6 +1,6 @@
 # ROADMAP – meshchōsei
 
-Stand: 2026-11-26 · aktuelle Version: 1.19
+Stand: 2026-11-26 · aktuelle Version: 1.20
 
 | Version | Status | Inhalt |
 |---|---|---|
@@ -24,6 +24,7 @@ Stand: 2026-11-26 · aktuelle Version: 1.19
 | **1.17** | ✅ veröffentlicht (Tag `v1.17`) | Markenname „meshchōsei“ unübersetzbar in allen Sprachen; alter Arbeitstitel „Repeater Configurator“ aus Seitenmenü, App-Name und Über-Dialog entfernt; persönlicher Build-Zusatz „BW2“ entfernt |
 | **1.18** | ✅ veröffentlicht (Tag `v1.18`) | CLI-Autocomplete als vertikales Klappmenü über dem Eingabefeld (öffnet erst ab dem 1. Zeichen, Treffer alphabetisch, Befehl fett + übersetzte Kurzbeschreibung, `✕` oben rechts bzw. Zurück schließt), Capability-Filter (Filter/Whitelist, Seriell-only-Befehle nur bei USB); CLI-Hilfe um 122 Firmware-Befehle ergänzt (`get pwrmgt.*`, Diagnose, CAD, GPS, LEDs, Bridge, Uplink …) in DE/EN/NL/FR; Bootloader-Version (`get bootloader.ver`) im Start-Scan und Hardware-Screen mit OTA-Bootloop-Warnung unter `0.9.2-OTAFIX2.2-BP1.3`; Hardware-Screen: Versorgung per rahmenlosem ↻ direkt hinter dem Wert statt „Abfragen“-Button |
 | **1.19** | ✅ veröffentlicht (Tag `v1.19`) | Repeater-Auswahl als vertikales Klappmenü nach unten unter dem Auswahlfeld (öffnet automatisch beim Einlesen der Kontakte, solange kein Repeater gewählt ist; Name fett + Public-Key-Präfix + Schlüssel-Merkmal bei gespeichertem Passwort; `✕` oben rechts bzw. Zurück schließt, Antippen des Feldes öffnet wieder; Auswahl schließt das Menü und holt die Passwort-/Login-Zeile in den Blick); fester, immer sichtbarer Login-Bereich ganz oben (Name + Public-Key + Passwort + Login; ohne Auswahl Platzhalter und gesperrt, kein Layout-Springen), darunter Suchfeld mit ↻ und Klappmenü; Übernehmen schließt die Liste und leert das Suchfeld, kein doppeltes Status-Badge mehr; Login-Button mit konstanter Größe, während des Versuchs nur blasser und erneut antippbar; kein Auf-/Zu-Pfeil im Suchfeld (schließen nur per `✕`); Verbindungs-Tabs einheitlich „USB-OTG“ / „BLE-OTA“ (DE/EN/NL/FR); rahmenloses ↻ für Kontakte, OTG-Geräte und BLE-Scan, laufender Scan per Stop-Icon; STYLE_GUIDE §2.10 zur allgemeinen Regel für vertikale Klappmenüs (nach oben/nach unten) erweitert |
+| **1.20** | ✅ veröffentlicht (Tag `v1.20`) | Zentrierter Bauhaus-Update-Dialog beim Start: einmalige, offline-sichere Versionsprüfung gegen GitHub `releases/latest` (Hintergrund, 3 s Timeout, Fehler still ignoriert, numerischer Major.Minor-Vergleich), Meldung „Neue Version vX.YZ verfügbar“ mit anklickbarer Release-URL in Kobalt und `✕` unten mittig; Debug-APK testet gegen simulierte 1.00 (`[DEBUG-Test]`); PRIVACY.md um den anonymen Versions-Check ergänzt |
 | **1.1** | 📋 geplant | BLE-OTA-Firmware-Update (F2), Live-Repeater-Suche (F3), Präfix-Filter Repeater-Auswahl (F4) |
 
 Beide Features folgen den Regeln aus [`STYLE_GUIDE.md`](STYLE_GUIDE.md):

@@ -1,5 +1,7 @@
 package com.meshcore.repeater.viewmodel
 
+import com.meshcore.repeater.BuildConfig
+import com.meshcore.repeater.service.UpdateCheck
 import com.meshcore.repeater.i18n.tr
 import android.app.Application
 import android.content.Context
@@ -360,6 +362,18 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         onDevicesChanged = { refreshUsbDevices() },
         onLinkLost = { reason -> handleLinkLost(reason) }
     )
+
+    // --- Update-Check (v1.19): einmal beim Start, asynchron auf IO, Fehler werden still ignoriert ---
+    /** Debug-APK prüft gegen die simulierte Version „1.00“ ([DEBUG-Test]), Release gegen BuildConfig.VERSION_NAME. */
+    val updateCheckIsDebugTest: Boolean = BuildConfig.DEBUG
+    private val updateCheckLocalVersion: String = if (BuildConfig.DEBUG) UpdateCheck.DEBUG_SIMULATED_VERSION else BuildConfig.VERSION_NAME
+    private val _availableUpdate = MutableStateFlow<UpdateCheck.ReleaseInfo?>(null)
+    /** Echt neuere Version auf GitHub, solange der Hinweis in dieser Sitzung nicht geschlossen wurde. */
+    val availableUpdate: StateFlow<UpdateCheck.ReleaseInfo?> = _availableUpdate.asStateFlow()
+    fun dismissUpdateHint() { _availableUpdate.value = null }
+    private val updateCheckJob = viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+        try { UpdateCheck.newerRelease(UpdateCheck.fetchLatest(), updateCheckLocalVersion)?.let { _availableUpdate.value = it } } catch (_: Throwable) {}
+    }
 
     private lateinit var bleManager: BleConnectionManager
     init { bleManager = BleConnectionManager(
