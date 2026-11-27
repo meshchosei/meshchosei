@@ -18,6 +18,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import com.meshcore.repeater.ui.components.InlineRefreshIcon
+import com.meshcore.repeater.ui.components.SegmentButton
 import kotlinx.coroutines.delay
 import com.meshcore.repeater.R
 import androidx.compose.ui.res.stringResource
@@ -107,6 +108,7 @@ import androidx.compose.ui.unit.sp
 import com.meshcore.repeater.model.ConnectionState
 import com.meshcore.repeater.model.ConnectionType
 import com.meshcore.repeater.model.MeshContact
+import com.meshcore.repeater.model.LiveScanRules
 import com.meshcore.repeater.ui.theme.AlertRed
 import com.meshcore.repeater.ui.theme.BauhausCornerShape
 import com.meshcore.repeater.ui.theme.LocalBauhausColors
@@ -124,6 +126,10 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
     val caps by viewModel.deviceCapabilities.collectAsState()
     val meshContacts by viewModel.meshContacts.collectAsState()
     val isRefreshingContacts by viewModel.isRefreshingContacts.collectAsState()
+    val liveScan by viewModel.liveScan.collectAsState()
+    // Live per `get name` gelesener Name hat Vorrang vor dem gespeicherten (Statuskarte und Login-Bereich)
+    val readName by viewModel.readRepeaterName.collectAsState()
+    fun shownTargetName(t: MeshContact?): String? = t?.let { LiveScanRules.shownName(it, readName?.name, readName?.pubKeyHex) }
     val remoteAdmin by viewModel.remoteAdminSession.collectAsState()
     val bColors = LocalBauhausColors.current
     val blePerms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT) else arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -142,7 +148,8 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
 
     var manualCommand by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var filterOnlyRepeaters by remember { mutableStateOf(true) }
+    // Repeater-Auswahl zeigt immer nur Repeater/Room-Server (v1.24: Chip „Nur Repeater“ ersetzt durch Gespeichert | Live)
+    val filterOnlyRepeaters = true
     var filterOnlyKnownPaths by remember { mutableStateOf(false) }
     var contactSearchQuery by remember { mutableStateOf("") }
 
@@ -230,7 +237,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                     } else Text(
                         text = when (val state = connectionState) {
                             is ConnectionState.Connected -> {
-                                "${remoteAdmin.targetRepeater?.name} • ${if (remoteAdmin.isLoggedIn) tr("Eingeloggt") else tr(remoteAdmin.sessionStatus)}"
+                                "${shownTargetName(remoteAdmin.targetRepeater)} • ${if (remoteAdmin.isLoggedIn) tr("Eingeloggt") else tr(remoteAdmin.sessionStatus)}"
                             }
                             is ConnectionState.Connecting -> tr(state.message)
                             else -> tr("Wähle USB-OTG oder BLE-OTA")
@@ -536,7 +543,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                     Icon(Icons.Default.Router, contentDescription = null, tint = if (target != null) bColors.signalRed else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                                     Spacer(Modifier.width(6.dp))
                                     Text(
-                                        text = target?.name ?: tr("Kein Repeater gewählt"),
+                                        text = shownTargetName(target) ?: tr("Kein Repeater gewählt"),
                                         fontWeight = FontWeight.Bold, fontSize = 14.sp,
                                         maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
                                         color = if (target != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -596,16 +603,31 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             }
                         }
 
+                        // Live-Modus: eine Live-Suche ist aktiv (Chip „Live“), sonst gespeicherte Kontakte
+                        val liveMode = liveScan.tag != 0L
                         // Kopfzeile + Filter-Chips (zwischen Login-Bereich und Suchfeld)
                         Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(tr("Repeater-Auswahl ({0})", meshContacts.size), style = MaterialTheme.typography.titleMedium, color = bColors.signalRed, fontWeight = FontWeight.Bold)
-                                Text(tr("Companion Mesh-Kontakte"), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(if (liveMode) tr("Live: Repeater in direkter Funkreichweite") else tr("Companion Mesh-Kontakte"), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FilterChip(shape = BauhausCornerShape, selected = filterOnlyRepeaters, onClick = { filterOnlyRepeaters = !filterOnlyRepeaters; repeaterMenuOpen = true }, label = { Text(tr("Nur Repeater"), fontSize = 11.sp) })
-                            FilterChip(shape = BauhausCornerShape, selected = filterOnlyKnownPaths, onClick = { filterOnlyKnownPaths = !filterOnlyKnownPaths; repeaterMenuOpen = true }, label = { Text(tr("Nur aktive Pfade"), fontSize = 11.sp) })
+                        // v1.24: drei gleich breite Segment-Buttons in einer Zeile (feste Höhe, zentriert) – Gespeichert | Live | Nur aktive Pfade.
+                        // Beim Scan ersetzt die Braille-Animation zentriert das Wort „Live“: nichts ändert seine Größe oder verschiebt sich.
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            SegmentButton(
+                                text = tr("Gespeichert"), selected = !liveMode, modifier = Modifier.weight(1f),
+                                onClick = { viewModel.clearLiveRepeaterScan(); repeaterMenuOpen = true }
+                            )
+                            SegmentButton(
+                                text = tr("Live"), selected = liveMode, busy = liveScan.scanning, modifier = Modifier.weight(1f),
+                                onClick = { if (!liveScan.scanning) { contactSearchQuery = ""; focusManager.clearFocus(); viewModel.startLiveRepeaterScan() }; repeaterMenuOpen = true }
+                            )
+                            // Originaltext aus i18n.json; zu lange Übersetzungen (FR) enden zentriert mit „…“
+                            SegmentButton(
+                                text = tr("Nur aktive Pfade"), selected = filterOnlyKnownPaths, modifier = Modifier.weight(1f),
+                                onClick = { filterOnlyKnownPaths = !filterOnlyKnownPaths; repeaterMenuOpen = true }
+                            )
                         }
 
                         // Suchfeld: Tippen öffnet die Liste, Eingabe filtert (Name oder Key); daneben rahmenloses ↻ (Kontakte neu einlesen)
@@ -631,10 +653,90 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             }
                         )
                         Spacer(Modifier.width(4.dp))
-                        InlineRefreshIcon(onClick = { repeaterMenuOpen = true; viewModel.refreshMeshContacts() }, busy = isRefreshingContacts, contentDescription = tr("Kontakte neu einlesen"))
+                        InlineRefreshIcon(onClick = { repeaterMenuOpen = true; viewModel.clearLiveRepeaterScan(); viewModel.refreshMeshContacts() }, busy = isRefreshingContacts, contentDescription = tr("Kontakte neu einlesen"))
                         }
 
-                        if (repeaterMenuOpen) {
+                        // Live-Ergebnisse statt Kontaktliste, solange eine Live-Suche aktiv ist (stärkstes Signal oben)
+                        if (repeaterMenuOpen && liveMode) {
+                            val decimalComma = com.meshcore.repeater.i18n.I18n.language != "en"
+                            val q = contactSearchQuery.trim()
+                            val liveRows = liveScan.results.map { it to LiveScanRules.findKnown(it, meshContacts) }.filter { (r, k) ->
+                                q.isEmpty() || LiveScanRules.displayName(r, k).contains(q, ignoreCase = true) || r.pubKeyHex.startsWith(q, ignoreCase = true)
+                            }
+                            Card(
+                                Modifier.fillMaxWidth().padding(top = 4.dp),
+                                shape = BauhausCornerShape,
+                                border = BorderStroke(1.dp, bColors.cobalt),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            ) {
+                              Box(Modifier.fillMaxWidth()) {
+                                Column(Modifier.fillMaxWidth().heightIn(max = 240.dp).hintedVerticalScroll(rememberScrollState(), always = true, fadeColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                                    Text(
+                                        tr("In Reichweite ({0}) · stärkstes Signal oben", liveScan.results.size),
+                                        fontSize = 11.sp, fontWeight = FontWeight.Bold, color = bColors.cobalt, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(start = 10.dp, end = 26.dp, top = 6.dp, bottom = 4.dp)
+                                    )
+                                    if (liveRows.isEmpty()) {
+                                        Row(Modifier.fillMaxWidth().heightIn(min = 40.dp).padding(start = 10.dp, end = 26.dp), verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = if (liveScan.scanning) tr("Suche Repeater in direkter Reichweite…") else tr("Kein Repeater in direkter Reichweite hat geantwortet."),
+                                                fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                    liveRows.forEach { (r, known) ->
+                                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                                        val isSelected = target?.pubKeyHex == r.pubKeyHex
+                                        Row(
+                                            Modifier.fillMaxWidth().heightIn(min = 40.dp)
+                                                .background(if (isSelected) bColors.signalRed.copy(alpha = 0.14f) else Color.Transparent)
+                                                .clickable {
+                                                    if (!isSelected) viewModel.selectLiveRepeater(r)
+                                                    contactSearchQuery = ""
+                                                    repeaterMenuOpen = false
+                                                    focusManager.clearFocus()
+                                                    focusPasswordAfterSelect = true
+                                                }
+                                                .padding(start = 10.dp, end = 10.dp, top = 6.dp, bottom = 6.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column(Modifier.weight(1f)) {
+                                                Text(
+                                                    LiveScanRules.displayName(r, known), fontWeight = FontWeight.Bold, fontSize = 13.sp,
+                                                    maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
+                                                    color = if (known != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Text("${r.pubKeyHex.take(12)}…", fontFamily = FontFamily.Monospace, fontSize = 11.sp, maxLines = 1, softWrap = false, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                    if (known == null) Text("  " + tr("neu"), fontSize = 11.sp, maxLines = 1, softWrap = false, color = bColors.cobalt)
+                                                    if (viewModel.hasSavedPassword(r.pubKeyHex)) {
+                                                        Spacer(Modifier.width(4.dp))
+                                                        Icon(Icons.Default.Key, contentDescription = tr("Passwort gespeichert"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(12.dp))
+                                                    }
+                                                }
+                                            }
+                                            Spacer(Modifier.width(8.dp))
+                                            // Rechts kompakt der gemessene Wert (feste Spalte, Monospace: Zeilen bleiben bündig)
+                                            Column(horizontalAlignment = Alignment.End) {
+                                                Text(LiveScanRules.formatSnr(r.snr, decimalComma), fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1, softWrap = false, color = bColors.cobalt)
+                                                Text(LiveScanRules.formatRssi(r.rssi), fontFamily = FontFamily.Monospace, fontSize = 11.sp, maxLines = 1, softWrap = false, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
+                                    }
+                                }
+                                Box(
+                                    Modifier.align(Alignment.TopEnd).padding(2.dp).size(22.dp).clip(BauhausCornerShape)
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .clickable { repeaterMenuOpen = false; viewModel.clearLiveRepeaterScan() },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(Icons.Filled.Close, contentDescription = tr("Schließen"), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(CloseIconSize))
+                                }
+                              }
+                            }
+                        }
+                        if (repeaterMenuOpen && !liveMode) {
                             val menuScroll = rememberScrollState()
                             LaunchedEffect(contactSearchQuery) { menuScroll.scrollTo(0) }
                             Card(

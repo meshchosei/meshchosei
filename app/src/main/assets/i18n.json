@@ -4393,5 +4393,50 @@
   "Block",
   "Blokkeren",
   "Bloquer"
+ ],
+ "In Reichweite ({0}) · stärkstes Signal oben": [
+  "In range ({0}) · strongest signal first",
+  "In bereik ({0}) · sterkste signaal bovenaan",
+  "À portée ({0}) · signal le plus fort en haut"
+ ],
+ "Suche Repeater in direkter Reichweite…": [
+  "Searching for repeaters in direct range…",
+  "Zoeken naar repeaters in direct bereik…",
+  "Recherche de répéteurs à portée directe…"
+ ],
+ "Kein Repeater in direkter Reichweite hat geantwortet.": [
+  "No repeater in direct range answered.",
+  "Geen repeater in direct bereik heeft geantwoord.",
+  "Aucun répéteur à portée directe n'a répondu."
+ ],
+ "neu": [
+  "new",
+  "nieuw",
+  "nouveau"
+ ],
+ "> [Mesh] Live-Suche nach Repeatern in Reichweite…": [
+  "> [Mesh] Live search for repeaters in range…",
+  "> [Mesh] Live zoeken naar repeaters in bereik…",
+  "> [Mesh] Recherche en direct des répéteurs à portée…"
+ ],
+ "> [Mesh] Repeater {0} als direkter Kontakt im Companion angelegt": [
+  "> [Mesh] Repeater {0} added to the companion as a direct contact",
+  "> [Mesh] Repeater {0} als direct contact in de companion aangemaakt",
+  "> [Mesh] Répéteur {0} ajouté au companion comme contact direct"
+ ],
+ "Gespeichert": [
+  "Saved",
+  "Opgeslagen",
+  "Enregistrés"
+ ],
+ "Live": [
+  "Live",
+  "Live",
+  "En direct"
+ ],
+ "Live: Repeater in direkter Funkreichweite": [
+  "Live: repeaters in direct radio range",
+  "Live: repeaters in direct radiobereik",
+  "En direct : répéteurs à portée radio directe"
  ]
 }

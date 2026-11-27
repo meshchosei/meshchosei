@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -85,8 +86,18 @@ class MainActivity : ComponentActivity() {
                 // Nur beim echten App-Start (einmal pro Prozess) – nicht bei USB-Intents oder Activity-Neuaufbau
                 var showSplash by remember { mutableStateOf(!splashShownInProcess) }
                 LaunchedEffect(Unit) { if (showSplash) { kotlinx.coroutines.delay(2500L); splashShownInProcess = true; showSplash = false } }
-                androidx.compose.animation.Crossfade(targetState = showSplash, animationSpec = androidx.compose.animation.core.tween(700), label = "splash") { splash ->
-                    if (splash) com.meshcore.repeater.ui.components.MeshchoseiSplash() else MainAppContent(viewModel = viewModel)
+                // Oberste Root-Box: App (Splash/Drawer/Screens) und als allerletztes Kind der Türkanten-Lichtschein
+                Box(Modifier.fillMaxSize()) {
+                    androidx.compose.animation.Crossfade(targetState = showSplash, animationSpec = androidx.compose.animation.core.tween(700), label = "splash") { splash ->
+                        if (splash) com.meshcore.repeater.ui.components.MeshchoseiSplash() else MainAppContent(viewModel = viewModel)
+                    }
+                    // v1.24: rechts Node verbunden, links Repeater-Login – nur Zeichnen, kein Touch, kein Layout
+                    val edgeLight by viewModel.edgeLightTrigger.collectAsState()
+                    val bc = com.meshcore.repeater.ui.theme.LocalBauhausColors.current
+                    EdgeLightEffect(
+                        trigger = edgeLight, rightColor = bc.cobalt, leftColor = bc.successGreen, isDark = bc.isDark,
+                        modifier = Modifier.fillMaxSize().zIndex(999f)
+                    )
                 }
             }
             }

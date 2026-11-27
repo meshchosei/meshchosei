@@ -76,10 +76,19 @@ data class MeshContact(
             else -> "Node"
         }
 
+    /**
+     * Gleich nur bei gleichem Key **und** gleichen Werten (v1.24). Vorher zählte allein `pubKeyHex`: Ein umbenannter
+     * Repeater (gleicher Key, neuer Name) galt als unverändert, und `MutableStateFlow` verwarf das Update – der per
+     * `get name` gelesene Name kam deshalb nie im Verbindungs-Screen an. `pubKey` (ByteArray) wird über `pubKeyHex`
+     * verglichen. Für „derselbe Repeater?“ immer `pubKeyHex` vergleichen, nie `==`.
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is MeshContact) return false
-        return pubKeyHex == other.pubKeyHex
+        return pubKeyHex == other.pubKeyHex && keyPrefix == other.keyPrefix && type == other.type && flags == other.flags &&
+            outPathLen == other.outPathLen && name == other.name && lastAdvertTimestamp == other.lastAdvertTimestamp &&
+            gpsLat == other.gpsLat && gpsLon == other.gpsLon && snr == other.snr && rssi == other.rssi &&
+            lastSeenMillis == other.lastSeenMillis
     }
 
     override fun hashCode(): Int = pubKeyHex.hashCode()

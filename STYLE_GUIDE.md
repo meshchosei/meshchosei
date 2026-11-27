@@ -190,6 +190,17 @@ BusyButton(                                   // ui/components/BusyButton.kt
 
 **Kompakte Listen-Schalter:** In dichten Listen (z. B. „KONFIGURIERTE REGIONEN“) stehen eckige Bauhaus-Schalter `[HOME] [DEF] [FLOOD]` statt runder Material-Switches. Sie haben `BauhausCornerShape` (2 dp), 28 dp Höhe, Monospace 10 sp fett und eine 1-dp-Outline. Aktiv sind sie vollflächig in ihrer Signalfarbe (HOME = Rot, DEF = Kobalt, FLOOD = Ocker). Während einer Übertragung sind sie gesperrt.
 
+### 2.2.1 Segment-Buttons: gleich breit, Braille ersetzt die Beschriftung (seit v1.24, verbindlich)
+**Regel: Segment-Buttons sind gleich breit. Eine laufende Braille-Animation ersetzt zentriert die Beschriftung, ohne das Layout zu verschieben.**
+- Mehrere Wahl- oder Filter-Buttons in einer Reihe sind `SegmentButton` (`ui/components/BauhausControls.kt`) und **kein** `FilterChip`. `FilterChip` richtet die Beschriftung links aus und wächst mit Icon oder Text.
+- Jeder Button bekommt `Modifier.weight(1f)`, Abstand 8 dp, feste Höhe `SegmentButtonHeight` = 36 dp. Der Inhalt ist zentriert (`Alignment.Center`, `TextAlign.Center`), einzeilig (`maxLines = 1`, Ellipsis), 12 sp.
+- Aussehen gewählt: 1-dp-Rahmen und Text in der Akzentfarbe, Fläche in der Akzentfarbe mit 16 % Deckkraft. Nicht gewählt: Rahmen in `outline`, Text in `onSurfaceVariant`.
+- **Arbeitszustand:**
+  - Während `busy` steht im Button **nur** die zentrierte Braille-Animation, nicht zusätzlich die Beschriftung daneben.
+  - Breite und Höhe bleiben exakt gleich, kein Nachbar verschiebt sich.
+  - Die Beschriftung bleibt als `contentDescription` für Screenreader erhalten.
+- **Übersetzungen bleiben unangetastet:** Bestehende Texte in `i18n.json` werden für das Layout **nie** gekürzt oder umgeschrieben. Eine zu lange Übersetzung (z. B. FR „Chemins actifs uniquement“) endet im Button zentriert mit „…“ (`maxLines = 1`, `softWrap = false`, `TextOverflow.Ellipsis`, wie beim Repeater-Namen). Sie bricht nicht um und verändert die Button-Größe nicht. Der volle Text bleibt als `contentDescription` für Screenreader erhalten.
+
 ### 2.3 Schalter: `BauhausSwitch` (verbindlich)
 
 Runde Material-`Switch`-Komponenten sind seit v1.04 **verboten**. Jeder Ein/Aus-Schalter ist ein `BauhausSwitch` (`ui/components/BauhausControls.kt`):
@@ -371,7 +382,7 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
 
 - **Ort:** Verbindungs-Screen nach dem Verbinden mit einem Companion-Node (`ConnectionScreen`). Feste Reihenfolge von oben:
   1. **Login-Bereich** (immer sichtbar, sobald der Companion verbunden ist): eckige Card mit Repeater-**Name** (fett) und **Public-Key-Präfix** + Hops (Monospace 11 sp) in einer Zeile, darunter Passwortfeld + Login-Button. Name, Key und Passwort stehen immer fest zusammen und verschieben sich weder beim Aufklappen der Liste noch bei der Auswahl um einen Pixel. Ohne gewählten Repeater: Platzhalter nur „Kein Repeater gewählt“ (gedämpft, ohne Key-Angabe), Passwortfeld und Login-Button gesperrt (`enabled = false`), Rahmen in `outline`.
-  2. Kopfzeile „Repeater-Auswahl (n)“ und Filter-Chips „Nur Repeater“/„Nur aktive Pfade“.
+  2. Kopfzeile „Repeater-Auswahl (n)“ und Segment-Buttons `Gespeichert` | `Live` | `Nur aktive Pfade` in einer Zeile (seit v1.24, §2.14).
   3. **Suchfeld** mit rahmenlosem ↻ (`InlineRefreshIcon`, Kontakte neu einlesen) direkt rechts daneben.
   4. unmittelbar darunter das **Klappmenü** mit `✕` oben rechts.
 - **Suchfeld:** eckiges `OutlinedTextField`, Filter nach Name oder Key-Präfix, Platzhalter „Repeater suchen (Name oder Key)…“. **Kein** Auf-/Zu-Pfeil: Antippen (`PressInteraction.Release`) oder Tippen öffnet das Menü, geschlossen wird es nur über das `✕` oben rechts in der Liste, System-Zurück oder durch eine Auswahl (wie im CLI). Bei getipptem Text steht im Feld nur das Leeren-`✕` (leert den Filter, schließt nicht).
@@ -399,6 +410,67 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
 - **Einheitliche ✕-Größe (verbindlich seit v1.21):** Jedes Schließen-`✕` (`Icons.Filled.Close`) – Klappmenüs (§2.10), Update-Dialog (§2.11), Haftungsausschluss – zeichnet das Icon in genau **`CloseIconSize` = 16 dp** (`ui/components/BauhausControls.kt`). Nur die Touch-Fläche darf je nach Ort größer sein (22-dp-Box in der Menü-Ecke, `IconButton` 48 dp in Dialogen). Keine eigenen Größen im Code; geprüft durch `CloseIconSizeTest`. Das Leeren-Icon im Suchfeld (`Icons.Default.Clear`) ist kein Schließen-✕ und fällt nicht darunter.
 - Einsatzorte: Update-Dialog (§2.11) und der **Haftungsausschluss beim erneuten Ansehen** aus „Über & Lizenz“ / Seitenmenü (`DisclaimerDialog(isInitialAcceptance = false)`).
 - Ausnahme: Beim **Erststart** bleibt der Haftungsausschluss ein Entscheidungsdialog mit den Text-Buttons „Abbrechen“ (beendet die App) und „Akzeptieren“; er ist dort nicht wegklickbar.
+
+### 2.13 Türkanten-Lichtschein als Rückmeldung (seit v1.24)
+`EdgeLightEffect` (`ui/components/EdgeLightEffect.kt`) zeigt einen Lichtspalt an der Bildschirmkante, wie eine Taschenlampe hinter einer geschlossenen Tür im Dunkeln:
+- **Rechts, Kobaltblau:** Die Verbindung zum Node steht, über USB-OTG oder BLE.
+- **Links, Signalgrün:** Der Remote-Admin-Login beim Repeater war erfolgreich.
+- **Auslöser (verbindlich):**
+  - Das `RepeaterViewModel` setzt `edgeLightTrigger = EdgeLightTrigger(id = System.nanoTime(), side)` (`model/EdgeLightTrigger.kt`) **direkt an der Erfolgsstelle**. Das sind genau drei Stellen: USB `Connected`, BLE `Connected` und `onLoginSuccess()`.
+  - Die UI merkt sich `lastPlayedId` per `rememberSaveable` und spielt jede id genau einmal ab (`id > lastPlayedId`).
+  - Kein Flankenvergleich im Composable: Er geht bei Neuaufbau verloren oder löst bei Display-Drehung doppelt aus.
+- **Animation über die echte Zeit (verbindlich):**
+  - Die Animation läuft per `withFrameNanos` und `EdgeLightRules.progressAt(ms)` mit `FastOutSlowInEasing`, **nicht** über `Animatable` oder `tween`.
+  - Compose-Animationen übernehmen die System-Animationsskala. Bei „Animator-Dauer aus“ (Entwickleroptionen, Energiesparmodus) springen sie sofort ans Ende, und der Effekt bliebe unsichtbar.
+  - Jede Seite hat ihren eigenen Job. Wird ein Job abgebrochen, wird der Schein sauber ausgeblendet.
+- **Lage:**
+  - Das Overlay ist das allerletzte Kind der obersten Root-Box in `MainActivity.setContent`, über Splash, Screens, Cards und `BauhausModalDrawer`, mit `Modifier.fillMaxSize().zIndex(999f)`.
+  - Es hat kein `systemBarsPadding` und kein `clipToBounds` und zeichnet über die volle Fläche (`size.width` × `size.height`).
+  - Material-`Dialog`s sind eigene Fenster; dort kann kein Overlay der App darüberliegen.
+- **Optik:**
+  - Kernlinie: 3 dp direkt an der äußersten Kante (links ab `x = 0`, rechts bis `x = size.width`). Im Dunkelmodus ist sie `Color.White`; im Hellmodus eine aufgehellte Kantenfarbe, weil Weiß auf Weiß unsichtbar wäre. Alpha höchstens 0,95.
+  - Lichtkegel: 64 dp breiter `Brush.horizontalGradient` in der Kantenfarbe, von `MAX_ALPHA` 0,92 am Rand bis 0.
+  - Senkrecht blendet eine `DstIn`-Maske den Schein nach oben und unten weich aus. Die Mitte wandert dabei von 30 % auf 70 % der Bildhöhe.
+  - Dauer 1,5 s, Helligkeit als Halbwelle (sanft auf, sanft ab).
+- **Nicht blockierend:** kein `pointerInput`, keine Semantik, kein Layout-Platz.
+- **Nur echte Ereignisse:** Der Schein erscheint ausschließlich beim echten Verbinden und beim echten Login. Es gibt keinen Test-Auslöser in der Oberfläche.
+- **TopBar bleibt ruhig:** links nur `☰` und der Titel, kein Logo. Das ō-Emblem steht nur im Kopf des Seitenmenüs und im Splash.
+
+### 2.14 Repeater-Auswahl: `Gespeichert` | `Live` | `Nur aktive Pfade` (seit v1.24)
+Über dem Suchfeld der Repeater-Auswahl stehen in **einer** Zeile drei gleich breite Segment-Buttons `Gespeichert` | `Live` | `Nur aktive Pfade` (`SegmentButton`, je `weight(1f)`, §2.2.1), alle mit ihren Originaltexten. Rechts neben dem Suchfeld bleibt nur das ruhige ↻ (Kontakte neu einlesen); dort gibt es kein weiteres Mini-Icon.
+- **Gespeichert:** die im Companion gespeicherten Kontakte. Gezeigt werden immer nur Repeater und Room-Server.
+- **Live:**
+  - Ein Tipp startet sofort eine Funksuche nach Repeatern in **direkter** Reichweite und öffnet die Trefferliste.
+  - Während des 4-s-Scan-Fensters ersetzen zentrierte Braille-Punkte das Wort „Live“; der Button behält seine Größe. Ein erneuter Tipp sucht neu.
+  - „Gespeichert“, ✕ und ↻ beenden die Live-Ansicht.
+- **Nur aktive Pfade:** filtert auf Einträge mit bekanntem Routing-Pfad. Live-Treffer sind immer direkt (0 Hops).
+- **Protokoll (`service/CompanionProtocol.kt`, MeshCore = ZephCore):**
+  - Die App sendet `CMD_SEND_CONTROL_DATA [0x37][0x80][1<<ADV_TYPE_REPEATER][tag(4)][since(4)=0]`. Der Companion sendet das als Zero-Hop.
+  - Jeder Repeater in Reichweite antwortet. Beim Companion kommt die Antwort als Push `[0x8E][SNR×4][RSSI][path_len][0x92][Remote-SNR×4][tag][pub_key(32)]` an.
+  - Ausgewertet werden nur Antworten von **Repeatern** mit unserem Tag und vollem Public-Key.
+  - Spätere Antworten derselben Suche werden noch übernommen. Je Repeater gibt es einen Eintrag mit der jüngsten Messung.
+  - Repeater mit `disable_fwd`, versteckte Repeater und solche mit vollem Discover-Limiter antworten nicht.
+- **Anzeige:**
+  - Sortiert wird strikt nach SNR absteigend, bei Gleichstand nach RSSI (`LiveScanRules.sortBySignal`).
+  - Rechts stehen in Monospace `SNR +11,5 dB` (Dezimalkomma außer im Englischen) und darunter `−87 dBm`.
+- **Namen (verbindlich):**
+  - Die Discover-Antwort enthält **keinen Namen**. Jeder Treffer wird deshalb sofort per Public-Key mit den gespeicherten Kontakten abgeglichen (`LiveScanRules.findKnown`), und deren Name wird übernommen.
+  - Ohne bekannten Namen zeigt die Zeile das kurze Key-Präfix als Platzhalter, z. B. `cf3a8206…`, mit dem Hinweis „neu“. Auch „Node-xxxxxxxx“ gilt als Platzhalter.
+  - Sobald `get name` vom gewählten Repeater gelesen wurde (Start-Scan oder ↻), zieht `LiveScanRules.applyFetchedName` den echten Namen sofort an drei Stellen nach, jeweils für den gleichen Public-Key: im gewählten Repeater des Login-Bereichs, im Live-Eintrag (`LiveRepeater.name`) und im Kontakt.
+  - Ein Login ist dafür keine Voraussetzung, die Antwort kam ja vom Repeater. Der gewählte Repeater wird atomar aktualisiert (`MutableStateFlow.update`), damit ein gleichzeitiges Status-Update den Namen nicht überschreibt.
+  - Der gelernte Name bleibt erhalten:
+    - bei einem neuen Live-Scan (`merge` behält den Namen);
+    - beim Neu-Einlesen der Kontakte, wenn im Companion noch der Platzhalter steht (`keepLearnedName`).
+  - Einen von der Live-Suche angelegten Kontakt speichert die App mit dem echten Namen auch im Companion.
+  - **Anzeige-Vorrang:** Statuskarte und Login-Bereich zeigen `LiveScanRules.shownName`. Ein live per `get name` gelesener, nicht leerer Name (`viewModel.readRepeaterName`) hat Vorrang vor dem gespeicherten Namen, sofern er zum gewählten Repeater gehört.
+  - **Key-Vergleich:** `LiveScanRules.sameKey` vergleicht ohne Groß-/Kleinschreibung über das gemeinsame Hex-Präfix (mindestens 8 Hex-Zeichen), weil Listen teils nur 8/12 Zeichen oder den vollen Key halten.
+- **StateFlow und `equals` (verbindlich):**
+  - Modelle in einem `StateFlow` dürfen `equals` **nicht** auf eine ID verkürzen. `MutableStateFlow` verwirft jeden Wert, der dem aktuellen gleicht.
+  - Bis v1.24 verglich `MeshContact.equals` nur `pubKeyHex`. Ein umbenannter Repeater galt deshalb als unverändert, und der Name aus `get name` kam nie im Verbindungs-Screen an.
+  - Heute vergleicht `equals` alle Werte. Für „derselbe Repeater?“ wird immer `pubKeyHex` bzw. `sameKey` verglichen, nie `==`. Abgesichert durch `LiveRepeaterNameAfterLoginTest`.
+- **Übernahme:**
+  - Ein Tipp übernimmt den Repeater mit Public-Key und gespeichertem Passwort in den Login-Bereich.
+  - Ein unbekannter Repeater wird vorher per `CMD_ADD_UPDATE_CONTACT` (0x09, Typ 2, `out_path_len = 0`) als direkter Kontakt im Companion angelegt. Sonst lehnt der Companion `CMD_SEND_LOGIN` ab (`lookupContactByPubKey`).
 
 ## 3. Kommunikations- & Protokoll-Architektur
 

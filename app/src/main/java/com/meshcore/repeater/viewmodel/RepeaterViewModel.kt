@@ -8,6 +8,7 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.meshcore.repeater.model.*
+import com.meshcore.repeater.service.CompanionProtocol
 import com.meshcore.repeater.service.BleConnectionManager
 import com.meshcore.repeater.service.ChannelHash
 import com.meshcore.repeater.service.FilterListParser
@@ -123,6 +124,11 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
 
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val connectionState: StateFlow<ConnectionState> = _connectionState
+
+    // Türkanten-Lichtschein (v1.24): Ereignis direkt an der Erfolgsstelle, id = System.nanoTime() (nie gleich -> nie verschluckt)
+    private val _edgeLightTrigger = MutableStateFlow<EdgeLightTrigger?>(null)
+    val edgeLightTrigger: StateFlow<EdgeLightTrigger?> = _edgeLightTrigger
+    private fun fireEdgeLight(side: EdgeSide) { _edgeLightTrigger.value = EdgeLightTrigger(id = System.nanoTime(), side = side) }
 
     private val _usbDevices = MutableStateFlow<List<UsbSerialDeviceItem>>(emptyList())
     val usbDevices: StateFlow<List<UsbSerialDeviceItem>> = _usbDevices
@@ -351,6 +357,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             if (connected) {
                 _usbDebugInfo.value = ""   // Verbindung steht – kein "Warte auf USB-Daten…" mehr
                 _connectionState.value = ConnectionState.Connected(name ?: "USB-Node", ConnectionType.USB_SERIAL, "115200 Baud")
+                fireEdgeLight(EdgeSide.RIGHT)
                 startLinkWatch()
                 _deviceCapabilities.value = DeviceCapabilities(detectionComplete = false)
                 _hasCompletedInitialRead.value = false
@@ -394,6 +401,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 _deviceCapabilities.value = DeviceCapabilities()
                 _remoteAdminSession.value = RemoteAdminSession()
                 _meshContacts.value = emptyList()
+                clearLiveRepeaterScan()
                 stopMeshCare(restoreTx = false)
             }
         },
@@ -423,6 +431,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         onConnectionChanged = { connected, name ->
             if (connected) {
                 _connectionState.value = ConnectionState.Connected(name ?: "BLE-Node", ConnectionType.BLE_COMPANION, "MeshCore NUS")
+                fireEdgeLight(EdgeSide.RIGHT)
                 startLinkWatch()
                 viewModelScope.launch {
                     delay(250L); bleManager.sendBytes(RepeaterProtocol.buildAppStartFrame())
@@ -431,7 +440,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             } else {
                 stopLinkWatch()
                 resetInitialReadState()
-                _connectionState.value = ConnectionState.Disconnected; _telemetry.value = BatterySolarTelemetry(); _remoteAdminSession.value = RemoteAdminSession(); _meshContacts.value = emptyList(); stopMeshCare(restoreTx = false)
+                _connectionState.value = ConnectionState.Disconnected; _telemetry.value = BatterySolarTelemetry(); _remoteAdminSession.value = RemoteAdminSession(); _meshContacts.value = emptyList(); clearLiveRepeaterScan(); stopMeshCare(restoreTx = false)
             }
         },
         onLinkLost = { reason -> handleLinkLost(reason) }
@@ -574,6 +583,77 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             refreshMeshContacts()
         }
     }
+    // Live-Umgebungssuche (v1.24): Zero-Hop-Discover über den Companion, Ergebnisse nach Signal sortiert
+    private val _liveScan = MutableStateFlow(LiveScanState())
+    val liveScan: StateFlow<LiveScanState> = _liveScan
+    private var liveScanJob: Job? = null
+    private val liveScanRng = java.security.SecureRandom()
+    /** Startet eine neue Live-Suche nach direkt erreichbaren Repeatern (nur Companion, nur verbunden). */
+    fun startLiveRepeaterScan() {
+        if (!_deviceCapabilities.value.isCompanion || _connectionState.value !is ConnectionState.Connected) return
+        var tag = 0L
+        while (tag == 0L) tag = liveScanRng.nextInt().toLong() and 0xFFFFFFFFL
+        _liveScan.value = LiveScanState(scanning = true, tag = tag, startedAtMs = System.currentTimeMillis())
+        logTerminal(tr("> [Mesh] Live-Suche nach Repeatern in Reichweite…"), true, systemOnly = true)
+        sendCompanionBytes(CompanionProtocol.buildDiscoverRepeatersFrame(tag))
+        liveScanJob?.cancel()
+        liveScanJob = viewModelScope.launch {
+            delay(LiveScanRules.SCAN_WINDOW_MS)
+            if (_liveScan.value.tag == tag) _liveScan.value = _liveScan.value.copy(scanning = false)
+        }
+    }
+    /** Live-Ergebnisse ausblenden (Klappmenü zurück zur Kontaktliste). Spätere Antworten werden verworfen. */
+    fun clearLiveRepeaterScan() { liveScanJob?.cancel(); _liveScan.value = LiveScanState() }
+    private fun onControlData(data: ByteArray) {
+        val st = _liveScan.value
+        if (st.tag == 0L) return
+        val r = CompanionProtocol.parseDiscoverResponse(data, st.tag) ?: return
+        _liveScan.value = st.copy(results = LiveScanRules.merge(st.results, r))
+    }
+    /** Bekannter Kontakt zu einem Live-Repeater (gleicher Public-Key), sonst null. */
+    fun knownContactFor(r: LiveRepeater): MeshContact? = LiveScanRules.findKnown(r, _meshContacts.value)
+    /** Von der Live-Suche im Companion angelegte Kontakte: nur diese bekommen den echten Namen auch im Companion. */
+    private val liveAddedKeys = mutableSetOf<String>()
+    /**
+     * `get name` vom eingeloggten Repeater: Name in Login-Bereich, Kontakt- und Live-Liste sofort nachziehen.
+     * Für einen von der Live-Suche angelegten Kontakt (Platzhaltername) auch im Companion speichern.
+     */
+    private fun onRepeaterNameRead(name: String) {
+        // Nur im Remote-Modus (gewählter Repeater); kein isLoggedIn-Zwang – die Antwort kam ja vom Repeater
+        val t = _remoteAdminSession.value.targetRepeater ?: return
+        // Für die Anzeige immer merken (Vorrang vor dem gespeicherten Namen), auch wenn sonst nichts zu ändern ist
+        if (name.isNotBlank()) _readRepeaterName.value = ReadRepeaterName(t.pubKeyHex, name.trim())
+        val u = LiveScanRules.applyFetchedName(t, _liveScan.value.results, _meshContacts.value, name) ?: return
+        learnedNames[t.pubKeyHex.lowercase()] = u.target.name
+        // atomar, damit kein gleichzeitiges Status-Update den neuen Namen überschreibt
+        _remoteAdminSession.update { cur -> if (LiveScanRules.sameKey(cur.targetRepeater?.pubKeyHex, t.pubKeyHex)) cur.copy(targetRepeater = cur.targetRepeater!!.copy(name = u.target.name)) else cur }
+        _liveScan.update { it.copy(results = LiveScanRules.applyFetchedName(t, it.results, emptyList(), name)?.live ?: it.results) }
+        _meshContacts.value = u.contacts.sortedWith(compareByDescending<MeshContact> { it.isRepeater }.thenBy { it.name })
+        if (liveAddedKeys.remove(t.pubKeyHex)) sendCompanionBytes(CompanionProtocol.buildAddRepeaterContactFrame(t.pubKey, u.target.name))
+    }
+    /** Zuletzt per `get name` gelesener Name samt Key des Repeaters, von dem er stammt (Anzeige-Vorrang im Verbindungs-Screen). */
+    data class ReadRepeaterName(val pubKeyHex: String, val name: String)
+    private val _readRepeaterName = MutableStateFlow<ReadRepeaterName?>(null)
+    val readRepeaterName: StateFlow<ReadRepeaterName?> = _readRepeaterName
+    /** Per `get name` gelernte Namen (Public-Key -> Name), damit ein Neu-Einlesen der Kontakte sie nicht verliert. */
+    private val learnedNames = HashMap<String, String>()
+    /**
+     * Live-Repeater in den Login-Bereich übernehmen. Unbekannte Repeater werden zuerst als direkter Kontakt im Companion
+     * angelegt (CMD_ADD_UPDATE_CONTACT) – sonst lehnt der Companion CMD_SEND_LOGIN ab. Ein gespeichertes Passwort
+     * (pwd_<pubKeyHex>) wird wie gewohnt vorbelegt.
+     */
+    fun selectLiveRepeater(r: LiveRepeater) {
+        val known = knownContactFor(r)
+        val contact = LiveScanRules.toContact(r, known)
+        if (known == null) {
+            sendCompanionBytes(CompanionProtocol.buildAddRepeaterContactFrame(r.pubKey, contact.name))
+            liveAddedKeys += contact.pubKeyHex
+            _meshContacts.value = (_meshContacts.value + contact).sortedWith(compareByDescending<MeshContact> { it.isRepeater }.thenBy { it.name })
+            logTerminal(tr("> [Mesh] Repeater {0} als direkter Kontakt im Companion angelegt", contact.name), true, systemOnly = true)
+        }
+        selectTargetRepeater(contact)
+    }
+
     fun refreshMeshContacts() { _isRefreshingContacts.value = true; sendCompanionBytes(RepeaterProtocol.buildGetContactsFrame()) }
     fun selectTargetRepeater(contact: MeshContact?) {
         if (contact?.pubKeyHex != _remoteAdminSession.value.targetRepeater?.pubKeyHex) { readJob?.cancel(); _hasCompletedInitialRead.value = false; loginTimeoutJob?.cancel(); loginAttemptPending = false }
@@ -619,6 +699,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         loginAttemptPending = false
         onRemoteTrafficReceived()
         _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggedIn = true, isLoggingIn = false, sessionStatus = "Eingeloggt")
+        fireEdgeLight(EdgeSide.LEFT)
         logTerminal(tr("< [Mesh] Admin-Login bestätigt!"), false, systemOnly = true)
         startInitialScan()
     }
@@ -958,7 +1039,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             }
             "get tx" -> { _radioConfig.value = _radioConfig.value.copy(txPowerDbm = v.toDouble()); _basicSetup.value = s.copy(txPowerDbm = v) }
             "get dutycycle" -> QuerySpec.parseDutyCyclePercent(v)?.let { p -> _basicSetup.value = s.copy(dutyCyclePercent = if (p.endsWith(".0")) p.dropLast(2) else p) }
-            "get name" -> _basicSetup.value = s.copy(nodeName = v)
+            "get name" -> { _basicSetup.value = s.copy(nodeName = v); onRepeaterNameRead(v) }
             "get owner.info" -> _basicSetup.value = s.copy(ownerInfo = v)
             "get lat" -> _basicSetup.value = s.copy(latitude = v)
             "get lon" -> _basicSetup.value = s.copy(longitude = v)
@@ -1383,8 +1464,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                 }
             }
             RepeaterProtocol.PACKET_CONTACT_START -> { _deviceCapabilities.value = _deviceCapabilities.value.copy(isCompanion = true, detectionComplete = true); _isRefreshingContacts.value = true; _meshContacts.value = emptyList() }
-            RepeaterProtocol.PACKET_CONTACT -> RepeaterProtocol.parseContactFrame(data)?.let { ct -> val l = _meshContacts.value.toMutableList(); val i = l.indexOfFirst { it.pubKeyHex == ct.pubKeyHex }; if (i >= 0) l[i] = ct else l.add(ct); _meshContacts.value = l.sortedWith(compareByDescending<MeshContact> { it.isRepeater }.thenBy { it.name }) }
+            RepeaterProtocol.PACKET_CONTACT -> RepeaterProtocol.parseContactFrame(data)?.let { LiveScanRules.keepLearnedName(it, learnedNames[it.pubKeyHex.lowercase()]) }?.let { ct -> val l = _meshContacts.value.toMutableList(); val i = l.indexOfFirst { it.pubKeyHex == ct.pubKeyHex }; if (i >= 0) l[i] = ct else l.add(ct); _meshContacts.value = l.sortedWith(compareByDescending<MeshContact> { it.isRepeater }.thenBy { it.name }) }
             RepeaterProtocol.PACKET_CONTACT_END -> _isRefreshingContacts.value = false
+            CompanionProtocol.PUSH_CODE_CONTROL_DATA -> onControlData(data)
             // Remote-CLI-Antworten landen in der Offline-Queue des Companions -> per CMD_SYNC_NEXT_MESSAGE abholen
             RepeaterProtocol.PUSH_MSG_WAITING -> requestNextMessage(fromPush = true)
             RepeaterProtocol.PACKET_NO_MORE_MESSAGES -> syncInFlightSinceMs = 0L

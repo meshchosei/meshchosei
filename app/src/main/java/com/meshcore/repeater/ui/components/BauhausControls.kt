@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,6 +31,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -132,3 +138,43 @@ fun InlineRefreshIcon(
  * Update-Dialog und Haftungsausschluss. Die antippbare Fläche darum bleibt je nach Ort größer (22 dp Box bzw. IconButton).
  */
 val CloseIconSize = 16.dp
+
+/** Feste Höhe der Segment-Buttons (v1.24). */
+val SegmentButtonHeight = 36.dp
+
+/**
+ * Gleich breiter Segment-Button (v1.24, STYLE_GUIDE §2.2.1): in einer Reihe jeweils mit `Modifier.weight(1f)`, feste
+ * Höhe [SegmentButtonHeight], Inhalt zentriert, einzeilig. Während [busy] ersetzt die Braille-Animation **zentriert die
+ * Beschriftung** – der Button behält seine Abmessungen exakt, Nachbarn verschieben sich nie. Die Beschriftung bleibt
+ * dabei als Bedienhilfe erhalten (Screenreader).
+ */
+@Composable
+fun SegmentButton(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    busy: Boolean = false,
+    color: Color = LocalBauhausColors.current.cobalt
+) {
+    val outline = if (selected) color else MaterialTheme.colorScheme.outline
+    Box(
+        modifier
+            .height(SegmentButtonHeight)
+            .clip(BauhausCornerShape)
+            .background(if (selected) color.copy(alpha = 0.16f) else Color.Transparent)
+            .border(1.dp, outline, BauhausCornerShape)
+            .clickable(role = Role.Button, onClickLabel = text, onClick = onClick)
+            .semantics { contentDescription = text; this.selected = selected }
+            .padding(horizontal = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (busy) BrailleSpinner(color, fontSize = 14.sp)
+        else Text(
+            text, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, textAlign = TextAlign.Center,
+            color = if (selected) color else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
