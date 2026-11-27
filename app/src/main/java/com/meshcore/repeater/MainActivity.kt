@@ -144,9 +144,21 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
     val meshCareAvailable = !capabilities.isCompanion || remoteAdminSession.targetRepeater != null
     // Zurück zum Verbindungs-Screen: Tour beenden und Navigationsverlauf zurücksetzen
     fun resetToConnection() { setupTourStep = null; if (navHistory.last() != NavDrawerItem.CONNECTION || navHistory.size > 1) { navHistory.clear(); navHistory.add(NavDrawerItem.CONNECTION) } }
-    LaunchedEffect(isConnected) { if (!isConnected) resetToConnection() }
+    // v1.26: Während eines OTA-Vorgangs ist der Verbindungsabbruch gewollt (`start ota`, Trennen vor dem DFU) –
+    // wer im OTA-Screen ist, bleibt dort und sieht den Fortschritt bis „Fertig“.
+    val otaActiveOrFinished by viewModel.otaActiveOrFinished.collectAsState()
+    // „Firmware / OTA“ erst mit Ziel-Repeater (USB direkt oder Remote-Admin eingeloggt) – nur Companion reicht nicht
+    val isRepeaterReady = com.meshcore.repeater.model.OtaFlowRules.isRepeaterReady(isConnected, capabilities.isDirectRepeater, remoteAdminSession.isLoggedIn)
+    val otaMenuEnabled = com.meshcore.repeater.model.OtaFlowRules.menuEnabled(isRepeaterReady, otaActiveOrFinished)
+    val resetOnDisconnect by androidx.compose.runtime.rememberUpdatedState(
+        com.meshcore.repeater.model.OtaFlowRules.resetToConnectionOnDisconnect(currentScreen == NavDrawerItem.FIRMWARE_OTA, otaActiveOrFinished)
+    )
+    LaunchedEffect(isConnected) { if (!isConnected && resetOnDisconnect) resetToConnection() }
     // Aktive Verbindungsüberwachung (USB-Detach, BLE-Abriss, Remote-Repeater stumm): Meldung kommt als Snackbar über uiEvents
-    LaunchedEffect(Unit) { viewModel.linkLost.collect { resetToConnection(); scope.launch { drawerState.close() } } }
+    LaunchedEffect(Unit) { viewModel.linkLost.collect { if (resetOnDisconnect) { resetToConnection(); scope.launch { drawerState.close() } } } }
+    // OTA-Screen verlassen: nach Abschluss alle DFU-Felder leeren (und ggf. automatisch neu verbinden)
+    var lastScreen by remember { mutableStateOf(currentScreen) }
+    LaunchedEffect(currentScreen) { if (lastScreen == NavDrawerItem.FIRMWARE_OTA && currentScreen != NavDrawerItem.FIRMWARE_OTA) viewModel.onLeaveOtaScreen(); lastScreen = currentScreen }
     LaunchedEffect(Unit) { viewModel.uiEvents.collectLatest { snackbarHostState.showSnackbar(it) } }
     var showDisclaimerForced by remember { mutableStateOf(!disclaimerAccepted) }
     LaunchedEffect(disclaimerAccepted) { showDisclaimerForced = !disclaimerAccepted }
@@ -156,7 +168,11 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
     // sonst kappt Android beim Sperren die GATT-Verbindung und auf dem nRF52-Node bleibt ein BLE-Slot hängen.
     val activeRead by viewModel.activeReadStatusText.collectAsState()
     val bleScanning by viewModel.isScanningBle.collectAsState()
-    val keepScreenOn = com.meshcore.repeater.model.ScreenWakeRules.keepScreenOn(connectionState, setupReading || activeRead != null || bleScanning)
+    // v1.26: auch während des gesamten DFU-Vorgangs (Scan, Bootloader-Suche, Upload)
+    val otaState by viewModel.otaState.collectAsState()
+    val dfuScanning by viewModel.isScanningDfu.collectAsState()
+    val otaRequest by viewModel.otaBootloaderRequest.collectAsState()
+    val keepScreenOn = com.meshcore.repeater.model.ScreenWakeRules.keepScreenOn(connectionState, setupReading || activeRead != null || bleScanning, otaState.phase.isRunning || dfuScanning || otaRequest.isBusy)
     DisposableEffect(keepScreenOn, act) {
         val w = act?.window
         if (keepScreenOn) w?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -200,13 +216,14 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
             currentRoute = currentScreen, connectionState = connectionState, meshCareFlow = viewModel.meshCareState, filterStatsFlow = viewModel.filterStats,
             firmwareVersion = capabilities.firmwareVersion, themeMode = themeMode, appLanguage = appLanguage, effectiveLang = langCodeFor(appLanguage), navigationAllowed = navigationAllowed,
             meshCareAvailable = meshCareAvailable,
-            supportsBlacklist = blacklistMenuEnabled, supportsWhitelist = whitelistMenuEnabled,
+            supportsBlacklist = blacklistMenuEnabled, supportsWhitelist = whitelistMenuEnabled, otaMenuEnabled = otaMenuEnabled,
             // Geführtes Setup: KEINE erneute Abfrage – die Werte stammen aus dem einmaligen Start-Scan
             onStartGuidedSetup = { val s = if (remoteAdminSession.targetRepeater != null) 1 else 2; setupTourStep = s; viewModel.ensureInitialRead(); navHistory[navHistory.lastIndex] = (if (s == 1) NavDrawerItem.MESH_CARE else NavDrawerItem.HARDWARE_ANTENNA); scope.launch { drawerState.close() } },
             onItemClick = { item ->
                 setupTourStep = null
                 // Differenzierter Hinweis, warum ein Menüpunkt gesperrt ist
                 val blockedMsg: String? = when {
+                    item == NavDrawerItem.FIRMWARE_OTA -> if (otaMenuEnabled) null else msgNotConnected
                     item == NavDrawerItem.CONNECTION || item == NavDrawerItem.ABOUT -> null
                     !navigationAllowed -> msgNotConnected
                     item == NavDrawerItem.BLACKLIST && !capabilities.supportsBlacklist -> msgUnsupported
@@ -243,6 +260,7 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
                         NavDrawerItem.BLACKLIST -> FilterScreen(viewModel = viewModel, view = com.meshcore.repeater.model.FilterMode.BLACKLIST)
                         NavDrawerItem.WHITELIST -> FilterScreen(viewModel = viewModel, view = com.meshcore.repeater.model.FilterMode.WHITELIST)
                         NavDrawerItem.CLI_CONSOLE -> CliConsoleScreen(viewModel = viewModel)
+                        NavDrawerItem.FIRMWARE_OTA -> com.meshcore.repeater.ui.screens.OtaScreen(viewModel = viewModel)
                         NavDrawerItem.BACKUP -> BackupScreen(viewModel = viewModel)
                         NavDrawerItem.ABOUT -> AboutScreen(viewModel = viewModel, onShowDisclaimer = { showDisclaimerInfo = true })
                     }

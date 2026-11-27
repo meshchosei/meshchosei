@@ -4493,5 +4493,265 @@
   "Repeat live search",
   "Live-zoekactie herhalen",
   "Relancer la recherche en direct"
+ ],
+ "Ohne Bluetooth-Berechtigung ist kein Firmware-Update möglich.": [
+  "A firmware update is not possible without Bluetooth permission.",
+  "Zonder Bluetooth-toestemming is een firmware-update niet mogelijk.",
+  "Sans autorisation Bluetooth, aucune mise à jour du firmware n’est possible."
+ ],
+ "Bitte ein Nordic-DFU-Paket (.zip) wählen.": [
+  "Please choose a Nordic DFU package (.zip).",
+  "Kies een Nordic-DFU-pakket (.zip).",
+  "Veuillez choisir un paquet Nordic DFU (.zip)."
+ ],
+ "Die Datei ist leer.": [
+  "The file is empty.",
+  "Het bestand is leeg.",
+  "Le fichier est vide."
+ ],
+ "Die Datei ist zu groß für ein Firmware-Paket.": [
+  "The file is too large for a firmware package.",
+  "Het bestand is te groot voor een firmwarepakket.",
+  "Le fichier est trop volumineux pour un paquet de firmware."
+ ],
+ "Kein Nordic-DFU-Paket: manifest.json bzw. .bin + .dat fehlen.": [
+  "Not a Nordic DFU package: manifest.json or .bin + .dat missing.",
+  "Geen Nordic-DFU-pakket: manifest.json of .bin + .dat ontbreekt.",
+  "Pas un paquet Nordic DFU : manifest.json ou .bin + .dat manquant."
+ ],
+ "FIRMWARE-PAKET WÄHLEN": [
+  "CHOOSE FIRMWARE PACKAGE",
+  "FIRMWAREPAKKET KIEZEN",
+  "CHOISIR LE PAQUET DE FIRMWARE"
+ ],
+ "Nordic-DFU-Paket (.zip) öffnen": [
+  "Open Nordic DFU package (.zip)",
+  "Nordic-DFU-pakket (.zip) openen",
+  "Ouvrir un paquet Nordic DFU (.zip)"
+ ],
+ "Datei": [
+  "File",
+  "Bestand",
+  "Fichier"
+ ],
+ "Größe": [
+  "Size",
+  "Grootte",
+  "Taille"
+ ],
+ "Nur Firmware flashen, die genau für dieses Board gebaut ist. Eine falsche Firmware kann das Gerät unbrauchbar machen.": [
+  "Only flash firmware built exactly for this board. Wrong firmware can make the device unusable.",
+  "Flash alleen firmware die precies voor dit board is gebouwd. Verkeerde firmware kan het apparaat onbruikbaar maken.",
+  "Ne flashez qu’un firmware compilé exactement pour cette carte. Un mauvais firmware peut rendre l’appareil inutilisable."
+ ],
+ "Verbundenes Board: {0}": [
+  "Connected board: {0}",
+  "Verbonden board: {0}",
+  "Carte connectée : {0}"
+ ],
+ "ZIELGERÄT WÄHLEN": [
+  "CHOOSE TARGET DEVICE",
+  "DOELAPPARAAT KIEZEN",
+  "CHOISIR L’APPAREIL CIBLE"
+ ],
+ "Anderes Gerät wählen": [
+  "Choose another device",
+  "Ander apparaat kiezen",
+  "Choisir un autre appareil"
+ ],
+ "A · Verbundenen Repeater in den DFU-Bootloader versetzen": [
+  "A · Put the connected repeater into the DFU bootloader",
+  "A · Verbonden repeater in de DFU-bootloader zetten",
+  "A · Passer le répéteur connecté en bootloader DFU"
+ ],
+ "Sendet \"start ota\" und sucht danach automatisch das Gerät im DFU-Modus. Es muss in Bluetooth-Reichweite dieses Smartphones sein.": [
+  "Sends \"start ota\" and then automatically looks for the device in DFU mode. It must be within Bluetooth range of this phone.",
+  "Stuurt \"start ota\" en zoekt daarna automatisch het apparaat in DFU-modus. Het moet binnen Bluetooth-bereik van deze telefoon zijn.",
+  "Envoie « start ota » puis recherche automatiquement l’appareil en mode DFU. Il doit être à portée Bluetooth de ce téléphone."
+ ],
+ "Verfügbar, wenn ein Repeater direkt per USB verbunden oder per Remote-Admin eingeloggt ist.": [
+  "Available when a repeater is connected directly via USB or logged in via remote admin.",
+  "Beschikbaar wanneer een repeater direct via USB is verbonden of via remote-admin is ingelogd.",
+  "Disponible lorsqu’un répéteur est connecté directement en USB ou connecté via l’admin à distance."
+ ],
+ "Bootloader aktivieren (start ota)": [
+  "Enable bootloader (start ota)",
+  "Bootloader activeren (start ota)",
+  "Activer le bootloader (start ota)"
+ ],
+ "Sende \"start ota\"…": [
+  "Sending \"start ota\"…",
+  "\"start ota\" wordt verzonden…",
+  "Envoi de « start ota »…"
+ ],
+ "Suche DFU-Gerät {0}…": [
+  "Looking for DFU device {0}…",
+  "DFU-apparaat {0} zoeken…",
+  "Recherche de l’appareil DFU {0}…"
+ ],
+ "Suche DFU-Gerät…": [
+  "Looking for DFU device…",
+  "DFU-apparaat zoeken…",
+  "Recherche de l’appareil DFU…"
+ ],
+ "Kein eindeutiges DFU-Gerät gefunden – bitte unten aus der Liste wählen.": [
+  "No unique DFU device found – please choose from the list below.",
+  "Geen eenduidig DFU-apparaat gevonden – kies hieronder uit de lijst.",
+  "Aucun appareil DFU unique trouvé – veuillez choisir dans la liste ci-dessous."
+ ],
+ "Der Repeater hat \"start ota\" abgelehnt: {0}": [
+  "The repeater rejected \"start ota\": {0}",
+  "De repeater heeft \"start ota\" geweigerd: {0}",
+  "Le répéteur a refusé « start ota » : {0}"
+ ],
+ "B · Gerät im DFU-Modus suchen": [
+  "B · Search for a device in DFU mode",
+  "B · Apparaat in DFU-modus zoeken",
+  "B · Rechercher un appareil en mode DFU"
+ ],
+ "Findet Bootloader (DfuTarg, AdaDFU) und Nodes nach \"start ota\" (…_OTA).": [
+  "Finds bootloaders (DfuTarg, AdaDFU) and nodes after \"start ota\" (…_OTA).",
+  "Vindt bootloaders (DfuTarg, AdaDFU) en nodes na \"start ota\" (…_OTA).",
+  "Trouve les bootloaders (DfuTarg, AdaDFU) et les nœuds après « start ota » (…_OTA)."
+ ],
+ "Suche stoppen": [
+  "Stop search",
+  "Zoeken stoppen",
+  "Arrêter la recherche"
+ ],
+ "DFU-Geräte suchen": [
+  "Search DFU devices",
+  "DFU-apparaten zoeken",
+  "Rechercher des appareils DFU"
+ ],
+ "Suche läuft…": [
+  "Searching…",
+  "Zoeken…",
+  "Recherche en cours…"
+ ],
+ "BESTÄTIGEN & FLASHEN": [
+  "CONFIRM & FLASH",
+  "BEVESTIGEN & FLASHEN",
+  "CONFIRMER & FLASHER"
+ ],
+ "Bestehende Verbindungen werden vor dem Update getrennt. Das Smartphone bleibt währenddessen wach – bitte die App geöffnet lassen.": [
+  "Existing connections are closed before the update. The phone stays awake meanwhile – please keep the app open.",
+  "Bestaande verbindingen worden vóór de update verbroken. De telefoon blijft intussen wakker – houd de app open.",
+  "Les connexions existantes sont fermées avant la mise à jour. Le téléphone reste éveillé pendant ce temps – veuillez garder l’application ouverte."
+ ],
+ "Erst Firmware-Paket und Zielgerät wählen.": [
+  "Choose firmware package and target device first.",
+  "Kies eerst firmwarepakket en doelapparaat.",
+  "Choisissez d’abord le paquet de firmware et l’appareil cible."
+ ],
+ "Zum Flashen schieben": [
+  "Slide to flash",
+  "Schuif om te flashen",
+  "Glisser pour flasher"
+ ],
+ "Teil {0} von {1}": [
+  "Part {0} of {1}",
+  "Deel {0} van {1}",
+  "Partie {0} sur {1}"
+ ],
+ "Update abgeschlossen. Das Gerät startet mit der neuen Firmware neu.": [
+  "Update complete. The device restarts with the new firmware.",
+  "Update voltooid. Het apparaat start opnieuw met de nieuwe firmware.",
+  "Mise à jour terminée. L’appareil redémarre avec le nouveau firmware."
+ ],
+ "Update abgebrochen. Das Gerät bleibt im Bootloader und kann erneut geflasht werden.": [
+  "Update cancelled. The device stays in the bootloader and can be flashed again.",
+  "Update afgebroken. Het apparaat blijft in de bootloader en kan opnieuw worden geflasht.",
+  "Mise à jour annulée. L’appareil reste dans le bootloader et peut être flashé à nouveau."
+ ],
+ "Update fehlgeschlagen: {0}": [
+  "Update failed: {0}",
+  "Update mislukt: {0}",
+  "Échec de la mise à jour : {0}"
+ ],
+ "Zurücksetzen": [
+  "Reset",
+  "Opnieuw",
+  "Réinitialiser"
+ ],
+ "Bootloader aktivieren": [
+  "Enabling bootloader",
+  "Bootloader activeren",
+  "Activation du bootloader"
+ ],
+ "DFU-Initialisierung": [
+  "DFU init",
+  "DFU-initialisatie",
+  "Initialisation DFU"
+ ],
+ "Firmware-Upload": [
+  "Firmware upload",
+  "Firmware-upload",
+  "Envoi du firmware"
+ ],
+ "Fertig / Neustart": [
+  "Completed / restart",
+  "Klaar / herstart",
+  "Terminé / redémarrage"
+ ],
+ "[OTA] Antwort auf \"start ota\": {0}": [
+  "[OTA] Reply to \"start ota\": {0}",
+  "[OTA] Antwoord op \"start ota\": {0}",
+  "[OTA] Réponse à « start ota » : {0}"
+ ],
+ "[OTA] Bestehende Verbindung wird für das Update getrennt.": [
+  "[OTA] Closing the existing connection for the update.",
+  "[OTA] Bestaande verbinding wordt verbroken voor de update.",
+  "[OTA] Fermeture de la connexion existante pour la mise à jour."
+ ],
+ "Firmware-Update konnte nicht gestartet werden.": [
+  "Firmware update could not be started.",
+  "Firmware-update kon niet worden gestart.",
+  "La mise à jour du firmware n’a pas pu être lancée."
+ ],
+ "Dieses Board ({0}) nutzt kein Nordic BLE DFU. ESP32-Geräte werden per WLAN- bzw. MCUmgr-OTA aktualisiert.": [
+  "This board ({0}) does not use Nordic BLE DFU. ESP32 devices are updated via Wi-Fi or MCUmgr OTA.",
+  "Dit board ({0}) gebruikt geen Nordic BLE DFU. ESP32-apparaten worden via wifi- of MCUmgr-OTA bijgewerkt.",
+  "Cette carte ({0}) n’utilise pas Nordic BLE DFU. Les appareils ESP32 sont mis à jour via OTA Wi-Fi ou MCUmgr."
+ ],
+ "Kein Nordic-DFU-Gerät (ESP32-OTA): {0}": [
+  "Not a Nordic DFU device (ESP32 OTA): {0}",
+  "Geen Nordic-DFU-apparaat (ESP32-OTA): {0}",
+  "Pas un appareil Nordic DFU (OTA ESP32) : {0}"
+ ],
+ "[OTA] Verbindung getrennt (erwartet: Neustart in den Bootloader).": [
+  "[OTA] Connection closed (expected: restart into the bootloader).",
+  "[OTA] Verbinding verbroken (verwacht: herstart in de bootloader).",
+  "[OTA] Connexion fermée (attendu : redémarrage dans le bootloader)."
+ ],
+ "Nach Update automatisch neu verbinden": [
+  "Reconnect automatically after update",
+  "Na update automatisch opnieuw verbinden",
+  "Reconnecter automatiquement après la mise à jour"
+ ],
+ "Die App verbindet sich nach dem Neustart automatisch wieder.": [
+  "The app reconnects automatically after the restart.",
+  "De app maakt na de herstart automatisch opnieuw verbinding.",
+  "L’application se reconnecte automatiquement après le redémarrage."
+ ],
+ "[OTA] Automatisches Neuverbinden in {0} s…": [
+  "[OTA] Reconnecting automatically in {0} s…",
+  "[OTA] Automatisch opnieuw verbinden over {0} s…",
+  "[OTA] Reconnexion automatique dans {0} s…"
+ ],
+ "Automatisches Neuverbinden: kein USB-Gerät gefunden.": [
+  "Automatic reconnect: no USB device found.",
+  "Automatisch opnieuw verbinden: geen USB-apparaat gevonden.",
+  "Reconnexion automatique : aucun appareil USB trouvé."
+ ],
+ "Automatisches Neuverbinden: Companion nicht erreichbar.": [
+  "Automatic reconnect: companion not reachable.",
+  "Automatisch opnieuw verbinden: companion niet bereikbaar.",
+  "Reconnexion automatique : companion injoignable."
+ ],
+ "[OTA] Melde \"{0}\" wieder an…": [
+  "[OTA] Logging in to \"{0}\" again…",
+  "[OTA] Opnieuw aanmelden bij \"{0}\"…",
+  "[OTA] Nouvelle connexion à « {0} »…"
  ]
 }

@@ -279,6 +279,8 @@ InlineRefreshIcon(
 ### 2.6 Navigation & System-Zurück
 
 - Navigation läuft über einen Drawer (`AppDrawer`, `NavDrawerItem`). Startseite ist **CONNECTION**.
+- **Alle Menüpunkte immer sichtbar (seit v1.26):** Das Menü zeigt stets alle `NavDrawerItem` in fester Reihenfolge (`DrawerItemRules.items()`). Gesperrte Einträge sind nur ausgegraut (Alpha 0,5), nie ausgeblendet. Die Sperrlogik steht zentral in `DrawerItemRules.isEnabled`; „Firmware / OTA“ folgt `isRepeaterReady || otaActiveOrFinished` (§2.16). Geprüft in `DrawerItemRulesTest`.
+- **Dichte der Menüeinträge (seit v1.26):** `NavigationDrawerItem` mit `padding(horizontal = 8.dp, vertical = 0.dp)` und `heightIn(min = 56.dp)` (vorher 1 dp / 58 dp); der Kopfbereich hat oben 18 statt 20 dp Innenabstand. So stehen die Einträge je 4 dp enger, und alle Menüpunkte inklusive „Firmware / OTA“ passen ohne Scrollen ins Seitenmenü. Ein neuer Menüpunkt darf diese Dichte nicht weiter verringern; passt er nicht mehr, werden Einträge zusammengelegt statt die Abstände weiter zu kürzen.
 - **Interaktiver Bauhaus-Drawer (seit v1.22, verbindlich):**
   - Ersetzt `ModalNavigationDrawer`, bei dem das Menü im geschlossenen Zustand nur an der ~20-dp-Kante reagierte (Konflikt mit der System-Zurück-Geste) und leicht zurückschnappte.
   - Technik: `BauhausModalDrawer` mit `rememberBauhausDrawerState()` in `ui/components/BauhausDrawer.kt`. Die Position ist ein `Animatable` von 0 (zu) bis 1 (offen), der Offset läuft von `-drawerWidth` bis `0`.
@@ -307,6 +309,12 @@ InlineRefreshIcon(
   - Der Verlauf ist begrenzt: jeder Screen höchstens einmal, maximal 8 Einträge.
 - Compose-State wird nie während der Komposition geschrieben.
   - Beispiel: `I18n.language` wird vor `setContent` gesetzt und bei Änderungen per `LaunchedEffect(langCode)`.
+
+### 2.6.1 Aufzählungen mit hängendem Einzug (seit v1.26, verbindlich)
+- Aufzählungen mit `•` werden nie als ein einziger `Text` mit eingebetteten Punkten gesetzt, weil Folgezeilen sonst unter den Punkt rutschen.
+- Stattdessen `BulletList` (`ui/components/BulletList.kt`): je Eintrag eine `Row` mit fester Bullet-Spalte (`•` in `BulletColumnWidth` = 14 dp) und rechts `Text(modifier = Modifier.weight(1f))`. So stehen 2. und 3. Zeile bündig unter dem Textanfang.
+- Ressourcentexte dürfen weiter als „• a\n• b“ gepflegt werden; `BulletListRules.items()` zerlegt sie und entfernt das führende `•`.
+- Erster Einsatz: „Verwendete Open-Source-Komponenten“ in „Über & Lizenz“.
 
 ### 2.7 Status-Overlay mit Braille-Spinner
 
@@ -505,6 +513,50 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
   - Eine Rückmeldung erscheint als kleine Statuszeile im Dialog.
 - **Datenschutz:** Abschnitt 5 in `PRIVACY.md` (DE und EN) und `about_privacy_debug_body` in der Datenschutz-Karte (4 Sprachen). Meldungen werden nur im Arbeitsspeicher gesammelt (letzte 60).
 
+### 2.16 Firmware / OTA-Update per Nordic BLE DFU (seit v1.26, verbindlich)
+- **Ort:** eigener Menüpunkt **„Firmware / OTA“** (`NavDrawerItem.FIRMWARE_OTA`, `OtaScreen.kt`) zwischen „Backup“ und „Über & Lizenz“. Er ist ausgegraut, bis ein **Ziel-Repeater bereit** ist (direkt per USB verbunden oder per Remote-Admin eingeloggt; ein bloß verbundener Companion-Node reicht nicht, weil dann offen ist, wohin `start ota` geht), **außer** ein OTA-Vorgang ist aktiv oder noch nicht abgeschlossen (`OtaFlowRules.menuEnabled(isRepeaterReady, otaActiveOrFinished)`). So kommt man während eines Updates jederzeit zurück.
+- **Technik:** offizielle Nordic Android DFU Library `no.nordicsemi.android:dfu` **2.8.0**. Das ist die neueste Version ohne Kotlin-2.x-Abhängigkeit (ab 2.9.0 kotlin-stdlib 2.x, Projekt: Kotlin 1.9).
+  - `service/dfu/DfuService` erweitert `DfuBaseService` (Vordergrund-Dienst, `foregroundServiceType="connectedDevice"`). Die Benachrichtigung führt zurück zur `MainActivity`.
+  - Manifest: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_CONNECTED_DEVICE`, `POST_NOTIFICATIONS` (Android 13+, wird erst beim Start optional angefragt; das Update läuft auch ohne).
+  - Benachrichtigungskanal einmalig per `DfuServiceInitiator.createDfuNotificationChannel`.
+- **Feste DFU-Einstellungen, keine Expertenoptionen in der UI** (`FirmwareUpdateController.start`):
+  - Packet Receipt Notifications an, alle **12** Pakete;
+  - `setKeepBond(true)`, `setForceDfu(false)`;
+  - Resume bleibt aktiv (Bibliotheksstandard; 2.8.0 hat kein `setDisableResume(false)`, nur das Abschalten);
+  - `setMtu(247)`, `setForeground(true)`.
+- **Firmware-Fakten (am Quellcode geprüft):**
+  - MeshCore nRF52 `start ota` bleibt in der Anwendung, startet den Adafruit-Legacy-DFU-Dienst (`00001530-…`) unter dem Namen `<BOARD>_OTA` und antwortet `OK - mac: AA:BB:…`. Den Sprung in den Bootloader macht die Nordic-Bibliothek selbst (Buttonless).
+  - ZephCore nRF52 `start ota` setzt GPREGRET 0xA8 und startet direkt im BLE-OTA-Bootloader neu. Die Antwort kommt deshalb oft nicht mehr an.
+  - Bootloader melden sich als `DfuTarg` (Secure DFU, `FE59`) oder `AdaDFU` (Legacy). **Nicht** jedes Gerät nennt sich `DfuTarg`; der Scan erkennt alle drei Fälle (`DfuScanRules.classify`).
+  - ESP32 (WLAN-/HTTP-OTA, MCUmgr) ist mit Nordic DFU nicht kompatibel: Option A ist für ESP32-Boards gesperrt (`OtaTargetRules.nordicCapable`), ESP32-Antworten gelten als Fehler mit Erklärung.
+- **Drei Schritte als nummerierte Karten** (Nummernkästchen in Kobalt / Signalrot / Grün, ✓ wenn erledigt):
+  1. **Firmware-Paket wählen:** `OpenDocument` für `application/zip`. Das Paket wird in den App-Cache kopiert (`cacheDir/dfu/firmware.zip`), damit der Dienst unabhängig von der Dokument-Freigabe lesen kann. Geprüft werden Endung `.zip`, Größe (0 < x ≤ 4 MB) und Inhalt (`manifest.json` oder `.bin`/`.hex` + `.dat`). Angezeigt werden Dateiname und Größe sowie immer der Ocker-Hinweis, nur passende Board-Firmware zu flashen (mit dem verbundenen Board, wenn bekannt).
+  2. **Zielgerät wählen:**
+     - **A** – verbundenen Repeater (USB direkt oder Remote-Admin eingeloggt) per `start ota` in den Bootloader versetzen. Der Befehl läuft genau einmal unter `sequentialQueryMutex`; ein aktiver Schonmodus wird vorher beendet. Danach sucht die App 30 s nach dem DFU-Gerät und wählt **nur bei eindeutigem Treffer** automatisch (MAC aus der Antwort, MAC+1, gemeldeter Name, sonst genau ein neues DFU-Gerät). Mehrdeutig heißt: Der Nutzer wählt aus der Liste.
+     - **B** – eigener BLE-Scan (20 s, Low Latency) nach DFU-Geräten. Die Liste ist nach RSSI sortiert und zeigt eckige Signalbalken, Name, Adresse, DFU-Art und dBm.
+     - Der erwartete Verbindungsabbruch nach `start ota` erzeugt keine Warnung „Verbindung getrennt“, nur einen Eintrag im System-Protokoll.
+  3. **Bestätigen & Flashen:** Start nur per `SlideToConfirm`. Vorher werden BLE-Scans gestoppt und die bestehende Verbindung (GATT/USB) sauber getrennt (§3.7), dann 800 ms gewartet, damit der DFU-Dienst den BLE-Chip exklusiv hat.
+- **Fortschritt in 4 Phasen** (`PhaseList`): erledigt `✓` grün, aktiv Braille-Spinner in Kobalt, abgebrochen/fehlgeschlagen `✕` rot, offen `○`.
+  1. Bootloader aktivieren (`onDeviceConnecting`, `onEnablingDfuMode`);
+  2. DFU-Initialisierung (`onDfuProcessStarting/Started`, `onFirmwareValidating`);
+  3. Firmware-Upload mit **eckigem** Fortschrittsbalken (`SquareProgressBar`, kein runder Material-Indikator), `0–100 %` in Monospace und Übertragungsrate in kB/s; bei mehrteiligen Paketen „Teil x von y“;
+  4. Fertig / Neustart (`onDfuCompleted`).
+  - Während des Laufs gibt es nur „Abbrechen“ (rot umrandet), danach „Zurücksetzen“ (leert alles für einen neuen Durchlauf).
+- **Zustandsmaschine `OtaStateMachine` (rein, unit-getestet):**
+  - Start nur mit Paket und Ziel; kein Doppelstart; Auswahl während des Laufs gesperrt.
+  - Phasen laufen vorwärts. Einzige Ausnahme: DFU-Init → Bootloader aktivieren, solange 0 % übertragen sind (Buttonless-Sprung der Bibliothek).
+  - Prozent steigen nur und werden auf 0–100 begrenzt; je Teil eines mehrteiligen Pakets beginnt die Zählung neu.
+  - Nach Fertig, Abbruch oder Fehler werden späte Bibliotheksereignisse ignoriert; der Schritt des Abbruchs bleibt sichtbar (`stoppedAtStep`).
+  - `Reset` liefert einen komplett leeren Zustand (`OtaState()`).
+- **Kein Zurückspringen bei gewolltem Abbruch:** Nach `start ota` bzw. dem Trennen vor dem DFU fällt die Verbindung absichtlich weg. Wer im OTA-Screen ist, bleibt dort und sieht den Fortschritt bis „Fertig“ (`OtaFlowRules.resetToConnectionOnDisconnect`). Ohne OTA-Vorgang und auf anderen Screens gilt weiter: zurück zum Verbindungs-Screen.
+- **„Nach Update automatisch neu verbinden“** (`BauhausSwitch` in Karte 3, Standard an, gespeichert):
+  - Beim ersten OTA-Schritt merkt sich die App die Verbindung (`OtaReconnectPlan`: BLE-Adresse bzw. USB-Gerät mit Vendor/Product-ID, Baudrate, eingeloggter Remote-Repeater).
+  - Nach erfolgreichem Update (oder beim Verlassen bzw. „Zurücksetzen“ danach) verbindet sie sich nach **2,5 s** Neustart-Pause genau einmal neu. Ein USB-Gerät mit neuer ID wird über Vendor/Product-ID wiedergefunden.
+  - War vorher ein Repeater eingeloggt, wird er nach der Companion-Erkennung wieder ausgewählt und mit dem gespeicherten Passwort angemeldet.
+  - Nach Abbruch oder Fehler wird nicht neu verbunden.
+- **Aufräumen:** Nach Abschluss (Fertig, Abbruch, Fehler) leert das Verlassen des OTA-Screens oder „Zurücksetzen“ **alle** DFU-Felder: Paket samt Cache-Kopie, Ziel, Trefferliste, Fortschritt, Status, `start ota`-Status und die OTA-Sitzung. Während eines Laufs bleibt alles erhalten.
+- **Wachhalten:** Der Bildschirm bleibt während Scan, Bootloader-Suche und Upload an (`ScreenWakeRules.keepScreenOn(…, firmwareUpdateActive)`), auch wenn die App-Verbindung schon getrennt ist.
+
 ## 3. Kommunikations- & Protokoll-Architektur
 
 ### 3.1 Streng sequentielles Request-Response
@@ -606,6 +658,7 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
   - `MainActivity` setzt das Flag dynamisch, solange eine Verbindung aufgebaut wird oder steht (USB oder BLE) oder ein Einlesen bzw. BLE-Scan läuft (`ScreenWakeRules.keepScreenOn`).
   - Das Flag wird per `DisposableEffect` sofort wieder freigegeben (`clearFlags`), sobald nichts mehr läuft.
   - Grund: Sperrt sich das Smartphone mitten in einer BLE-Sitzung, kappt Android die GATT-Verbindung, und auf dem nRF52-Node bleibt oft ein belegter BLE-Slot hängen.
+  - Seit v1.26 zusätzlich während eines Firmware-Updates (DFU-Scan, Bootloader-Suche, Upload), unabhängig vom Verbindungsstatus (§2.16).
 - **GATT freigeben (`BleConnectionManager.releaseGatt`):**
   - Immer `gatt.disconnect()` und danach **immer** `gatt.close()`, jeweils einzeln abgesichert, damit eine Exception in `disconnect()` das `close()` nicht überspringt.
   - Danach `activeGatt = null`, und die Instanz wird als `closedGatt` gemerkt. Späte Callbacks dieser Instanz werden ignoriert.

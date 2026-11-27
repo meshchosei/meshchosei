@@ -67,7 +67,11 @@ fun AboutScreen(viewModel: RepeaterViewModel, onShowDisclaimer: () -> Unit) {
                 Text(stringResource(R.string.about_ai_title), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = bColors.ochre); Spacer(Modifier.height(6.dp))
                 Text(stringResource(R.string.about_ai_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant); Spacer(Modifier.height(12.dp))
                 Text(stringResource(R.string.about_credits_title), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = bColors.cobalt); Spacer(Modifier.height(6.dp))
-                Text(stringResource(R.string.about_credits_body), fontSize = 12.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                // v1.26: hängender Einzug – Folgezeilen bündig unter dem Textanfang (STYLE_GUIDE §2.6.1)
+                com.meshcore.repeater.ui.components.BulletList(
+                    com.meshcore.repeater.ui.components.BulletListRules.items(stringResource(R.string.about_credits_body)),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, fontFamily = FontFamily.Monospace
+                )
             }
         }
         // Datenschutzerklärung (ersetzt die doppelte Disclaimer-Karte; der Disclaimer bleibt über den Button abrufbar)

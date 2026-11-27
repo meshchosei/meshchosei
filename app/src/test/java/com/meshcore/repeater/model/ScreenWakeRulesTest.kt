@@ -22,4 +22,10 @@ class ScreenWakeRulesTest {
         assertFalse(ScreenWakeRules.keepScreenOn(ConnectionState.Disconnected, readingOrScanning = false))
         assertFalse(ScreenWakeRules.keepScreenOn(ConnectionState.Error("BLE-Verbindung fehlgeschlagen"), false))
     }
+
+    @Test fun staysAwakeDuringFirmwareUpdateEvenWithoutConnection() {
+        // v1.26: vor dem DFU wird die Verbindung getrennt – der Bildschirm muss trotzdem an bleiben
+        assertTrue(ScreenWakeRules.keepScreenOn(ConnectionState.Disconnected, readingOrScanning = false, firmwareUpdateActive = true))
+        assertFalse(ScreenWakeRules.keepScreenOn(ConnectionState.Disconnected, readingOrScanning = false, firmwareUpdateActive = false))
+    }
 }

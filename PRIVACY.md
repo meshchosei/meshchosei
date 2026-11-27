@@ -1,6 +1,6 @@
 # Datenschutz – meshchōsei
 
-Stand: 2026-11-27 (Version 1.25)
+Stand: 2026-11-27 (Version 1.26)
 
 meshchōsei betreibt **keine eigenen Server**, enthält **kein Tracking**, keine Werbung und keine Analyse-Bibliotheken. Die App erhebt keine Nutzungsdaten.
 
@@ -14,6 +14,7 @@ meshchōsei betreibt **keine eigenen Server**, enthält **kein Tracking**, keine
 ## 2. Bluetooth- und Standort-Berechtigung
 
 - **Bluetooth** (`BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`) wird nur benötigt, um einen Companion-Node zu finden und zu verbinden. Ab Android 12 ist der Scan als `neverForLocation` deklariert.
+- **Firmware-Update (seit Version 1.26):** Für „Firmware / OTA“ sucht die App per Bluetooth nach Geräten im DFU-Modus und überträgt die von dir gewählte Firmware-Datei mit einem Vordergrund-Dienst (`FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_CONNECTED_DEVICE`). Ab Android 13 fragt sie dafür optional die Benachrichtigungs-Berechtigung (`POST_NOTIFICATIONS`) an, um den Fortschritt anzuzeigen. Die Firmware-Datei wird nur lokal im App-Cache zwischengespeichert und an niemanden außer dem gewählten Gerät gesendet.
 - **Standort** (`ACCESS_FINE_LOCATION`) wird nur bis Android 11 angefordert, weil Android dort BLE-Scans an die Standortberechtigung koppelt. Die App liest den Standort deines Smartphones **nicht** aus und überträgt ihn nirgendwohin.
 - „GPS“ in der App bezieht sich immer auf das GPS-Modul des **Repeaters** (z. B. `gps setloc`). Die Koordinaten des Repeaters setzt du selbst; sie werden nur an deinen Repeater gesendet.
 
@@ -46,6 +47,10 @@ Kartenkacheln und Versions-Check sind die einzigen Internetzugriffe der App (Ber
 - Contents: app and Android version, device model, selected language and palette, connection type, the device data of the **companion node** (name, model, firmware, build date, protocol version, radio settings) and of the **target repeater** (board, radio chip, firmware, bootloader version, capabilities), the latest status and error messages, and the CLI and system log of the current session. The companion node's **BLE PIN** and **GPS position** are never included.
 - **Passwords and keys are excluded:** the private key (`prv.key`), admin and guest passwords, `wifi.pass` and `mqtt.*.password` are replaced by `[REDACTED]` before the report is shown. This also applies to every admin password stored in the app, wherever it appears in the text.
 - The full report is shown to you. You decide whether to **copy** it or **save it as a file**, and you can remove any line before sharing it (e.g. in a GitHub issue). It stays in memory and is not stored permanently unless you save it yourself.
+
+## Firmware update (optional, since version 1.26) – English
+
+- For **“Firmware / OTA”** the app scans via Bluetooth for devices in DFU mode and sends the firmware file you selected using a foreground service (`FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_CONNECTED_DEVICE`). On Android 13+ it optionally asks for the notification permission (`POST_NOTIFICATIONS`) to show the progress. The firmware file is only cached locally in the app and is sent to nobody but the selected device.
 
 ## Kontakt & Quellcode
 

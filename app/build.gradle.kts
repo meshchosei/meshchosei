@@ -22,8 +22,8 @@ android {
         applicationId = "com.meshcore.repeater"
         minSdk = 26
         targetSdk = 34
-        versionCode = 125
-        versionName = "1.25"
+        versionCode = 126
+        versionName = "1.26"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -98,6 +98,7 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.usb.serial.android)
+    implementation(libs.nordic.dfu)   // v1.26: Firmware / OTA (BLE DFU)
 
     testImplementation(libs.junit)
     // echte org.json-Implementierung für JVM-Unit-Tests (android.jar enthält nur Stubs)

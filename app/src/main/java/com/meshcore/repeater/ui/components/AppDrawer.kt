@@ -60,6 +60,7 @@ import com.meshcore.repeater.model.FilterStats
 import com.meshcore.repeater.model.MeshCareState
 import com.meshcore.repeater.model.ThemeMode
 import com.meshcore.repeater.ui.navigation.NavDrawerItem
+import com.meshcore.repeater.ui.navigation.DrawerItemRules
 import com.meshcore.repeater.ui.theme.BauhausCornerShape
 import com.meshcore.repeater.ui.theme.LocalBauhausColors
 
@@ -83,6 +84,8 @@ fun AppDrawerHost(
     meshCareAvailable: Boolean,
     supportsBlacklist: Boolean = false,
     supportsWhitelist: Boolean = false,
+    /** v1.26: „Firmware / OTA“ nur mit bereitem Ziel-Repeater oder während eines aktiven/nicht abgeschlossenen OTA-Vorgangs. */
+    otaMenuEnabled: Boolean = false,
     onStartGuidedSetup: () -> Unit,
     onItemClick: (NavDrawerItem) -> Unit,
     onThemeChange: (ThemeMode) -> Unit,
@@ -94,7 +97,7 @@ fun AppDrawerHost(
     AppDrawerSheet(
         currentRoute = currentRoute, connectionState = connectionState, meshCareState = meshCareState, filterStats = filterStats,
         themeMode = themeMode, appLanguage = appLanguage, effectiveLang = effectiveLang, firmwareVersion = firmwareVersion, navigationAllowed = navigationAllowed,
-        meshCareAvailable = meshCareAvailable, supportsBlacklist = supportsBlacklist, supportsWhitelist = supportsWhitelist, onStartGuidedSetup = onStartGuidedSetup, onItemClick = onItemClick,
+        meshCareAvailable = meshCareAvailable, supportsBlacklist = supportsBlacklist, supportsWhitelist = supportsWhitelist, otaMenuEnabled = otaMenuEnabled, onStartGuidedSetup = onStartGuidedSetup, onItemClick = onItemClick,
         onThemeChange = onThemeChange, onLanguageChange = onLanguageChange, onShowDisclaimer = onShowDisclaimer
     )
 }
@@ -113,6 +116,7 @@ fun AppDrawerSheet(
     meshCareAvailable: Boolean = true,
     supportsBlacklist: Boolean = false,
     supportsWhitelist: Boolean = false,
+    otaMenuEnabled: Boolean = false,
     onStartGuidedSetup: () -> Unit = {},
     onItemClick: (NavDrawerItem) -> Unit,
     onThemeChange: (ThemeMode) -> Unit,
@@ -134,7 +138,8 @@ fun AppDrawerSheet(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(20.dp)
+                // v1.26: oben 2 dp weniger (18 statt 20 dp), damit auch der letzte Menüpunkt ohne Scrollen bündig passt
+                .padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 20.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Markenzeichen: "ō"-Emblem mit den 3 Funk-Blitzen
@@ -194,12 +199,13 @@ fun AppDrawerSheet(
         }
 
         // === Navigation Items ===
-        NavDrawerItem.values().forEach { item ->
+        // Immer ALLE Einträge an festem Platz (auch „Firmware / OTA“); gesperrte nur ausgegraut, nie ausgeblendet
+        DrawerItemRules.items().forEach { item ->
             val isSelected = currentRoute == item
-            val isEnabled = (item == NavDrawerItem.CONNECTION || item == NavDrawerItem.ABOUT || navigationAllowed) &&
-                (item != NavDrawerItem.MESH_CARE || meshCareAvailable) &&
-                (item != NavDrawerItem.BLACKLIST || supportsBlacklist) &&      // nur wenn die Firmware Sperrlisten kann
-                (item != NavDrawerItem.WHITELIST || supportsWhitelist)         // nur wenn die Firmware "filter wl" kann
+            val isEnabled = DrawerItemRules.isEnabled(
+                item, navigationAllowed = navigationAllowed, meshCareAvailable = meshCareAvailable,
+                supportsBlacklist = supportsBlacklist, supportsWhitelist = supportsWhitelist, otaMenuEnabled = otaMenuEnabled
+            )
 
             val badgeText = when (item) {
                 NavDrawerItem.MESH_CARE -> null
@@ -273,8 +279,10 @@ fun AppDrawerSheet(
                     unselectedContainerColor = Color.Transparent
                 ),
                 modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 1.dp)
-                    .heightIn(min = 58.dp)
+                    // v1.26: 2 dp dichter (kein vertikaler Abstand, Mindesthöhe 56 statt 58 dp), damit alle Einträge
+                    // inkl. „Firmware / OTA“ ohne Scrollen ins Menü passen
+                    .padding(horizontal = 8.dp, vertical = 0.dp)
+                    .heightIn(min = 56.dp)
                     .clip(BauhausCornerShape)
                     .alpha(if (isEnabled) 1f else 0.5f)
             )

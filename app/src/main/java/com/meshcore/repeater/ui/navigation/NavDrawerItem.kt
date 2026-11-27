@@ -21,5 +21,6 @@ enum class NavDrawerItem(
     WHITELIST("whitelist", R.string.menu_whitelist, Icons.Default.VerifiedUser, R.string.menu_whitelist_sub),
     CLI_CONSOLE("cli_console", R.string.menu_cli, Icons.Default.Terminal, R.string.menu_cli_sub),
     BACKUP("backup", R.string.menu_backup, Icons.Default.Backup, R.string.menu_backup_sub),
+    FIRMWARE_OTA("firmware_ota", R.string.menu_ota, Icons.Default.SystemUpdate, R.string.menu_ota_sub),
     ABOUT("about", R.string.menu_about, Icons.Default.Info, R.string.menu_about_sub)
 }

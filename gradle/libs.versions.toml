@@ -11,6 +11,8 @@ navigationCompose = "2.7.7"
 materialIconsExtended = "1.6.7"
 coroutines = "1.8.1"
 usbSerial = "3.8.0"
+# Nordic Android DFU Library: 2.8.0 ist die neueste Version ohne Kotlin-2.x-Abhängigkeit (Projekt: Kotlin 1.9)
+nordicDfu = "2.8.0"
 junit = "4.13.2"
 extJunit = "1.1.5"
 espressoCore = "3.5.1"
@@ -30,6 +32,7 @@ androidx-material-icons-extended = { group = "androidx.compose.material", name =
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 usb-serial-android = { group = "com.github.mik3y", name = "usb-serial-for-android", version.ref = "usbSerial" }
+nordic-dfu = { group = "no.nordicsemi.android", name = "dfu", version.ref = "nordicDfu" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "extJunit" }

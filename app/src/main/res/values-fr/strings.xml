@@ -189,6 +189,8 @@
     <string name="menu_cli_sub">Terminal de commandes</string>
     <string name="menu_backup">Sauvegarde &amp; restauration</string>
     <string name="menu_backup_sub">Sauvegarde &amp; restauration</string>
+    <string name="menu_ota">Firmware / OTA</string>
+    <string name="menu_ota_sub">Mise à jour Nordic BLE DFU</string>
     <string name="menu_about">À propos &amp; licence</string>
     <string name="menu_about_sub">Licence GPLv3 &amp; infos</string>
     <string name="about_license_title">Licence : GNU GPLv3 (logiciel libre)</string>
@@ -196,7 +198,7 @@
     <string name="about_ai_title">Développement assisté par IA</string>
     <string name="about_ai_body">Développé avec l\'aide de l\'IA à partir du code source ouvert de MeshCore, ZephCore et Dutch MeshCore. L\'exploitant reste seul responsable du respect de la réglementation radio.</string>
     <string name="about_credits_title">Composants open source utilisés</string>
-    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (licence MIT)\n• Tuiles OpenStreetMap (© contributeurs OpenStreetMap, ODbL)</string>
+    <string name="about_credits_body">• Jetpack Compose &amp; Material 3 (Apache 2.0)\n• usb-serial-for-android (licence MIT)\n• Nordic Android DFU Library (licence BSD-3-Clause, Nordic Semiconductor ASA)\n• Tuiles OpenStreetMap (© contributeurs OpenStreetMap, ODbL)</string>
     <string name="lang_nl">NL</string>
     <string name="lang_fr">FR</string>
     <string name="menu_hardware_antenna">Matériel &amp; antenne</string>

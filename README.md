@@ -23,6 +23,7 @@
 - **Packet filters:** blacklist (Dutch MeshCore filter) and whitelist for channels, path prefixes, senders, text, hops and packet age, with dry-run.
 - **CLI console** with a complete, translated command reference and automatic retry over LoRa.
 - **Backup & restore** of all settings, regions and filter lists as JSON; restore only sends what differs.
+- **Firmware / OTA update** for nRF52 boards via the integrated official **Nordic BLE DFU** library: pick a DFU `.zip`, send `start ota` to the connected repeater or scan for a device in DFU mode, confirm by slider and follow the four phases with percentage and transfer rate.
 - **Confirmed saves:** a change counts as saved only once the repeater acknowledges it.
 - **Bauhaus UI** with light and dark mode.
 
@@ -52,6 +53,8 @@ Build from source: JDK 17, Android SDK 34 – `./gradlew assembleDebug`.
 
 Free software under the **GNU General Public License v3.0**. Provided without any warranty, developed with AI assistance. You are responsible for complying with your local radio regulations.
 
+Third-party components: Jetpack Compose & Material 3 (Apache 2.0), usb-serial-for-android (MIT), Nordic Android DFU Library `no.nordicsemi.android:dfu` (BSD-3-Clause, Nordic Semiconductor ASA), OpenStreetMap map tiles (ODbL). See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+
 ---
 
 <a id="deutsch"></a>
@@ -80,6 +83,7 @@ Oberfläche in **Deutsch, Englisch, Niederländisch und Französisch**, umschalt
 | **Paket-Filter** | Blacklist (Dutch-MeshCore-Filter) und Whitelist: Kanäle, Pfad-Präfixe, Absender, Texte, Hops, Paketalter, Dry-Run. `filter RESET` ist durch Slide-to-Confirm geschützt. |
 | **CLI-Konsole** | Freie Befehlseingabe mit vollständiger, übersetzter Befehlsübersicht; über LoRa ein automatischer Retry und klare Timeout-Meldung. |
 | **Backup & Wiederherstellung** | JSON-Backup aller Variablen, Regionen und Filterlisten; Wiederherstellung per Abgleich (nur Abweichungen werden gesendet). |
+| **Firmware / OTA** | Firmware-Update für nRF52-Boards mit der integrierten, offiziellen **Nordic BLE DFU**-Bibliothek: DFU-`.zip` wählen, `start ota` an den verbundenen Repeater senden oder ein Gerät im DFU-Modus suchen, per Schieberegler bestätigen; Fortschritt in vier Phasen mit Prozent und Übertragungsrate. ESP32-Boards werden erkannt und nicht in den Nordic-Ablauf geschickt. |
 
 Alle Änderungen gelten erst als gespeichert, wenn der Repeater sie **bestätigt** hat. Speichern-Buttons zeigen jederzeit, ob ungespeicherte Änderungen vorliegen.
 
@@ -147,6 +151,6 @@ Diese Software wurde mit KI-Unterstützung entwickelt und wird **ohne jegliche G
 
 meshchōsei ist freie Software unter der **GNU General Public License v3.0 (GPLv3)**. Du darfst sie nutzen, untersuchen, verändern und unter denselben Bedingungen weitergeben.
 
-Verwendete Bibliotheken: Jetpack Compose & Material 3 (Apache 2.0), usb-serial-for-android (MIT). Kartendaten © OpenStreetMap-Mitwirkende (ODbL).
+Verwendete Bibliotheken: Jetpack Compose & Material 3 (Apache 2.0), usb-serial-for-android (MIT), Nordic Android DFU Library `no.nordicsemi.android:dfu` (BSD-3-Clause, Nordic Semiconductor ASA). Kartendaten © OpenStreetMap-Mitwirkende (ODbL). Details und Lizenztexte: [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 🄯2026 AHGH

@@ -34,6 +34,16 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.isActive
+import com.meshcore.repeater.model.DfuScanRules
+import com.meshcore.repeater.model.DfuTarget
+import com.meshcore.repeater.model.FirmwareFileRules
+import com.meshcore.repeater.model.OtaBootloaderRequest
+import com.meshcore.repeater.model.OtaState
+import com.meshcore.repeater.model.OtaTargetRules
+import com.meshcore.repeater.model.OtaFlowRules
+import com.meshcore.repeater.model.OtaPhase
+import com.meshcore.repeater.model.OtaReconnectPlan
+import com.meshcore.repeater.service.FirmwareUpdateController
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 import java.nio.charset.StandardCharsets
@@ -584,6 +594,174 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     fun acceptDisclaimer() { prefs.edit().putBoolean("disclaimer_accepted", true).apply(); _disclaimerAccepted.value = true }
     fun setThemeMode(mode: ThemeMode) { prefs.edit().putString("theme_mode", mode.name).apply(); _themeMode.value = mode }
     fun setAppLanguage(lang: AppLanguage) { prefs.edit().putString("app_lang", lang.name).apply(); _appLanguage.value = lang }
+    // ---- Firmware / OTA-Update (v1.26, STYLE_GUIDE §2.16): Nordic BLE DFU ----
+    val firmwareUpdate = FirmwareUpdateController(application, viewModelScope) { msg -> logTerminal(msg, false, systemOnly = true) }
+    val otaState: StateFlow<OtaState> get() = firmwareUpdate.state
+    val dfuDevices: StateFlow<List<DfuTarget>> get() = firmwareUpdate.devices
+    val isScanningDfu: StateFlow<Boolean> get() = firmwareUpdate.isScanning
+    private val _otaBootloaderRequest = MutableStateFlow<OtaBootloaderRequest>(OtaBootloaderRequest.Idle)
+    /** Fortschritt von Option A („start ota“ senden und Bootloader-Gerät suchen). */
+    val otaBootloaderRequest: StateFlow<OtaBootloaderRequest> = _otaBootloaderRequest
+    private var otaRequestJob: Job? = null
+    /** OTA-Vorgang begonnen (`start ota` gesendet oder DFU gestartet) und noch nicht zurückgesetzt. */
+    private val _otaSessionStarted = MutableStateFlow(false)
+    /** Menüpunkt & Navigation: ein OTA-Vorgang ist aktiv oder noch nicht abgeschlossen ([OtaFlowRules.isActiveOrFinished]). */
+    val otaActiveOrFinished: StateFlow<Boolean> = combine(firmwareUpdate.state, _otaBootloaderRequest, _otaSessionStarted) { st, rq, started ->
+        OtaFlowRules.isActiveOrFinished(st.phase, rq, started)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    private val _otaAutoReconnect = MutableStateFlow(prefs.getBoolean("ota_auto_reconnect", true))
+    /** Schalter „Nach Update automatisch neu verbinden“ (Standard: an, gespeichert). */
+    val otaAutoReconnect: StateFlow<Boolean> = _otaAutoReconnect
+    fun setOtaAutoReconnect(on: Boolean) { _otaAutoReconnect.value = on; prefs.edit().putBoolean("ota_auto_reconnect", on).apply() }
+    /** Verbindung vor dem Update, für das automatische Neuverbinden. */
+    private var otaReconnectPlan: OtaReconnectPlan? = null
+    private var otaReconnectStarted = false
+    private var otaReconnectJob: Job? = null
+
+    /** Aktuelle Verbindung merken – nur beim ersten Schritt einer OTA-Sitzung, solange noch verbunden. */
+    private fun captureOtaReconnectPlan() {
+        _otaSessionStarted.value = true
+        if (otaReconnectPlan != null || _connectionState.value !is ConnectionState.Connected) return
+        val session = _remoteAdminSession.value
+        val repeater = session.targetRepeater?.takeIf { session.isLoggedIn }
+        otaReconnectPlan = when (_selectedConnectionType.value) {
+            ConnectionType.BLE_COMPANION -> lastBleAddress?.let { OtaReconnectPlan(ConnectionType.BLE_COMPANION, bleAddress = it, repeater = repeater) }
+            ConnectionType.USB_SERIAL -> {
+                val dev = _usbDevices.value.firstOrNull { it.deviceId == lastUsbDeviceId }
+                lastUsbDeviceId?.let { OtaReconnectPlan(ConnectionType.USB_SERIAL, usbDeviceId = it, usbVendorId = dev?.vendorId, usbProductId = dev?.productId, usbBaud = lastUsbBaud, repeater = repeater) }
+            }
+        }
+    }
+
+    private fun maybeAutoReconnectAfterOta() {
+        val plan = otaReconnectPlan
+        if (!OtaFlowRules.shouldAutoReconnect(_otaAutoReconnect.value, firmwareUpdate.state.value.phase, plan, otaReconnectStarted, _connectionState.value is ConnectionState.Connected)) return
+        otaReconnectStarted = true
+        otaReconnectJob = viewModelScope.launch {
+            logTerminal(tr("[OTA] Automatisches Neuverbinden in {0} s…", "%.1f".format(java.util.Locale.ROOT, OtaFlowRules.RECONNECT_DELAY_MS / 1000.0)), false, systemOnly = true)
+            delay(OtaFlowRules.RECONNECT_DELAY_MS)
+            if (_connectionState.value !is ConnectionState.Disconnected) return@launch
+            when (plan!!.type) {
+                ConnectionType.BLE_COMPANION -> { selectConnectionType(ConnectionType.BLE_COMPANION, startScan = false); connectBle(plan.bleAddress ?: return@launch) }
+                ConnectionType.USB_SERIAL -> {
+                    selectConnectionType(ConnectionType.USB_SERIAL); refreshUsbDevices()
+                    val id = OtaFlowRules.pickUsbDevice(_usbDevices.value, plan)
+                    if (id == null) { notifyUser(tr("Automatisches Neuverbinden: kein USB-Gerät gefunden.")); return@launch }
+                    connectUsb(id, plan.usbBaud)
+                }
+            }
+            val rep = plan.repeater ?: return@launch
+            // Remote-Repeater wieder anmelden, sobald der Companion erkannt ist und seine Kontakte geladen hat
+            val ready = withTimeoutOrNull(30_000L) { _deviceCapabilities.first { it.detectionComplete && it.isCompanion && _connectionState.value is ConnectionState.Connected } }
+            if (ready == null) { notifyUser(tr("Automatisches Neuverbinden: Companion nicht erreichbar.")); return@launch }
+            withTimeoutOrNull(10_000L) { _meshContacts.first { list -> list.any { LiveScanRules.sameKey(it.pubKeyHex, rep.pubKeyHex) } } }
+            delay(1_000L)
+            val contact = _meshContacts.value.firstOrNull { LiveScanRules.sameKey(it.pubKeyHex, rep.pubKeyHex) } ?: rep
+            selectTargetRepeater(contact)
+            if (_remoteAdminSession.value.savedPassword.isNotEmpty()) { logTerminal(tr("[OTA] Melde \"{0}\" wieder an…", contact.name), false, systemOnly = true); startRemoteLogin() }
+        }
+    }
+    init {
+        // Erfolgreiches Update -> (Schalter an) nach kurzer Neustart-Pause automatisch neu verbinden
+        viewModelScope.launch { firmwareUpdate.state.map { it.phase }.distinctUntilChanged().collect { if (it == OtaPhase.COMPLETED) maybeAutoReconnectAfterOta() } }
+    }
+
+    /**
+     * Nutzer verlässt den OTA-Screen: nach Abschluss (Fertig/Abbruch/Fehler) ggf. neu verbinden und alles leeren,
+     * damit ein weiterer Durchlauf sauber startet. Während eines Laufs bleibt alles erhalten (Rückkehr per Menü).
+     */
+    fun onLeaveOtaScreen() {
+        if (!OtaFlowRules.clearOnLeave(firmwareUpdate.state.value.phase)) return
+        maybeAutoReconnectAfterOta()
+        clearOtaSession()
+    }
+
+    private fun clearOtaSession() {
+        otaRequestJob?.cancel()
+        firmwareUpdate.reset()
+        _otaBootloaderRequest.value = OtaBootloaderRequest.Idle
+        _otaSessionStarted.value = false
+        otaExpectedDisconnectUntilMs = 0L
+        otaReconnectPlan = null; otaReconnectStarted = false   // ein laufendes Neuverbinden (otaReconnectJob) läuft weiter
+    }
+
+    /** Option A ist möglich, wenn ein CLI-Ziel da ist: Repeater direkt per USB oder eingeloggter Remote-Repeater. */
+    fun canRequestBootloader(): Boolean = isLinkUp() && (_deviceCapabilities.value.isDirectRepeater || _remoteAdminSession.value.isLoggedIn) &&
+        OtaTargetRules.nordicCapable(_radioConfig.value.board.mcu) != false
+    /** Nach `start ota` ist ein Verbindungsabbruch (Neustart in den Bootloader) erwartet – keine Warnung. */
+    @Volatile private var otaExpectedDisconnectUntilMs = 0L
+
+    /**
+     * Option A: `start ota` an den verbundenen Repeater senden und anschließend nach dem DFU-Gerät suchen.
+     * Ausgewählt wird nur automatisch, wenn das Ergebnis eindeutig ist ([DfuScanRules.pickAfterStartOta]).
+     */
+    fun requestBootloader() {
+        if (otaRequestJob?.isActive == true || otaState.value.phase.isRunning || !canRequestBootloader()) return
+        captureOtaReconnectPlan()
+        otaRequestJob = viewModelScope.launch {
+            _otaBootloaderRequest.value = OtaBootloaderRequest.Sending
+            val before = firmwareUpdate.devices.value.map { it.address }.toSet()
+            // aktiver Schonmodus zuerst beenden – nach dem Update ließe sich die Sendeleistung nicht mehr zurücksetzen
+            if (_meshCareState.value.isActive) stopMeshCare(restoreTx = true)
+            firmwareUpdate.startScan(durationMs = OTA_FIND_TIMEOUT_MS + 5_000L, clear = false)
+            otaExpectedDisconnectUntilMs = System.currentTimeMillis() + OTA_FIND_TIMEOUT_MS + 30_000L
+            val reply = sequentialQueryMutex.withLock { runQuery(RepeaterProtocol.CMD_START_OTA, isAuto = true, timeoutMs = 6_000L) }
+            val text = reply?.value ?: reply?.error
+            val parsed = DfuScanRules.parseOtaReply(text)
+            logTerminal(tr("[OTA] Antwort auf \"start ota\": {0}", text ?: "—"), false, systemOnly = true)
+            if (parsed.unsupported || parsed.nonNordic || (text != null && !parsed.ok)) {
+                firmwareUpdate.stopScan(); otaExpectedDisconnectUntilMs = 0L
+                _otaBootloaderRequest.value = OtaBootloaderRequest.Failed(text ?: "—")
+                return@launch
+            }
+            // ZephCore startet sofort neu (keine Antwort) – trotzdem weitersuchen
+            _otaBootloaderRequest.value = OtaBootloaderRequest.Searching(parsed.mac)
+            val deadline = System.currentTimeMillis() + OTA_FIND_TIMEOUT_MS
+            while (System.currentTimeMillis() < deadline) {
+                DfuScanRules.pickAfterStartOta(firmwareUpdate.devices.value, parsed, before)?.let { t ->
+                    firmwareUpdate.chooseTarget(t)
+                    firmwareUpdate.stopScan()
+                    _otaBootloaderRequest.value = OtaBootloaderRequest.Found(t)
+                    return@launch
+                }
+                delay(500L)
+            }
+            firmwareUpdate.stopScan()
+            _otaBootloaderRequest.value = OtaBootloaderRequest.NotFound
+        }
+    }
+
+    fun startDfuScan() { if (!otaState.value.phase.isRunning) firmwareUpdate.startScan() }
+    fun stopDfuScan() { firmwareUpdate.stopScan() }
+    fun chooseDfuTarget(t: DfuTarget) { firmwareUpdate.chooseTarget(t) }
+    fun clearDfuTarget() { firmwareUpdate.clearTarget(); _otaBootloaderRequest.value = OtaBootloaderRequest.Idle }
+    suspend fun importFirmware(uri: android.net.Uri): FirmwareFileRules.Check = firmwareUpdate.importFirmware(uri)
+    fun clearFirmware() { firmwareUpdate.clearFirmware() }
+    /** „Zurücksetzen“: nach Abschluss ggf. neu verbinden, dann alle DFU-Felder leeren. */
+    fun resetOta() { if (otaState.value.phase.isRunning) return; maybeAutoReconnectAfterOta(); clearOtaSession() }
+    fun abortOta() { firmwareUpdate.abort() }
+
+    /**
+     * Nach dem Schieberegler: Scans stoppen, bestehende Verbindung (GATT/USB) sauber trennen, damit der DFU-Dienst den
+     * BLE-Chip exklusiv nutzt, und dann Nordic DFU starten.
+     */
+    fun startFirmwareUpdate() {
+        if (!otaState.value.canStart) return
+        otaRequestJob?.cancel()
+        captureOtaReconnectPlan()
+        // das Trennen vor dem DFU ist gewollt: keine Warnung, Navigation bleibt im OTA-Screen
+        otaExpectedDisconnectUntilMs = System.currentTimeMillis() + 60_000L
+        viewModelScope.launch {
+            stopBleScan(); firmwareUpdate.stopScan(); clearLiveRepeaterScan()
+            if (_connectionState.value !is ConnectionState.Disconnected) {
+                logTerminal(tr("[OTA] Bestehende Verbindung wird für das Update getrennt."), false, systemOnly = true)
+                disconnect()
+                delay(OTA_GATT_RELEASE_MS)   // Android gibt den GATT-Client verzögert frei
+            }
+            if (!firmwareUpdate.start()) notifyUser(tr("Firmware-Update konnte nicht gestartet werden."))
+        }
+    }
+
     fun selectConnectionType(type: ConnectionType, startScan: Boolean = true) { if (_selectedConnectionType.value == type) return; _selectedConnectionType.value = type; if (type == ConnectionType.USB_SERIAL) { stopBleScan(); refreshUsbDevices() } else if (startScan) { startBleScan() } }
     /** Hinweis aus der UI (deutscher Schlüssel, wird über tr() übersetzt). */
     fun showUserHint(msg: String) { notifyUser(msg) }
@@ -599,10 +777,14 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             }
         }
     }
-    fun connectUsb(deviceId: Int, baudRate: Int = 115200) { usbArrowRepliesSeen = false; usbReplySeen = false; _connectionState.value = ConnectionState.Connecting("Verbinde USB..."); serialManager.connect(deviceId, baudRate) }
+    /** Letzte USB-Verbindungsparameter (für das Neuverbinden nach einem Firmware-Update). */
+    private var lastUsbDeviceId: Int? = null; private var lastUsbBaud = 115200
+    fun connectUsb(deviceId: Int, baudRate: Int = 115200) { lastUsbDeviceId = deviceId; lastUsbBaud = baudRate; usbArrowRepliesSeen = false; usbReplySeen = false; _connectionState.value = ConnectionState.Connecting("Verbinde USB..."); serialManager.connect(deviceId, baudRate) }
     fun startBleScan() { bleManager.startScan() }
     fun stopBleScan() { bleManager.stopScan() }
-    fun connectBle(address: String) { stopBleScan(); _connectionState.value = ConnectionState.Connecting("Verbinde BLE..."); bleManager.connect(address) }
+    /** Letzte BLE-Adresse (für das Neuverbinden nach einem Firmware-Update). */
+    private var lastBleAddress: String? = null
+    fun connectBle(address: String) { lastBleAddress = address; stopBleScan(); _connectionState.value = ConnectionState.Connecting("Verbinde BLE..."); bleManager.connect(address) }
     fun disconnect() { connectProbeJob?.cancel(); stopLinkWatch(); readJob?.cancel(); loginTimeoutJob?.cancel(); loginAttemptPending = false; serialManager.disconnect(); bleManager.disconnect(); _usbDebugInfo.value = ""; _telemetry.value = BatterySolarTelemetry(); _connectionState.value = ConnectionState.Disconnected }
 
     // ---------------------------------------------------------------------------------------
@@ -615,6 +797,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     private fun handleLinkLost(reason: String) {
         stopLinkWatch()
         readJob?.cancel()
+        // v1.26: nach "start ota" startet der Repeater in den Bootloader – erwarteter Abbruch, nur ins System-Protokoll
+        if (System.currentTimeMillis() < otaExpectedDisconnectUntilMs) { logTerminal(tr("[OTA] Verbindung getrennt (erwartet: Neustart in den Bootloader)."), false, systemOnly = true); _linkLost.tryEmit(Unit); return }
         notifyUser(tr("⚠ Verbindung getrennt: {0}", tr(reason)))
         _linkLost.tryEmit(Unit)
     }
@@ -2062,12 +2246,18 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         // destroy(): trennt UND meldet den USB-BroadcastReceiver ab bzw. stoppt BLE-Scan/Schreib-Queue (kein Leak)
         try { serialManager.destroy() } catch (_: Exception) {}
         try { bleManager.destroy() } catch (_: Exception) {}
+        otaReconnectJob?.cancel()
+        try { firmwareUpdate.destroy() } catch (_: Exception) {}
         super.onCleared()
     }
 
     private companion object {
         /** Beruhigungszeit, bevor die erkannte Geräterolle den Lichtschein auslöst (v1.25). */
         private const val EDGE_ROLE_SETTLE_MS = 250L
+        /** So lange wird nach `start ota` auf das DFU-Gerät gewartet. */
+        private const val OTA_FIND_TIMEOUT_MS = 30_000L
+        /** Wartezeit nach dem Trennen, bis Android den GATT-Client wirklich freigegeben hat. */
+        private const val OTA_GATT_RELEASE_MS = 800L
         /** Geräte-/Rollenerkennung (Teil 1 des Start-Scans). */
         val INITIAL_DETECTION_QUERIES = listOf("board", "ver", "filter", "filter help", "get gps")
         /** Start-Scan in Phasen (Reihenfolge wie im Status-Fenster angezeigt). */
