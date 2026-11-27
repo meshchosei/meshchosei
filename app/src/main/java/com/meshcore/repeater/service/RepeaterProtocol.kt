@@ -102,6 +102,22 @@ object RepeaterProtocol {
     ): String = String.format(Locale.US, "set radio %.3f,%.1f,%d,%d", freqMhz, bwKhz, sf, cr)
 
     fun buildSetTx(powerDbm: Int): String = "set tx $powerDbm"
+
+    // ---- RX-Duty-Cycle (v1.27, nur ZephCore: CommonCLI.cpp "rxduty") ----
+    const val CMD_GET_RXDUTY = "get rxduty"
+    /**
+     * ZephCore `get rxduty` antwortet `> 0` bzw. `> 1` (Präfix entfernt die App vorher); `on`/`off`/`true`/`false`
+     * werden ebenfalls verstanden. null = unbekanntes Format bzw. Firmware ohne Variable (Schalter bleibt ausgeblendet).
+     */
+    fun parseRxDuty(reply: String?): Boolean? = when (reply?.trim()?.removePrefix(">")?.trim()?.lowercase()?.substringBefore(' ')) {
+        "1", "on", "true" -> true
+        "0", "off", "false" -> false
+        else -> null
+    }
+    /** `set rxduty on|off` (Firmware akzeptiert 0/1/on/off; Antwort `OK - rxduty=1 (reboot to apply)`, wirkt nach Neustart). */
+    fun buildSetRxDuty(on: Boolean): String = "set rxduty ${if (on) "on" else "off"}"
+    /** Bestätigung von `set rxduty …`: der gemeldete neue Wert, null wenn die Antwort keinen enthält. */
+    fun parseSetRxDutyReply(reply: String?): Boolean? = Regex("rxduty=([01])").find(reply.orEmpty())?.groupValues?.get(1)?.let { it == "1" }
     fun buildSetFloodMax(hops: Int): String = "set flood.max $hops"
     fun buildSetFloodAdvertInterval(hours: Int): String = "set flood.advert.interval $hours"
     fun buildSetPassword(newPass: String): String = "password $newPass"

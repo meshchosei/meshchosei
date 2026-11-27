@@ -52,6 +52,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import com.meshcore.repeater.ui.components.heightToScreenBottom
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -680,7 +681,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                             ) {
                               Box(Modifier.fillMaxWidth()) {
-                                Column(Modifier.fillMaxWidth().heightIn(max = 240.dp).hintedVerticalScroll(rememberScrollState(), always = true, fadeColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                                Column(Modifier.fillMaxWidth().heightToScreenBottom().hintedVerticalScroll(rememberScrollState(), always = true, fadeColor = MaterialTheme.colorScheme.surfaceVariant)) {
                                     Text(
                                         tr("In Reichweite ({0}) · stärkstes Signal oben", liveScan.results.size),
                                         fontSize = 11.sp, fontWeight = FontWeight.Bold, color = bColors.cobalt, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis,
@@ -756,7 +757,7 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                             ) {
                               Box(Modifier.fillMaxWidth()) {
-                                Column(Modifier.fillMaxWidth().heightIn(max = 200.dp).hintedVerticalScroll(menuScroll, always = true, fadeColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                                Column(Modifier.fillMaxWidth().heightToScreenBottom().hintedVerticalScroll(menuScroll, always = true, fadeColor = MaterialTheme.colorScheme.surfaceVariant)) {
                                     if (filteredContacts.isEmpty()) {
                                         Row(Modifier.fillMaxWidth().heightIn(min = 40.dp).padding(start = 10.dp, end = 26.dp), verticalAlignment = Alignment.CenterVertically) {
                                             Text(

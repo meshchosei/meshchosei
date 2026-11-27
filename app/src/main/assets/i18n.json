@@ -4753,5 +4753,20 @@
   "[OTA] Logging in to \"{0}\" again…",
   "[OTA] Opnieuw aanmelden bij \"{0}\"…",
   "[OTA] Nouvelle connexion à « {0} »…"
+ ],
+ "RX-Duty-Cycle (stromsparender Empfang)": [
+  "RX duty cycle (power-saving receive)",
+  "RX-duty-cycle (stroombesparende ontvangst)",
+  "Cycle RX (réception économe en énergie)"
+ ],
+ "Wirkt erst nach einem Neustart. Nur einschalten, wenn die Nodes in der Umgebung aktuelle Firmware (Präambel 32) nutzen.": [
+  "Takes effect after a reboot. Only enable it if the nodes around you run current firmware (preamble 32).",
+  "Werkt pas na een herstart. Alleen inschakelen als de nodes in de omgeving actuele firmware (preamble 32) gebruiken.",
+  "Prend effet après un redémarrage. À activer uniquement si les nœuds environnants utilisent un firmware récent (préambule 32)."
+ ],
+ "{0} Funkeinstellung(en) übertragen – RX-Duty-Cycle wirkt erst nach einem Neustart (reboot).": [
+  "{0} radio setting(s) sent – RX duty cycle takes effect after a reboot.",
+  "{0} radio-instelling(en) verzonden – RX-duty-cycle werkt pas na een herstart (reboot).",
+  "{0} paramètre(s) radio envoyé(s) – le cycle RX prend effet après un redémarrage (reboot)."
  ]
 }

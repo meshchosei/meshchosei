@@ -166,12 +166,17 @@ fun RadioAntennaScreen(viewModel: RepeaterViewModel) {
                     )
                 }
                 // RX-Gain (v1.21): nur wenn die Firmware radio.rxgain bzw. radio.fem.rxgain im Start-Scan geliefert hat
-                if (setup.rxGain != null || setup.femRxGain != null) HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+                if (setup.rxGain != null || setup.femRxGain != null || setup.rxDuty != null) HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
                 setup.rxGain?.let { on ->
                     RxGainRow(tr("RX-Gain (LNA-Verstärkung)"), "radio.rxgain", on) { v -> edit { it.copy(rxGain = v) } }
                 }
                 setup.femRxGain?.let { on ->
                     RxGainRow(tr("FEM-RX-Gain (externer LNA)"), "radio.fem.rxgain", on) { v -> edit { it.copy(femRxGain = v) } }
+                }
+                // v1.27: RX-Duty-Cycle (nur ZephCore) – spart Empfangsstrom, wirkt erst nach Neustart
+                setup.rxDuty?.let { on ->
+                    RxGainRow(tr("RX-Duty-Cycle (stromsparender Empfang)"), "rxduty", on) { v -> edit { it.copy(rxDuty = v) } }
+                    Text(tr("Wirkt erst nach einem Neustart. Nur einschalten, wenn die Nodes in der Umgebung aktuelle Firmware (Präambel 32) nutzen."), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Text(
                     text = if (config.isCompliant) tr("Empfohlener TX mit aktueller Antenne: max. {0} dBm (Antenne unter Hardware & Antenne).", viewModel.recommendedTxDbm(config))

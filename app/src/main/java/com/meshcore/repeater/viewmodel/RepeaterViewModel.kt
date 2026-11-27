@@ -82,6 +82,8 @@ data class BasicSetupState(
     /** RX-Gain (v1.21): radio.rxgain (Boosted LNA) / radio.fem.rxgain (FEM-Boards, ZephCore); null = Firmware liefert den Wert nicht. */
     val rxGain: Boolean? = null,
     val femRxGain: Boolean? = null,
+    /** RX-Duty-Cycle (v1.27, nur ZephCore `rxduty`); null = Firmware liefert den Wert nicht. Wirkt nach Neustart. */
+    val rxDuty: Boolean? = null,
     val isReading: Boolean = false
 )
 
@@ -92,7 +94,7 @@ data class BasicSetupState(
 /** true, wenn der Funk-Entwurf (Funkparameter, TX, Duty-Cycle) vom bestätigten Stand abweicht. */
 fun BasicSetupState.radioDiffersFrom(b: BasicSetupState): Boolean =
     freqMhz != b.freqMhz || bwKhz != b.bwKhz || sf != b.sf || cr != b.cr || txPowerDbm != b.txPowerDbm || dutyCyclePercent != b.dutyCyclePercent ||
-        rxGain != b.rxGain || femRxGain != b.femRxGain
+        rxGain != b.rxGain || femRxGain != b.femRxGain || rxDuty != b.rxDuty
 
 class SetupChange(val command: String, val commit: (BasicSetupState) -> BasicSetupState = { it })
 
@@ -1281,6 +1283,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         )
         b.rxGain?.let { m["radio.rxgain"] = if (it) "on" else "off" }
         b.femRxGain?.let { m["radio.fem.rxgain"] = if (it) "on" else "off" }
+        b.rxDuty?.let { m["rxduty"] = if (it) "on" else "off" }
         return m.filterValues { it.isNotBlank() && it != "adaptive" }
     }
 
@@ -1375,6 +1378,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             "get flood.max.advert" -> _basicSetup.value = s.copy(floodMaxAdvert = v)
             "get radio.rxgain" -> _basicSetup.value = s.copy(rxGain = v.equals("on", true))
             "get radio.fem.rxgain" -> _basicSetup.value = s.copy(femRxGain = v.equals("on", true))
+            RepeaterProtocol.CMD_GET_RXDUTY -> _basicSetup.value = s.copy(rxDuty = RepeaterProtocol.parseRxDuty(v))
             "get leds" -> {
                 val mode = v.lowercase().substringBefore(' ')
                 _basicSetup.value = s.copy(ledsMode = mode)
@@ -1473,7 +1477,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                     done += filterQueries.size
                 }
                 // 4) Funk- & Routing-Parameter (optionale v1.21-Werte vorher leeren: ohne Antwort bleiben Feld/Schalter ausgeblendet)
-                _basicSetup.value = _basicSetup.value.copy(floodMax = "", floodMaxUnscoped = "", floodMaxAdvert = "", rxGain = null, femRxGain = null)
+                _basicSetup.value = _basicSetup.value.copy(floodMax = "", floodMaxUnscoped = "", floodMaxAdvert = "", rxGain = null, femRxGain = null, rxDuty = null)
                 if (ok) ok = runReadSequence(BASIC_SETUP_QUERIES, phaseText = "Lese Funk- & Routing-Parameter…", progressOffset = done, progressTotal = total)
                 done += BASIC_SETUP_QUERIES.size
                 // 5) Regionen & Scope-Routing (region / region home / region default)
@@ -1960,6 +1964,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         if (s.dutyCyclePercent != b.dutyCyclePercent) changes.add(SetupChange("set dutycycle ${s.dutyCyclePercent.trim()}") { it.copy(dutyCyclePercent = s.dutyCyclePercent) })
         if (s.rxGain != null && s.rxGain != b.rxGain) changes.add(SetupChange("set radio.rxgain ${if (s.rxGain) "on" else "off"}") { it.copy(rxGain = s.rxGain) })
         if (s.femRxGain != null && s.femRxGain != b.femRxGain) changes.add(SetupChange("set radio.fem.rxgain ${if (s.femRxGain) "on" else "off"}") { it.copy(femRxGain = s.femRxGain) })
+        val rxDutyChanged = s.rxDuty != null && s.rxDuty != b.rxDuty
+        if (rxDutyChanged) changes.add(SetupChange(RepeaterProtocol.buildSetRxDuty(s.rxDuty!!)) { it.copy(rxDuty = s.rxDuty) })
         if (changes.isEmpty()) return // still: keine Änderungen (z. B. "Weiter" in der Tour)
         if (!_radioConfig.value.isCompliant) notifyUser("Hinweis: ERP-Grenzwert mit aktueller Antenne überschritten (siehe Hardware & Antenne).")
         // Basis erst nach Bestätigung aktualisieren (nur bestätigte Befehle)
@@ -1967,6 +1973,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             notifyUser(when {
                 confirmed < changes.size -> tr("{0} von {1} Einstellung(en) bestätigt – bitte prüfen.", confirmed, changes.size)
                 radioChanged -> tr("{0} Funkeinstellung(en) übertragen – neue Funkparameter ggf. erst nach Neustart aktiv.", changes.size)
+                rxDutyChanged -> tr("{0} Funkeinstellung(en) übertragen – RX-Duty-Cycle wirkt erst nach einem Neustart (reboot).", changes.size)
                 else -> tr("{0} Funkeinstellung(en) übertragen.", changes.size)
             })
         }
@@ -2275,7 +2282,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             "get advert.interval", "get flood.advert.interval",
             "get txdelay", "get direct.txdelay", "get rxdelay", "get multi.acks", "get leds",
             // v1.21: Hop-Limits und RX-Gain (Firmware ohne Variable antwortet mit Fehler -> Feld/Schalter bleibt ausgeblendet)
-            "get flood.max", "get flood.max.unscoped", "get flood.max.advert", "get radio.rxgain", "get radio.fem.rxgain"
+            "get flood.max", "get flood.max.unscoped", "get flood.max.advert", "get radio.rxgain", "get radio.fem.rxgain",
+            // v1.27: RX-Duty-Cycle (nur ZephCore; MeshCore antwortet mit Fehler -> Schalter bleibt ausgeblendet)
+            RepeaterProtocol.CMD_GET_RXDUTY
         )
         /** Start-Scan-Schritte für "region", "region home", "region default". */
         const val REGION_STEPS = 3

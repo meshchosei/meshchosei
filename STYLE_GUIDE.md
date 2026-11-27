@@ -360,7 +360,7 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
 - **Richtung je nach Lage des Auslösers:**
   - **nach oben**, wenn der Auslöser eine Eingabezeile am **unteren** Bildschirmrand ist (CLI-Konsole). Das Menü steht direkt über der Zeile und verkleinert den Inhalt darüber (Log).
   - **nach unten**, wenn der Auslöser ein **Auswahlfeld** im oberen Bereich ist (Repeater-Auswahl). Das Menü steht direkt unter dem Feld. Was beim Aufklappen fest bleiben muss (Login-Bereich), steht **über** dem Feld.
-- **Form:** `Card` mit `BauhausCornerShape` (2 dp), `BorderStroke(1.dp, outline)`, Grund `surfaceVariant`, 4–8 dp Abstand zum Auslöser. Höchstens ca. 5 Zeilen sichtbar (`heightIn(max = 200.dp)`), darüber vertikal scrollbar mit `hintedVerticalScroll(always = true, fadeColor = surfaceVariant)`. Ändert sich der Filtertext, springt die Liste nach oben (`scrollTo(0)`).
+- **Form:** `Card` mit `BauhausCornerShape` (2 dp), `BorderStroke(1.dp, outline)`, Grund `surfaceVariant`, 4–8 dp Abstand zum Auslöser. Höchstens ca. 5 Zeilen sichtbar (`heightIn(max = 200.dp)`; Ausnahme Repeater-Auswahl, siehe unten), darüber vertikal scrollbar mit `hintedVerticalScroll(always = true, fadeColor = surfaceVariant)`. Ändert sich der Filtertext, springt die Liste nach oben (`scrollTo(0)`).
 - **Zeile:** mindestens 40 dp hoch, die **ganze Zeile** antippbar, `HorizontalDivider` (outline, 50 % Alpha) zwischen den Zeilen, Innenabstand `start = 10.dp, end = 26.dp`, vertikal 6 dp.
   - links der Haupttext **fett** (Befehl bzw. Name), rechts kompakt der Zusatz in 11 sp, `onSurfaceVariant`;
   - alle Texte einzeilig: `maxLines = 1, softWrap = false, overflow = Ellipsis` (`…`).
@@ -395,6 +395,11 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
   4. unmittelbar darunter das **Klappmenü** mit `✕` oben rechts.
 - **Suchfeld:** eckiges `OutlinedTextField`, Filter nach Name oder Key-Präfix, Platzhalter „Repeater suchen (Name oder Key)…“. **Kein** Auf-/Zu-Pfeil: Antippen (`PressInteraction.Release`) oder Tippen öffnet das Menü, geschlossen wird es nur über das `✕` oben rechts in der Liste, System-Zurück oder durch eine Auswahl (wie im CLI). Bei getipptem Text steht im Feld nur das Leeren-`✕` (leert den Filter, schließt nicht).
 - **Automatisches Öffnen:** solange kein Repeater gewählt ist, beim Verbinden, beim (Neu-)Einlesen der Kontakte (auch per ↻) und beim Umschalten der Filter-Chips. Nach `✕`/Zurück bleibt es zu, bis der Nutzer das Feld antippt oder ↻ drückt.
+- **Dynamische Höhe der Repeater-Auswahl (seit v1.27, verbindlich):** Die Listen „Gespeichert“ und „Live“ haben keine feste Maximalhöhe mehr (vorher 200 bzw. 240 dp), sondern `Modifier.heightToScreenBottom()` (`ui/components/DropdownHeight.kt`).
+  - Maximalhöhe = Fensterhöhe − Oberkante der Liste (`positionInWindow`) − Navigationsleiste bzw. Tastatur (das Größere) − 16 dp Sicherheitsabstand (`DropdownHeightRules.maxHeightDp`).
+  - Mindestens 120 dp, damit die Liste auch bei offener Tastatur bedienbar bleibt; bis die Position bekannt ist (erster Frame), gelten 240 dp.
+  - Es ist nur eine **Maximal**höhe: Bei wenigen Kontakten oder Live-Treffern schrumpft das Klappmenü auf seinen Inhalt, ohne leeren Raum darunter. Bei vielen reicht es ruhig bis knapp über den unteren Bildschirmrand.
+  - Andere Klappmenüs (z. B. CLI-Autocomplete nach oben) behalten ihre feste Höhe von ca. 5 Zeilen.
 - **Zeile:** links der Repeater-Name fett 13 sp (Room Server in Kobalt, `weight(1f, fill = false)`), rechts daneben das Public-Key-Präfix in Monospace 11 sp (`ABCDEF123456…`) und, falls ein Admin-Passwort gespeichert ist, ein dezentes Schlüssel-Icon (`Icons.Default.Key`, 12 dp, `onSurfaceVariant`). Der gewählte Repeater ist mit Signalrot 14 % hinterlegt.
 - **Übernehmen (Antippen einer Zeile):**
   - Repeater (Name, Public-Key, ggf. gespeichertes Admin-Passwort) in den Login-Bereich oben übernehmen (`selectTargetRepeater`; derselbe Repeater setzt die Sitzung nicht neu auf);
@@ -625,6 +630,11 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
 - **Start-Scan:** liest zusätzlich `flood.max`, `flood.max.unscoped`, `flood.max.advert`, `radio.rxgain` und `radio.fem.rxgain`. Vor dem Lesen werden diese Werte geleert. Antwortet die Firmware mit Fehler (`??:`/`unknown`/`Err`), bleibt das Feld bzw. der Schalter **ausgeblendet** – eine Fehlerantwort zählt nicht als LoRa-Timeout.
 - **Routing & Adverts:** Hop-Limits als Zahlenfelder 0–64 (`RoutingLimits.hopsOk`), Timing-Delays `txdelay`/`direct.txdelay` (0–2) und `rxdelay` (0–20) als Dezimalfelder (`RoutingLimits.delayOk`). ZephCore meldet die Delays als `adaptive`: Das Feld ist dann gesperrt und wird nie gesendet. Alles läuft über den gemeinsamen „Speichern“-Button der Karte (nur geänderte, gültige Werte).
 - **Funk & Region:** eckiger `BauhausSwitch` „RX-Gain (LNA-Verstärkung)“ (`radio.rxgain`) bzw. „FEM-RX-Gain (externer LNA)“ (`radio.fem.rxgain`), Teil des Funk-Speicherns (`radioDiffersFrom`).
+- **RX-Duty-Cycle `rxduty` (seit v1.27, nur ZephCore):**
+  - Firmware-Format (ZephCore `CommonCLI.cpp`): `get rxduty` → `> 0` / `> 1`; `set rxduty <0|1|on|off>` → `OK - rxduty=1 (reboot to apply)`. Standard: aus. MeshCore kennt die Variable nicht.
+  - Teil des Start-Scans (`BASIC_SETUP_QUERIES`, damit auch des ↻-Neueinlesens). `RepeaterProtocol.parseRxDuty` versteht `0/1`, `on/off`, `true/false`; jede andere Antwort ergibt `null`, und der Schalter bleibt ausgeblendet.
+  - Dritter Schalter „RX-Duty-Cycle (stromsparender Empfang)“ direkt unter RX-Gain und FEM-RX-Gain in der Funk-Karte, mit dem Hinweis, dass er erst nach einem Neustart wirkt und nur bei aktueller Firmware in der Umgebung (Präambel 32) eingeschaltet werden sollte. Gespeichert wird über den Funk-„Speichern“-Button (`set rxduty on|off`); die Rückmeldung nennt den nötigen Neustart.
+  - Backup: Variable `rxduty` (`VarType.BOOL`, JSON `true/false`); Wiederherstellung sendet `set rxduty on|off`, der Diff-Abgleich überspringt den Befehl, wenn der Repeater den Wert schon hat.
 - **Backup-/Template-Import (`MeshCoreBackup.parse`):** tolerant für Community-Templates (z. B. BSmesh):
   - `regions` und `filter` sind optional, `regions` auch direkt als Liste; ohne `vars`-Hülle zählen bekannte Variablen auf oberster Ebene;
   - `radio` als Objekt `{freq,bw,sf,cr}` (Strings oder Zahlen) oder als String `"869.618,62.5,8,8"`;

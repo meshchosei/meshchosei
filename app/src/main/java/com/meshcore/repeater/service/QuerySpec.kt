@@ -95,6 +95,8 @@ object QuerySpec {
         "get af" -> { v -> DECIMAL.matches(v) }
         "get int.thresh", "get agc.reset.interval", "get flood.max", "get flood.max.unscoped", "get flood.max.advert" -> { v -> INT.matches(v) }
         "get cad", "get radio.rxgain", "get radio.fem.rxgain" -> { v -> isOnOff(v) }
+        // v1.27 ZephCore: "> 0" / "> 1"
+        RepeaterProtocol.CMD_GET_RXDUTY -> { v -> RepeaterProtocol.parseRxDuty(v) != null }
         "get prv.key" -> { v -> HEX_KEY.matches(v) }
         "get guest.password" -> { v -> v.length <= 32 && !RADIO.matches(v) && !v.contains("(Build:", true) }
         // Filter-Erkennung: jede "filter…"-Antwort annehmen (auch "Filter: command error"), Auswertung in isBlacklistHelp/isWhitelistHelp
@@ -142,7 +144,7 @@ object QuerySpec {
         "get repeat", "get advert.interval", "get leds", "get flood.advert.interval", "get path.hash.mode",
         "get loop.detect", "get txdelay", "get direct.txdelay", "get rxdelay", "get multi.acks",
         "get flood.max", "get flood.max.unscoped", "get flood.max.advert" -> "Routing & Adverts werden abgefragt…"
-        "get radio.rxgain", "get radio.fem.rxgain" -> "Funkparameter werden abgefragt…"
+        "get radio.rxgain", "get radio.fem.rxgain", RepeaterProtocol.CMD_GET_RXDUTY -> "Funkparameter werden abgefragt…"
         "get gps" -> "GPS-Status wird abgefragt…"
         "filter", "filter help" -> "Prüfe Geräte- & Filter-Funktionen…"
         FilterStatusRules.CMD_STATS_AIR -> "Filter-Statistiken werden abgefragt…"

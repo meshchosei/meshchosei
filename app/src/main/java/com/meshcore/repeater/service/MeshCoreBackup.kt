@@ -27,7 +27,7 @@ object MeshCoreBackup {
         VarDef("guest.password", VarType.STRING, Sensitivity.GUEST_PASSWORD), VarDef("lat", VarType.NUMBER), VarDef("lon", VarType.NUMBER),
         VarDef("int.thresh", VarType.INT), VarDef("agc.reset.interval", VarType.INT), VarDef("multi.acks", VarType.NUMERIC_STRING),
         VarDef("owner.info", VarType.STRING), VarDef("path.hash.mode", VarType.INT), VarDef("loop.detect", VarType.STRING),
-        VarDef("cad", VarType.BOOL), VarDef("radio.rxgain", VarType.BOOL), VarDef("radio.fem.rxgain", VarType.BOOL), VarDef("prv.key", VarType.STRING, Sensitivity.PRIVATE_KEY)
+        VarDef("cad", VarType.BOOL), VarDef("radio.rxgain", VarType.BOOL), VarDef("radio.fem.rxgain", VarType.BOOL), VarDef("rxduty", VarType.BOOL), VarDef("prv.key", VarType.STRING, Sensitivity.PRIVATE_KEY)
     )
     private val DEFS = VARS.associateBy { it.key }
 
