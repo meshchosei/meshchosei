@@ -212,6 +212,7 @@
     <string name="menu_routing_adverts_sub">Forwarding, timing &amp; beacons</string>
     <string name="about_privacy_title">Privacy policy</string>
     <string name="about_privacy_body">1) No servers of our own, no tracking: all settings, filter lists and JSON backups stay exclusively on your device. The app collects no usage data.\n\n2) Bluetooth &amp; location: for BLE scans Android requires the location permission (up to Android 11) and enabled location services. GPS data is only used for the repeater\'s location and is never passed on to third parties.\n\n3) Map tiles (OpenStreetMap): when you open the location map, map tiles are loaded from tile.openstreetmap.org (OpenStreetMap Foundation). For technical reasons your IP address is transmitted to that server.</string>
+    <string name="about_privacy_debug_body">4) Debug report (optional): No diagnostic data is ever transmitted automatically. The report under „Report a bug“ is only created locally when you tap the button. It never contains passwords or private keys (these are replaced by [REDACTED]). You can read and shorten it freely before you copy it or save it as a file and share it yourself, e.g. in a GitHub issue.</string>
     <string name="conn_admin_password_label">Admin password (max. 15)</string>
     <string name="menu_blacklist">Blacklist</string>
     <string name="menu_blacklist_sub">Block channels &amp; paths</string>

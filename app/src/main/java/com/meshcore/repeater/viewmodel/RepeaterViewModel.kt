@@ -9,6 +9,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.meshcore.repeater.model.*
 import com.meshcore.repeater.service.CompanionProtocol
+import com.meshcore.repeater.service.DebugReportBuilder
 import com.meshcore.repeater.service.BleConnectionManager
 import com.meshcore.repeater.service.ChannelHash
 import com.meshcore.repeater.service.FilterListParser
@@ -240,6 +241,36 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     private val _deviceCapabilities = MutableStateFlow(DeviceCapabilities())
     val deviceCapabilities: StateFlow<DeviceCapabilities> = _deviceCapabilities
 
+    // v1.25: Türkanten-Lichtschein nach Rolle – nur beobachtend, ohne Eingriff in USB-/BLE-Verbindungsaufbau.
+    // Companion-Node (USB/BLE) -> rechts, direkter USB-Repeater -> links (Remote-Login: onLoginSuccess, links).
+    // Kurze Beruhigungszeit: Der Rollen-Reset beim USB-Connect kommt direkt nach "Connected" – ein Zwischenstand
+    // mit der Rolle der vorigen Verbindung darf keinen falschen Schein auslösen.
+    private val edgeRoleWatch = EdgeRoleWatch()
+
+    /** Handshake-Reihenfolge mit dem Companion (v1.25): nur ein GET_CONTACTS gleichzeitig, DEVICE_QUERY erst danach. */
+    private val companionHandshake = CompanionHandshake()
+    /** Zuletzt an den Companion gesendeter Befehl – ordnet RESP_ERR dem richtigen Befehl zu. */
+    @Volatile private var lastCompanionCmd: Byte? = null
+
+    /** Gerätedaten des Companion-Nodes (SELF_INFO / DEVICE_INFO), nur für die laufende Node-Verbindung (v1.25). */
+    private val _companionInfo = MutableStateFlow<CompanionNodeInfo?>(null)
+    val companionInfo: StateFlow<CompanionNodeInfo?> = _companionInfo
+
+    init {
+        viewModelScope.launch {
+            combine(_connectionState, _deviceCapabilities) { c, d -> Triple(c is ConnectionState.Connected, d.isDirectRepeater, d.isCompanion) }
+                .distinctUntilChanged()
+                .collectLatest { (connected, direct, companion) ->
+                    if (connected) delay(EDGE_ROLE_SETTLE_MS)
+                    edgeRoleWatch.onState(connected, direct, companion)?.let { fireEdgeLight(it) }
+                }
+        }
+        // Node-Daten gelten nur für die laufende Verbindung: beim Trennen leeren
+        viewModelScope.launch {
+            _connectionState.collect { if (it is ConnectionState.Disconnected) { _companionInfo.value = null; companionHandshake.reset(); lastCompanionCmd = null } }
+        }
+    }
+
     private val _radioConfig = MutableStateFlow(RadioAntennaConfig())
     val radioConfig: StateFlow<RadioAntennaConfig> = _radioConfig
 
@@ -357,7 +388,6 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             if (connected) {
                 _usbDebugInfo.value = ""   // Verbindung steht – kein "Warte auf USB-Daten…" mehr
                 _connectionState.value = ConnectionState.Connected(name ?: "USB-Node", ConnectionType.USB_SERIAL, "115200 Baud")
-                fireEdgeLight(EdgeSide.RIGHT)
                 startLinkWatch()
                 _deviceCapabilities.value = DeviceCapabilities(detectionComplete = false)
                 _hasCompletedInitialRead.value = false
@@ -431,10 +461,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         onConnectionChanged = { connected, name ->
             if (connected) {
                 _connectionState.value = ConnectionState.Connected(name ?: "BLE-Node", ConnectionType.BLE_COMPANION, "MeshCore NUS")
-                fireEdgeLight(EdgeSide.RIGHT)
                 startLinkWatch()
                 viewModelScope.launch {
-                    delay(250L); bleManager.sendBytes(RepeaterProtocol.buildAppStartFrame())
+                    delay(250L); companionHandshake.onAppStartSent(); lastCompanionCmd = RepeaterProtocol.CMD_APP_START; bleManager.sendBytes(RepeaterProtocol.buildAppStartFrame())
                     delay(450L); refreshMeshContacts()
                 }
             } else {
@@ -459,7 +488,99 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     }
     fun clearTerminalLogs() { _terminalLogs.value = emptyList() }
     fun clearSystemLogs() { _systemLogs.value = emptyList() }
-    private fun notifyUser(msg: String) { _uiEvents.tryEmit(tr(msg)) }  // statische Texte hier übersetzen
+    private fun notifyUser(msg: String) {
+        val t = tr(msg)   // statische Texte hier übersetzen
+        recordMessage(t)
+        _uiEvents.tryEmit(t)
+    }
+
+    // ---- Diagnose-Bericht (v1.25): nur lokal, nur auf Nutzeraktion, Geheimnisse geschwärzt ----
+    /** Letzte Status-/Fehlermeldungen (Snackbar) mit Uhrzeit, nur im Arbeitsspeicher, für den Debug-Bericht. */
+    private val recentMessages = ArrayDeque<String>()
+    private fun recordMessage(t: String) {
+        val stamp = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.ROOT).format(java.util.Date())
+        synchronized(recentMessages) { recentMessages.addLast("$stamp  $t"); while (recentMessages.size > 60) recentMessages.removeFirst() }
+    }
+    /** Der App bekannte Geheimnisse (gespeicherte Admin-Passwörter, aktuelle Sitzung) – werden im Bericht geschwärzt. */
+    private fun knownSecrets(): Set<String> {
+        val saved = prefs.all.filterKeys { it.startsWith("pwd_") }.values.mapNotNull { it as? String }
+        return (saved + _remoteAdminSession.value.savedPassword).filter { it.isNotBlank() }.toSet()
+    }
+    /** Dateistempel für den Debug-Bericht, z. B. `20261127-0912`. */
+    fun debugReportStamp(): String = java.text.SimpleDateFormat("yyyyMMdd-HHmm", java.util.Locale.ROOT).format(java.util.Date())
+    /** Erstellt den Debug-Bericht (Markdown) aus dem aktuellen Zustand. [palette] kommt aus der UI (CompositionLocal). */
+    fun buildDebugReport(palette: String): String {
+        val c = _connectionState.value
+        val caps = _deviceCapabilities.value
+        val hw = _hardwareInfo.value
+        val session = _remoteAdminSession.value
+        val connected = c as? ConnectionState.Connected
+        val summary = when (c) {
+            is ConnectionState.Connected -> "${c.connectionType.displayName} verbunden (${c.deviceName}, ${c.details})"
+            is ConnectionState.Connecting -> "verbindet …"
+            is ConnectionState.Error -> "Fehler: ${c.message}"
+            else -> "nicht verbunden"
+        }
+        val ci = _companionInfo.value
+        val companion = if (connected != null && caps.isCompanion && !caps.isDirectRepeater) DebugReportBuilder.CompanionNode(
+            connection = "${connected.connectionType.displayName} (${connected.deviceName})",
+            name = ci?.name.orEmpty(), model = ci?.model.orEmpty(), firmwareVersion = ci?.firmwareVersion.orEmpty(),
+            buildDate = ci?.buildDate.orEmpty(), protocolVersion = ci?.protocolVersion,
+            publicKeyPrefix = ci?.publicKeyHex?.take(12)?.let { if (it.isNotEmpty()) "$it…" else it }.orEmpty(),
+            radio = ci?.freqMhz?.let { "${"%.3f".format(java.util.Locale.ROOT, it)} MHz / ${"%.1f".format(java.util.Locale.ROOT, ci.bwKhz ?: 0.0)} kHz / SF${ci.sf ?: "—"} / CR${ci.cr ?: "—"}" }.orEmpty(),
+            txPower = ci?.txPowerDbm?.let { "$it dBm" + (ci.maxTxPowerDbm?.let { m -> " (max. $m dBm)" } ?: "") }.orEmpty(),
+            maxContacts = ci?.maxContacts, maxChannels = ci?.maxChannels
+        ) else null
+        val companionAbsent = when {
+            connected == null -> "nicht verbunden"
+            caps.isDirectRepeater -> "Direktverbindung (Repeater direkt am USB, kein Companion-Node)"
+            else -> "Gerät wird noch erkannt"
+        }
+        val capList = listOf(
+            "detectionComplete" to caps.detectionComplete.toString(),
+            "blacklist" to caps.supportsBlacklist.toString(),
+            "whitelist" to caps.supportsWhitelist.toString(),
+            "gps" to caps.hasGps.toString(),
+            "batteryTelemetry" to caps.hasBatteryTelemetry.toString()
+        )
+        val target = session.targetRepeater
+        val repeater = when {
+            connected != null && caps.isDirectRepeater -> DebugReportBuilder.TargetRepeater(
+                access = "direkt per USB-CLI", name = _basicSetup.value.nodeName,
+                board = hw.boardModel, radioChip = hw.radioChip, firmwareVersion = caps.firmwareVersion.ifBlank { hw.firmwareVersion },
+                bootloader = hw.bootloaderVersion, capabilities = capList
+            )
+            connected != null && target != null -> {
+                // Hardwaredaten stammen vom Repeater erst nach dem Login (Start-Scan); vorher nichts Veraltetes zeigen
+                val read = session.isLoggedIn
+                DebugReportBuilder.TargetRepeater(
+                    access = "Remote-Admin über Companion-Node", name = "${target.name} (${target.keyPrefix}…)", loggedIn = session.isLoggedIn,
+                    board = if (read) hw.boardModel else "", radioChip = if (read) hw.radioChip else "",
+                    firmwareVersion = if (read) caps.firmwareVersion.ifBlank { hw.firmwareVersion } else "",
+                    bootloader = if (read) hw.bootloaderVersion else "", capabilities = if (read) capList else emptyList()
+                )
+            }
+            else -> null
+        }
+        val repeaterAbsent = if (connected == null) "nicht verbunden" else "nicht eingeloggt (kein Repeater gewählt)"
+        val input = DebugReportBuilder.Input(
+            generatedAt = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", java.util.Locale.ROOT).format(java.util.Date()),
+            appVersionName = BuildConfig.VERSION_NAME, appVersionCode = BuildConfig.VERSION_CODE,
+            buildType = if (BuildConfig.DEBUG) "debug" else "release",
+            androidRelease = android.os.Build.VERSION.RELEASE.orEmpty(), androidSdk = android.os.Build.VERSION.SDK_INT,
+            manufacturer = android.os.Build.MANUFACTURER.orEmpty(), model = android.os.Build.MODEL.orEmpty(),
+            appLanguage = _appLanguage.value.name, effectiveLanguage = com.meshcore.repeater.i18n.I18n.language,
+            palette = palette, themeMode = _themeMode.value.name,
+            connectionSummary = summary,
+            companion = companion, companionAbsent = companionAbsent,
+            repeater = repeater, repeaterAbsent = repeaterAbsent,
+            messages = synchronized(recentMessages) { recentMessages.toList() },
+            cliLog = _terminalLogs.value.map { DebugReportBuilder.LogLine(it.text, it.isOutgoing) },
+            systemLog = _systemLogs.value.map { DebugReportBuilder.LogLine(it.text, it.isOutgoing) },
+            knownSecrets = knownSecrets()
+        )
+        return DebugReportBuilder.build(input)
+    }
     fun acceptDisclaimer() { prefs.edit().putBoolean("disclaimer_accepted", true).apply(); _disclaimerAccepted.value = true }
     fun setThemeMode(mode: ThemeMode) { prefs.edit().putString("theme_mode", mode.name).apply(); _themeMode.value = mode }
     fun setAppLanguage(lang: AppLanguage) { prefs.edit().putString("app_lang", lang.name).apply(); _appLanguage.value = lang }
@@ -571,6 +692,10 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         if (fromTarget) { onRemoteTrafficReceived(); onRemoteReply(txt) }
     }
     private fun sendCompanionBytes(frame: ByteArray) {
+        if (frame.isNotEmpty()) {
+            lastCompanionCmd = frame[0]
+            if (frame[0] == RepeaterProtocol.CMD_APP_START) companionHandshake.onAppStartSent()   // Firmware beendet den Kontakt-Iterator
+        }
         if (_selectedConnectionType.value == ConnectionType.USB_SERIAL) serialManager.sendBytes(frame)
         else bleManager.sendBytes(frame)
     }
@@ -612,8 +737,6 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     }
     /** Bekannter Kontakt zu einem Live-Repeater (gleicher Public-Key), sonst null. */
     fun knownContactFor(r: LiveRepeater): MeshContact? = LiveScanRules.findKnown(r, _meshContacts.value)
-    /** Von der Live-Suche im Companion angelegte Kontakte: nur diese bekommen den echten Namen auch im Companion. */
-    private val liveAddedKeys = mutableSetOf<String>()
     /**
      * `get name` vom eingeloggten Repeater: Name in Login-Bereich, Kontakt- und Live-Liste sofort nachziehen.
      * Für einen von der Live-Suche angelegten Kontakt (Platzhaltername) auch im Companion speichern.
@@ -629,7 +752,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         _remoteAdminSession.update { cur -> if (LiveScanRules.sameKey(cur.targetRepeater?.pubKeyHex, t.pubKeyHex)) cur.copy(targetRepeater = cur.targetRepeater!!.copy(name = u.target.name)) else cur }
         _liveScan.update { it.copy(results = LiveScanRules.applyFetchedName(t, it.results, emptyList(), name)?.live ?: it.results) }
         _meshContacts.value = u.contacts.sortedWith(compareByDescending<MeshContact> { it.isRepeater }.thenBy { it.name })
-        if (liveAddedKeys.remove(t.pubKeyHex)) sendCompanionBytes(CompanionProtocol.buildAddRepeaterContactFrame(t.pubKey, u.target.name))
+        // Kein erneutes CMD_ADD_UPDATE_CONTACT mit dem echten Namen: Es würde den inzwischen vom Companion gelernten Pfad
+        // wieder auf OUT_PATH_UNKNOWN setzen (Flood). Der Name bleibt in der App (learnedNames).
     }
     /** Zuletzt per `get name` gelesener Name samt Key des Repeaters, von dem er stammt (Anzeige-Vorrang im Verbindungs-Screen). */
     data class ReadRepeaterName(val pubKeyHex: String, val name: String)
@@ -647,14 +771,23 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         val contact = LiveScanRules.toContact(r, known)
         if (known == null) {
             sendCompanionBytes(CompanionProtocol.buildAddRepeaterContactFrame(r.pubKey, contact.name))
-            liveAddedKeys += contact.pubKeyHex
             _meshContacts.value = (_meshContacts.value + contact).sortedWith(compareByDescending<MeshContact> { it.isRepeater }.thenBy { it.name })
             logTerminal(tr("> [Mesh] Repeater {0} als direkter Kontakt im Companion angelegt", contact.name), true, systemOnly = true)
         }
         selectTargetRepeater(contact)
     }
 
-    fun refreshMeshContacts() { _isRefreshingContacts.value = true; sendCompanionBytes(RepeaterProtocol.buildGetContactsFrame()) }
+    fun refreshMeshContacts() {
+        // Nur ein GET_CONTACTS gleichzeitig – ein zweites beantwortet die Firmware mit ERR_CODE_BAD_STATE (4)
+        if (!companionHandshake.tryStartContactSync(System.currentTimeMillis())) {
+            logTerminal(tr("[Companion] Kontaktliste wird bereits geladen – keine zweite Anfrage"), false, systemOnly = true)
+            return
+        }
+        _isRefreshingContacts.value = true
+        sendCompanionBytes(RepeaterProtocol.buildGetContactsFrame())
+    }
+    /** CMD_DEVICE_QUERY genau einmal, sobald SELF_INFO und END_OF_CONTACTS da sind (Handshake abgeschlossen). */
+    private fun maybeSendDeviceQuery() { if (companionHandshake.takeDeviceQuery()) sendCompanionBytes(RepeaterProtocol.buildDeviceQueryFrame()) }
     fun selectTargetRepeater(contact: MeshContact?) {
         if (contact?.pubKeyHex != _remoteAdminSession.value.targetRepeater?.pubKeyHex) { readJob?.cancel(); _hasCompletedInitialRead.value = false; loginTimeoutJob?.cancel(); loginAttemptPending = false }
         if (contact == null) { _remoteAdminSession.value = _remoteAdminSession.value.copy(targetRepeater = null, isLoggedIn = false, isLoggingIn = false); return }
@@ -699,7 +832,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
         loginAttemptPending = false
         onRemoteTrafficReceived()
         _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggedIn = true, isLoggingIn = false, sessionStatus = "Eingeloggt")
-        fireEdgeLight(EdgeSide.LEFT)
+        fireEdgeLight(EdgeLightTrigger.SIDE_FOR_REPEATER_LOGIN)   // Remote-Admin-Login auf einen Repeater -> links
         logTerminal(tr("< [Mesh] Admin-Login bestätigt!"), false, systemOnly = true)
         startInitialScan()
     }
@@ -1403,7 +1536,7 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             }
             delay(if (_remoteAdminSession.value.targetRepeater != null) REGION_SETTLE_LORA_MS else REGION_SETTLE_USB_MS)
             if (isLinkUp()) readRegions()
-            _uiEvents.tryEmit(if (err == null) tr(successMsg) else tr("Regionen: nicht übernommen – {0}", err))
+            (if (err == null) tr(successMsg) else tr("Regionen: nicht übernommen – {0}", err)).let { recordMessage(it); _uiEvents.tryEmit(it) }
         }.invokeOnCompletion { clearBusy(BusyKey.REGION) }
     }
 
@@ -1453,7 +1586,14 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             refreshMeshContacts()
         }
         when (data[0]) {
-            RepeaterProtocol.PACKET_SELF_INFO, RepeaterProtocol.PACKET_DEVICE_INFO -> { if (!_deviceCapabilities.value.isCompanion) { _deviceCapabilities.value = _deviceCapabilities.value.copy(isCompanion = true, detectionComplete = true); refreshMeshContacts() } }
+            RepeaterProtocol.PACKET_SELF_INFO, RepeaterProtocol.PACKET_DEVICE_INFO -> {
+                if (data[0] == RepeaterProtocol.PACKET_SELF_INFO) companionHandshake.onSelfInfo()
+                // v1.25: Gerätedaten des Companion-Nodes für den Debug-Bericht merken (ohne BLE-PIN und GPS-Position)
+                val ci = _companionInfo.value ?: CompanionNodeInfo()
+                (CompanionProtocol.parseSelfInfo(data, ci) ?: CompanionProtocol.parseDeviceInfo(data, ci))?.let { _companionInfo.value = it }
+                if (!_deviceCapabilities.value.isCompanion) { _deviceCapabilities.value = _deviceCapabilities.value.copy(isCompanion = true, detectionComplete = true); refreshMeshContacts() }
+                maybeSendDeviceQuery()
+            }
             // RESP_CODE_SENT: [0x06][flood][tag(4)][est_timeout_ms(4, LE)] – nur "unterwegs", KEIN Login-Erfolg
             RepeaterProtocol.PACKET_SENT -> {
                 if (_remoteAdminSession.value.isLoggingIn) {
@@ -1463,9 +1603,9 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
                     armLoginTimeout(timeout)
                 }
             }
-            RepeaterProtocol.PACKET_CONTACT_START -> { _deviceCapabilities.value = _deviceCapabilities.value.copy(isCompanion = true, detectionComplete = true); _isRefreshingContacts.value = true; _meshContacts.value = emptyList() }
-            RepeaterProtocol.PACKET_CONTACT -> RepeaterProtocol.parseContactFrame(data)?.let { LiveScanRules.keepLearnedName(it, learnedNames[it.pubKeyHex.lowercase()]) }?.let { ct -> val l = _meshContacts.value.toMutableList(); val i = l.indexOfFirst { it.pubKeyHex == ct.pubKeyHex }; if (i >= 0) l[i] = ct else l.add(ct); _meshContacts.value = l.sortedWith(compareByDescending<MeshContact> { it.isRepeater }.thenBy { it.name }) }
-            RepeaterProtocol.PACKET_CONTACT_END -> _isRefreshingContacts.value = false
+            RepeaterProtocol.PACKET_CONTACT_START -> { companionHandshake.onContactFrame(System.currentTimeMillis());  _deviceCapabilities.value = _deviceCapabilities.value.copy(isCompanion = true, detectionComplete = true); _isRefreshingContacts.value = true; _meshContacts.value = emptyList() }
+            RepeaterProtocol.PACKET_CONTACT -> companionHandshake.onContactFrame(System.currentTimeMillis()).let { RepeaterProtocol.parseContactFrame(data) }?.let { LiveScanRules.keepLearnedName(it, learnedNames[it.pubKeyHex.lowercase()]) }?.let { ct -> val l = _meshContacts.value.toMutableList(); val i = l.indexOfFirst { it.pubKeyHex == ct.pubKeyHex }; if (i >= 0) l[i] = ct else l.add(ct); _meshContacts.value = l.sortedWith(compareByDescending<MeshContact> { it.isRepeater }.thenBy { it.name }) }
+            RepeaterProtocol.PACKET_CONTACT_END -> { _isRefreshingContacts.value = false; companionHandshake.onContactsEnd(); maybeSendDeviceQuery() }
             CompanionProtocol.PUSH_CODE_CONTROL_DATA -> onControlData(data)
             // Remote-CLI-Antworten landen in der Offline-Queue des Companions -> per CMD_SYNC_NEXT_MESSAGE abholen
             RepeaterProtocol.PUSH_MSG_WAITING -> requestNextMessage(fromPush = true)
@@ -1477,7 +1617,13 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
             RepeaterProtocol.PUSH_LOGIN_SUCCESS -> if (isLoginPushForTarget(data) && (loginAttemptPending || _remoteAdminSession.value.isLoggingIn) && !_remoteAdminSession.value.isLoggedIn) onLoginSuccess()
             RepeaterProtocol.PUSH_LOGIN_FAIL -> if (isLoginPushForTarget(data) && (loginAttemptPending || _remoteAdminSession.value.isLoggingIn)) onLoginFailed()
             RepeaterProtocol.PACKET_CLI_REPLY -> { pendingReplySignal?.complete(Unit); val r = String(data, 1, data.size - 1, StandardCharsets.UTF_8).trimEnd('\u0000', '\r', '\n'); logTerminal("< [Companion] $r", false, systemOnly = (lastCommandWasAuto || System.currentTimeMillis() < activeAutoUntilMs)); parseIncomingLine(r) }
-            RepeaterProtocol.PACKET_ERROR -> { val code = if (data.size > 1) data[1].toInt() and 0xFF else -1; logTerminal(tr("< [Fehler 0x01] Code={0}", code), false, systemOnly = true); if (_remoteAdminSession.value.isLoggingIn) { loginTimeoutJob?.cancel(); loginAttemptPending = false; _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggingIn = false, sessionStatus = tr("Fehler ({0})", code)) } }
+            RepeaterProtocol.PACKET_ERROR -> {
+                val code = if (data.size > 1) data[1].toInt() and 0xFF else -1
+                val cmd = lastCompanionCmd
+                logTerminal(tr("< [Fehler 0x01] Code={0} ({1}) auf {2}", code, CompanionProtocol.errorName(code), CompanionProtocol.commandName(cmd)), false, systemOnly = true)
+                // Nur ein Fehler auf CMD_SEND_LOGIN bricht den Login ab – nicht z. B. BAD_STATE auf ein GET_CONTACTS
+                if (_remoteAdminSession.value.isLoggingIn && CompanionProtocol.errorBelongsToLogin(cmd)) { loginTimeoutJob?.cancel(); loginAttemptPending = false; _remoteAdminSession.value = _remoteAdminSession.value.copy(isLoggingIn = false, sessionStatus = tr("Fehler ({0})", "$code ${CompanionProtocol.errorName(code)}")) }
+            }
         }
     }
     /**
@@ -1920,6 +2066,8 @@ class RepeaterViewModel(application: Application) : AndroidViewModel(application
     }
 
     private companion object {
+        /** Beruhigungszeit, bevor die erkannte Geräterolle den Lichtschein auslöst (v1.25). */
+        private const val EDGE_ROLE_SETTLE_MS = 250L
         /** Geräte-/Rollenerkennung (Teil 1 des Start-Scans). */
         val INITIAL_DETECTION_QUERIES = listOf("board", "ver", "filter", "filter help", "get gps")
         /** Start-Scan in Phasen (Reihenfolge wie im Status-Fenster angezeigt). */

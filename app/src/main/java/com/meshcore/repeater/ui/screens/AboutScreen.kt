@@ -38,6 +38,10 @@ fun AboutScreen(viewModel: RepeaterViewModel, onShowDisclaimer: () -> Unit) {
     var lastLogoTapMs by remember { mutableLongStateOf(0L) }
     var showPong by remember { mutableStateOf(false) }
     if (showPong) com.meshcore.repeater.ui.components.MonoPongDialog(onDismiss = { showPong = false })
+    // v1.25: Debug-Bericht – nur auf Knopfdruck lokal erzeugt (Momentaufnahme), Geheimnisse geschwärzt
+    var debugReport by remember { mutableStateOf<Pair<String, String>?>(null) }
+    val paletteName = com.meshcore.repeater.ui.theme.LocalBauhausPalette.current.value.name
+    debugReport?.let { (text, file) -> com.meshcore.repeater.ui.components.DebugReportDialog(report = text, fileName = file, onDismiss = { debugReport = null }) }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).hintedVerticalScroll(rememberScrollState()).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         // Kopf: Logo (5x tippen = MonoPong) + Versionsnummer dezent oben rechts
         Box(Modifier.fillMaxWidth().clip(BauhausCornerShape)) {
@@ -71,6 +75,19 @@ fun AboutScreen(viewModel: RepeaterViewModel, onShowDisclaimer: () -> Unit) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.about_privacy_title), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = bColors.cobalt)
                 Text(stringResource(R.string.about_privacy_body), fontSize = 13.sp, lineHeight = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.about_privacy_debug_body), fontSize = 13.sp, lineHeight = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        // Fehler melden / GitHub (v1.25): Debug-Informationen sammeln -> Dialog „Kopieren“ | „Als Datei speichern“
+        Card(Modifier.fillMaxWidth(), shape = BauhausCornerShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(tr("Fehler melden"), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = bColors.signalRed)
+                Text(tr("Fehler und Wünsche bitte als Issue auf GitHub melden. Ein Debug-Bericht hilft bei der Analyse; er entsteht nur lokal und wird nie automatisch gesendet."),
+                    fontSize = 13.sp, lineHeight = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Button(
+                    onClick = { debugReport = viewModel.buildDebugReport(paletteName) to com.meshcore.repeater.service.DebugReportBuilder.fileName(viewModel.debugReportStamp()) },
+                    shape = BauhausCornerShape, colors = ButtonDefaults.buttonColors(containerColor = bColors.cobalt), modifier = Modifier.fillMaxWidth()
+                ) { Text(tr("Debug-Informationen sammeln"), color = androidx.compose.ui.graphics.Color.Black, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
             }
         }
         OutlinedButton(onClick = onShowDisclaimer, shape = BauhausCornerShape, modifier = Modifier.fillMaxWidth()) {

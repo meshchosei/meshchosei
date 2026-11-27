@@ -209,6 +209,7 @@
     <string name="menu_routing_adverts_sub">Weiterleitung, Timing &amp; Baken</string>
     <string name="about_privacy_title">Datenschutzerklärung</string>
     <string name="about_privacy_body">1) Keine eigenen Server, kein Tracking: Alle Einstellungen, Filterlisten und JSON-Backups bleiben ausschließlich lokal auf deinem Gerät. Die App erhebt keine Nutzungsdaten.\n\n2) Bluetooth &amp; Standort: Android verlangt für BLE-Scans die Standortberechtigung (bis Android 11) und eingeschaltete Standortdienste. GPS-Daten werden nur für den Repeater-Standort verwendet und nicht an Dritte übertragen.\n\n3) Kartenkacheln (OpenStreetMap): Beim Öffnen der Standortkarte werden Kartenkacheln von tile.openstreetmap.org (OpenStreetMap Foundation) geladen. Dabei wird technisch bedingt deine IP-Adresse an diesen Server übermittelt.</string>
+    <string name="about_privacy_debug_body">4) Debug-Bericht (optional): Es werden keinerlei Diagnosedaten automatisch übertragen. Der Bericht unter „Fehler melden“ entsteht nur lokal, wenn du den Button antippst. Er enthält nie Passwörter oder private Schlüssel (diese werden durch [REDACTED] ersetzt). Du kannst ihn vor dem Kopieren oder Speichern frei einsehen und kürzen und teilst ihn nur selbst, z. B. in einem GitHub-Issue.</string>
     <string name="conn_admin_password_label">Admin-Passwort (max. 15)</string>
     <string name="menu_blacklist">Blacklist</string>
     <string name="menu_blacklist_sub">Kanäle &amp; Pfade sperren</string>

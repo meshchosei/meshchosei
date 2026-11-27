@@ -209,6 +209,7 @@
     <string name="menu_routing_adverts_sub">Routering, bakens &amp; timing</string>
     <string name="about_privacy_title">Privacyverklaring</string>
     <string name="about_privacy_body">1) Geen eigen servers, geen tracking: alle instellingen, filterlijsten en JSON-back-ups blijven uitsluitend lokaal op je apparaat. De app verzamelt geen gebruiksgegevens.\n\n2) Bluetooth &amp; locatie: voor BLE-scans vereist Android de locatietoestemming (tot Android 11) en ingeschakelde locatiediensten. GPS-gegevens worden alleen gebruikt voor de locatie van de repeater en nooit aan derden doorgegeven.\n\n3) Kaarttegels (OpenStreetMap): bij het openen van de locatiekaart worden kaarttegels geladen van tile.openstreetmap.org (OpenStreetMap Foundation). Daarbij wordt om technische redenen je IP-adres naar die server verzonden.</string>
+    <string name="about_privacy_debug_body">4) Debugrapport (optioneel): er worden nooit automatisch diagnosegegevens verzonden. Het rapport onder „Fout melden“ wordt alleen lokaal gemaakt wanneer je op de knop tikt. Het bevat nooit wachtwoorden of privésleutels (die worden vervangen door [REDACTED]). Je kunt het vóór het kopiëren of opslaan vrij bekijken en inkorten en deelt het alleen zelf, bijvoorbeeld in een GitHub-issue.</string>
     <string name="conn_admin_password_label">Admin-wachtwoord (max. 15)</string>
     <string name="menu_blacklist">Zwarte lijst</string>
     <string name="menu_blacklist_sub">Kanalen &amp; paden blokkeren</string>

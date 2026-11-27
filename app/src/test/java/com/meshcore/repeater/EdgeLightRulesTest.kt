@@ -1,6 +1,7 @@
 package com.meshcore.repeater
 
 import com.meshcore.repeater.model.EdgeLightTrigger
+import com.meshcore.repeater.model.EdgeRoleWatch
 import com.meshcore.repeater.model.EdgeSide
 import com.meshcore.repeater.ui.components.EdgeLightRules
 import org.junit.Assert.assertEquals
@@ -48,5 +49,36 @@ class EdgeLightRulesTest {
         assertEquals(0.70f, EdgeLightRules.sweepCenter(1f), 1e-4f)
         assertEquals(1500, EdgeLightRules.DURATION_MS)
         assertEquals(0.92f, EdgeLightRules.MAX_ALPHA, 0f)
+    }
+
+    /**
+     * v1.25: Maßgeblich ist das erkannte Gerät, nicht der Transport. Direkter USB-Repeater -> links (grün);
+     * Companion-Node (USB oder BLE) -> rechts (blau); anschließender Remote-Admin-Login auf einen Repeater -> links.
+     */
+    @Test fun sideFollowsDetectedDeviceNotTransport() {
+        assertEquals("direkte USB-Verbindung zu einem Repeater", EdgeSide.LEFT,
+            EdgeLightTrigger.sideForConnectedDevice(isDirectRepeater = true, isCompanion = false))
+        assertEquals("Verbindung mit einem Companion-Node", EdgeSide.RIGHT,
+            EdgeLightTrigger.sideForConnectedDevice(isDirectRepeater = false, isCompanion = true))
+        assertEquals("danach Remote-Admin-Login auf einen Repeater", EdgeSide.LEFT, EdgeLightTrigger.SIDE_FOR_REPEATER_LOGIN)
+        assertEquals("Transport verbunden, Gerät noch nicht erkannt -> kein Schein", null,
+            EdgeLightTrigger.sideForConnectedDevice(isDirectRepeater = false, isCompanion = false))
+        assertEquals("direkter Repeater hat Vorrang", EdgeSide.LEFT,
+            EdgeLightTrigger.sideForConnectedDevice(isDirectRepeater = true, isCompanion = true))
+    }
+
+    /** Beobachter: genau ein Schein pro Verbindung, erst wenn Verbindung steht UND Rolle feststeht. */
+    @Test fun roleWatchFiresOncePerConnectionAfterRoleIsKnown() {
+        val w = EdgeRoleWatch()
+        // USB-Repeater direkt: verbunden, Erkennung läuft -> nichts; dann direkter Repeater -> links
+        assertEquals(null, w.onState(connected = true, isDirectRepeater = false, isCompanion = false))
+        assertEquals(EdgeSide.LEFT, w.onState(true, isDirectRepeater = true, isCompanion = false))
+        assertEquals("weitere Zustandswechsel derselben Verbindung -> kein zweiter Schein", null, w.onState(true, true, false))
+        // Trennen, dann Companion-Node per USB/BLE -> rechts
+        assertEquals(null, w.onState(connected = false, isDirectRepeater = false, isCompanion = false))
+        assertEquals(EdgeSide.RIGHT, w.onState(true, isDirectRepeater = false, isCompanion = true))
+        assertEquals(null, w.onState(true, false, true))
+        // ohne Verbindung nie ein Schein, auch mit alter Rolle
+        assertEquals(null, w.onState(false, isDirectRepeater = true, isCompanion = false))
     }
 }

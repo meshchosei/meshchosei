@@ -616,7 +616,8 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                         // Beim Scan ersetzt die Braille-Animation zentriert das Wort „Live“: nichts ändert seine Größe oder verschiebt sich.
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                             SegmentButton(
-                                text = tr("Gespeichert"), selected = !liveMode, modifier = Modifier.weight(1f),
+                                // Laden/Neueinlesen der gespeicherten Kontakte: Braille zentriert hier (wie bei „Live“), nicht am ↻
+                                text = tr("Gespeichert"), selected = !liveMode, busy = isRefreshingContacts, modifier = Modifier.weight(1f),
                                 onClick = { viewModel.clearLiveRepeaterScan(); repeaterMenuOpen = true }
                             )
                             SegmentButton(
@@ -653,7 +654,16 @@ fun ConnectionScreen(viewModel: RepeaterViewModel) {
                             }
                         )
                         Spacer(Modifier.width(4.dp))
-                        InlineRefreshIcon(onClick = { repeaterMenuOpen = true; viewModel.clearLiveRepeaterScan(); viewModel.refreshMeshContacts() }, busy = isRefreshingContacts, contentDescription = tr("Kontakte neu einlesen"))
+                        // ↻ kontextabhängig (v1.25): im Live-Tab neuer Live-Scan (bleibt in „Live“), sonst gespeicherte Kontakte neu laden.
+                        // Das Icon bleibt ruhig; den Fortschritt zeigt der jeweilige Segment-Button.
+                        InlineRefreshIcon(
+                            onClick = {
+                                repeaterMenuOpen = true
+                                if (liveMode) { if (!liveScan.scanning) { focusManager.clearFocus(); viewModel.startLiveRepeaterScan() } }
+                                else viewModel.refreshMeshContacts()
+                            },
+                            contentDescription = if (liveMode) tr("Live-Suche wiederholen") else tr("Kontakte neu einlesen")
+                        )
                         }
 
                         // Live-Ergebnisse statt Kontaktliste, solange eine Live-Suche aktiv ist (stärkstes Signal oben)

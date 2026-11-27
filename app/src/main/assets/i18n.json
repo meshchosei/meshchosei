@@ -4438,5 +4438,60 @@
   "Live: repeaters in direct radio range",
   "Live: repeaters in direct radiobereik",
   "En direct : répéteurs à portée radio directe"
+ ],
+ "Fehler melden": [
+  "Report a bug",
+  "Fout melden",
+  "Signaler un bug"
+ ],
+ "Fehler und Wünsche bitte als Issue auf GitHub melden. Ein Debug-Bericht hilft bei der Analyse; er entsteht nur lokal und wird nie automatisch gesendet.": [
+  "Please report bugs and wishes as an issue on GitHub. A debug report helps with the analysis; it is only created locally and is never sent automatically.",
+  "Meld fouten en wensen als issue op GitHub. Een debugrapport helpt bij de analyse; het wordt alleen lokaal gemaakt en nooit automatisch verzonden.",
+  "Merci de signaler les bugs et suggestions sous forme d'issue sur GitHub. Un rapport de débogage aide à l'analyse ; il est créé uniquement en local et n'est jamais envoyé automatiquement."
+ ],
+ "Debug-Informationen sammeln": [
+  "Collect debug information",
+  "Debuginformatie verzamelen",
+  "Collecter les informations de débogage"
+ ],
+ "Debug-Informationen": [
+  "Debug information",
+  "Debuginformatie",
+  "Informations de débogage"
+ ],
+ "Enthalten: App- und Android-Version, Gerätemodell, Sprache und Palette, Verbindung, erkannte Hardware und Firmware sowie die letzten Meldungen und das CLI-Protokoll. Passwörter und private Schlüssel sind durch [REDACTED] ersetzt. Vor dem Einfügen in ein GitHub-Issue kannst du beliebige Zeilen entfernen.": [
+  "Included: app and Android version, device model, language and palette, connection, detected hardware and firmware, plus the latest messages and the CLI log. Passwords and private keys are replaced by [REDACTED]. You can remove any line before pasting it into a GitHub issue.",
+  "Inbegrepen: app- en Android-versie, apparaatmodel, taal en palet, verbinding, herkende hardware en firmware, plus de laatste meldingen en het CLI-logboek. Wachtwoorden en privésleutels zijn vervangen door [REDACTED]. Vóór het plakken in een GitHub-issue kun je willekeurige regels verwijderen.",
+  "Contenu : version de l'app et d'Android, modèle de l'appareil, langue et palette, connexion, matériel et firmware détectés, ainsi que les derniers messages et le journal CLI. Les mots de passe et clés privées sont remplacés par [REDACTED]. Vous pouvez supprimer n'importe quelle ligne avant de la coller dans une issue GitHub."
+ ],
+ "Als Datei speichern": [
+  "Save as file",
+  "Opslaan als bestand",
+  "Enregistrer comme fichier"
+ ],
+ "In die Zwischenablage kopiert": [
+  "Copied to clipboard",
+  "Naar klembord gekopieerd",
+  "Copié dans le presse-papiers"
+ ],
+ "GitHub-Issue öffnen": [
+  "Open GitHub issue",
+  "GitHub-issue openen",
+  "Ouvrir une issue GitHub"
+ ],
+ "< [Fehler 0x01] Code={0} ({1}) auf {2}": [
+  "< [Error 0x01] Code={0} ({1}) on {2}",
+  "< [Fout 0x01] Code={0} ({1}) op {2}",
+  "< [Erreur 0x01] Code={0} ({1}) sur {2}"
+ ],
+ "[Companion] Kontaktliste wird bereits geladen – keine zweite Anfrage": [
+  "[Companion] Contact list is already loading – no second request",
+  "[Companion] Contactlijst wordt al geladen – geen tweede verzoek",
+  "[Companion] Liste de contacts déjà en cours de chargement – pas de seconde requête"
+ ],
+ "Live-Suche wiederholen": [
+  "Repeat live search",
+  "Live-zoekactie herhalen",
+  "Relancer la recherche en direct"
  ]
 }

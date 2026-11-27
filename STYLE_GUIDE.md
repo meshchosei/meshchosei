@@ -413,10 +413,14 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
 
 ### 2.13 Türkanten-Lichtschein als Rückmeldung (seit v1.24)
 `EdgeLightEffect` (`ui/components/EdgeLightEffect.kt`) zeigt einen Lichtspalt an der Bildschirmkante, wie eine Taschenlampe hinter einer geschlossenen Tür im Dunkeln:
-- **Rechts, Kobaltblau:** Die Verbindung zum Node steht, über USB-OTG oder BLE.
-- **Links, Signalgrün:** Der Remote-Admin-Login beim Repeater war erfolgreich.
+- **Maßgeblich ist das Zielgerät, nicht der Transport (seit v1.25):**
+  - **Rechts, Kobaltblau:** Die App ist mit einem **Companion-Node** verbunden (USB-OTG oder BLE), über den anschließend andere Repeater per Remote-Admin gesteuert werden.
+  - **Links, Signalgrün:** Das Ziel ist ein **Repeater**. Das gilt beim erfolgreichen Remote-Admin-Login auf einen Repeater und ebenso bei einer **direkten USB-Verbindung zu einem Repeater**.
+  - „USB verbunden“ allein löst nichts aus. Der Schein kommt erst, wenn die Verbindung steht **und** die Rolle feststeht (direkter Repeater bzw. Companion, `deviceCapabilities`).
+  - **Kein Eingriff in den Verbindungsablauf (verbindlich):** USB-Handshake und Protokollerkennung bleiben unverändert. Ein Beobachter im ViewModel liest nur `connectionState` + `deviceCapabilities` und meldet je Verbindung genau einmal die Seite (`EdgeRoleWatch`). Eine Beruhigungszeit von 250 ms verhindert, dass die Rolle der vorigen Verbindung kurz nach „Connected“ einen falschen Schein auslöst.
+  - Regel: `EdgeLightTrigger.sideForConnectedDevice(isDirectRepeater, isCompanion)`. Der Remote-Login (`onLoginSuccess`) nutzt `SIDE_FOR_REPEATER_LOGIN`, also links.
 - **Auslöser (verbindlich):**
-  - Das `RepeaterViewModel` setzt `edgeLightTrigger = EdgeLightTrigger(id = System.nanoTime(), side)` (`model/EdgeLightTrigger.kt`) **direkt an der Erfolgsstelle**. Das sind genau drei Stellen: USB `Connected`, BLE `Connected` und `onLoginSuccess()`.
+  - Das `RepeaterViewModel` setzt `edgeLightTrigger = EdgeLightTrigger(id = System.nanoTime(), side)` (`model/EdgeLightTrigger.kt`) **direkt an der Erfolgsstelle**. Es gibt genau zwei Auslöser: den Rollen-Beobachter (`EdgeRoleWatch`; Companion rechts, direkter Repeater links) und `onLoginSuccess()` (links).
   - Die UI merkt sich `lastPlayedId` per `rememberSaveable` und spielt jede id genau einmal ab (`id > lastPlayedId`).
   - Kein Flankenvergleich im Composable: Er geht bei Neuaufbau verloren oder löst bei Display-Drehung doppelt aus.
 - **Animation über die echte Zeit (verbindlich):**
@@ -442,7 +446,9 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
 - **Live:**
   - Ein Tipp startet sofort eine Funksuche nach Repeatern in **direkter** Reichweite und öffnet die Trefferliste.
   - Während des 4-s-Scan-Fensters ersetzen zentrierte Braille-Punkte das Wort „Live“; der Button behält seine Größe. Ein erneuter Tipp sucht neu.
-  - „Gespeichert“, ✕ und ↻ beenden die Live-Ansicht.
+  - „Gespeichert“ und ✕ beenden die Live-Ansicht.
+- **↻ kontextabhängig (seit v1.25):** Im Tab **Live** löst ↻ einen neuen Live-Scan aus und bleibt in „Live“ (Braille im Button „Live“). Im Tab **Gespeichert** lädt ↻ die gespeicherten Kontakte vom Companion neu (Braille im Button „Gespeichert“). Das ↻ selbst bleibt immer ein ruhiges Icon. Die Bedienhilfe lautet „Live-Suche wiederholen“ bzw. „Kontakte neu einlesen“.
+- **Einheitliche Lade-Anzeige (seit v1.25):** Werden die gespeicherten Kontakte geladen, beim Verbinden oder über ↻ neu eingelesen, ersetzt die zentrierte Braille-Animation das Wort „Gespeichert“ **im Segment-Button**, genau wie bei „Live“. Die Button-Breite bleibt gleich. Das ↻ neben dem Suchfeld bleibt dabei ruhig ein ↻-Icon und wird selbst nicht zum Spinner. Fortschritt zeigt in dieser Leiste immer der betroffene Segment-Button (§2.2.1).
 - **Nur aktive Pfade:** filtert auf Einträge mit bekanntem Routing-Pfad. Live-Treffer sind immer direkt (0 Hops).
 - **Protokoll (`service/CompanionProtocol.kt`, MeshCore = ZephCore):**
   - Die App sendet `CMD_SEND_CONTROL_DATA [0x37][0x80][1<<ADV_TYPE_REPEATER][tag(4)][since(4)=0]`. Der Companion sendet das als Zero-Hop.
@@ -461,7 +467,6 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
   - Der gelernte Name bleibt erhalten:
     - bei einem neuen Live-Scan (`merge` behält den Namen);
     - beim Neu-Einlesen der Kontakte, wenn im Companion noch der Platzhalter steht (`keepLearnedName`).
-  - Einen von der Live-Suche angelegten Kontakt speichert die App mit dem echten Namen auch im Companion.
   - **Anzeige-Vorrang:** Statuskarte und Login-Bereich zeigen `LiveScanRules.shownName`. Ein live per `get name` gelesener, nicht leerer Name (`viewModel.readRepeaterName`) hat Vorrang vor dem gespeicherten Namen, sofern er zum gewählten Repeater gehört.
   - **Key-Vergleich:** `LiveScanRules.sameKey` vergleicht ohne Groß-/Kleinschreibung über das gemeinsame Hex-Präfix (mindestens 8 Hex-Zeichen), weil Listen teils nur 8/12 Zeichen oder den vollen Key halten.
 - **StateFlow und `equals` (verbindlich):**
@@ -470,7 +475,35 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
   - Heute vergleicht `equals` alle Werte. Für „derselbe Repeater?“ wird immer `pubKeyHex` bzw. `sameKey` verglichen, nie `==`. Abgesichert durch `LiveRepeaterNameAfterLoginTest`.
 - **Übernahme:**
   - Ein Tipp übernimmt den Repeater mit Public-Key und gespeichertem Passwort in den Login-Bereich.
-  - Ein unbekannter Repeater wird vorher per `CMD_ADD_UPDATE_CONTACT` (0x09, Typ 2, `out_path_len = 0`) als direkter Kontakt im Companion angelegt. Sonst lehnt der Companion `CMD_SEND_LOGIN` ab (`lookupContactByPubKey`).
+  - Ein unbekannter Repeater wird vorher per `CMD_ADD_UPDATE_CONTACT` (0x09, Typ 2, **`out_path_len = OUT_PATH_UNKNOWN` (0xFF)**, seit v1.25) im Companion angelegt. Sonst lehnt der Companion `CMD_SEND_LOGIN` ab (`lookupContactByPubKey`). Mit „direkt“ (0) würde MeshCore den Login nur als Zero-Hop senden, ohne Flood-Versuch. Mit 0xFF darf der Companion fluten und lernt den Pfad aus der Antwort.
+  - Nach `get name` wird der Kontakt **nicht** erneut per `CMD_ADD_UPDATE_CONTACT` umbenannt, weil das den gelernten Pfad wieder löschen würde. Der echte Name bleibt in der App.
+
+### 2.15 Debug-Bericht für Fehlermeldungen (seit v1.25, verbindlich)
+- **Ort:** „Über & Lizenz“, Karte **„Fehler melden“** unter der Datenschutzerklärung, mit dem Button **„Debug-Informationen sammeln“** (Kobalt, volle Breite).
+- **Erzeugung:** `DebugReportBuilder` (`service/DebugReportBuilder.kt`) ist rein und unit-getestet. Der ViewModel liefert nur die Werte (`buildDebugReport(palette)`). Der Bericht ist eine Momentaufnahme beim Antippen, nie im Hintergrund, und es wird **nichts automatisch übertragen**.
+- **Format:** Markdown für GitHub Issues mit deutschen Überschriften. **Companion-Node und Ziel-Repeater stehen in getrennten Abschnitten:**
+  - `## App & Gerät`: Version und Code, Build-Typ, Android und SDK, Hersteller und Modell, Sprache, Palette, Farbschema, Verbindungsstatus.
+  - `## Companion-Node`: Verbindungsart (USB-OTG/BLE), Node-Name, Board/Modell, Firmware-Typ und -Version, Build-Datum, Protokollversion, Public-Key-Präfix, Funkparameter, Sendeleistung, max. Kontakte und Kanäle. Ohne Companion steht dort „nicht verbunden“ bzw. „Direktverbindung“.
+  - `## Ziel-Repeater`: Zugang (direkt per USB-CLI / Remote-Admin über Companion), Name, eingeloggt, Board, Funkchip, Firmware-Typ und -Version, Bootloader, Fähigkeiten. Sonst steht dort „nicht verbunden / nicht eingeloggt“. Hardwaredaten eines Remote-Repeaters erscheinen erst nach dem Login, damit keine veralteten Werte einer früheren Sitzung im Bericht landen.
+  - `## Meldungen`, `## CLI-Protokoll`, `## System-Protokoll`, jeweils als Code-Block.
+  - Firmware-Typ: „ZephCore“, wenn die Version „zeph“ enthält, sonst „MeshCore“.
+- **Companion-Daten (`CompanionNodeInfo`):**
+  - Quelle sind `RESP_SELF_INFO` (Antwort auf APP_START) und `RESP_DEVICE_INFO` (Antwort auf `CMD_DEVICE_QUERY`). Die Geräteabfrage geht einmal pro Verbindung erst raus, wenn `SELF_INFO` **und** `END_OF_CONTACTS` empfangen wurden (§3.6).
+  - Die Daten gelten nur für die laufende Node-Verbindung und werden beim Trennen geleert.
+  - **Nie übernommen** werden die BLE-PIN (DEVICE_INFO) und die GPS-Position des Companions (SELF_INFO).
+- **Schwärzung (`sanitize`, Pflicht vor jeder Anzeige):**
+  - Ersetzt durch `[REDACTED]` werden die Werte von `prv.key`, `wifi.pass`, `mqtt.*.password`, `admin.`/`guest.password`, `password …` sowie Hex-Ketten ab 96 Zeichen (privater Schlüssel).
+  - Die Antwortzeile direkt nach `get prv.key` bzw. `get …pass…` wird komplett geschwärzt.
+  - Alle in der App gespeicherten Admin-Passwörter werden überall wörtlich ersetzt.
+  - Public-Keys (64 Hex) bleiben sichtbar, weil sie für die Analyse nötig und nicht geheim sind.
+- **Dialog:**
+  - zentriert, Surface mit `BauhausCornerShape` und 1-dp-Rahmen, `✕` oben rechts (`CloseIconSize` = 16 dp);
+  - kurzer Hinweis, was enthalten ist und dass man Zeilen entfernen kann;
+  - scrollbare Vorschau in Monospace (`hintedVerticalScroll`), genau mit dem Text, der geteilt wird.
+- **Aktionen:**
+  - Zwei gleichwertige, gleich breite Aktionen: **„Kopieren“** (Zwischenablage; danach erscheint der Link „GitHub-Issue öffnen“ → `…/issues/new`) und **„Als Datei speichern“** (`ActivityResultContracts.CreateDocument("text/plain")`, Name `meshchosei-debug-JJJJMMTT-HHMM.txt`).
+  - Eine Rückmeldung erscheint als kleine Statuszeile im Dialog.
+- **Datenschutz:** Abschnitt 5 in `PRIVACY.md` (DE und EN) und `about_privacy_debug_body` in der Datenschutz-Karte (4 Sprachen). Meldungen werden nur im Arbeitsspeicher gesammelt (letzte 60).
 
 ## 3. Kommunikations- & Protokoll-Architektur
 
@@ -557,6 +590,31 @@ Auswahl- und Vorschlagslisten sind **immer** dasselbe vertikale Bauhaus-Klappmen
   - Ablehnungen im Whitelist-Modus zählt die Firmware in keiner Kategorie; sie zeigen sich nur in der gesparten Airtime. Die Whitelist-Ansicht sagt das in einem kurzen Hinweis.
 - **Aktualisierung:** Die Statistik wird beim Öffnen des Screens still gelesen (`refreshFilterStats`, sequentiell, mit Tag und Retry) und zusätzlich mit dem ↻ der Kopfzeile. Bei Gerätewechsel oder neuem Start-Scan werden die Zähler geleert, nach `filter RESET` auf 0 gesetzt.
 - **Parser:** Er ist tolerant gegen gekürzte Antworten (`..`): angekommene Felder zählen, fehlende Felder zählen 0. Andere Statistik-Themen (`Blocked n [1B:…`, `dropped n`) dürfen die Zusammenfassung nie überschreiben. Geprüft in `FilterStatisticsTest`.
+
+### 3.6 Companion-Handshake & Fehlercodes (seit v1.25, verbindlich)
+- **Firmware-Befund** (MeshCore `companion_radio/MyMesh.cpp`, ZephCore `app/CompanionMesh.cpp`): Von den Befehlen dieser App liefert **nur `CMD_GET_CONTACTS`** `ERR_CODE_BAD_STATE` (4), und zwar während der Kontakt-Iterator noch läuft. `CMD_APP_START` beendet den Iterator. `CMD_DEVICE_QUERY`, `CMD_ADD_UPDATE_CONTACT` und `CMD_SEND_LOGIN` liefern nie Code 4.
+- **Ursache beim ThinkNode M1:** Beim BLE-Connect ging `CMD_GET_CONTACTS` doppelt raus: einmal über den ersten empfangenen Frame (Umschalten auf Companion) und einmal fest nach 700 ms. Bei vielen Kontakten antwortete der Node auf die zweite Anfrage mit `BAD_STATE`.
+- **Regeln (`model/CompanionHandshake.kt`, unit-getestet):**
+  - Höchstens **ein** `CMD_GET_CONTACTS` gleichzeitig. Weitere sind erst erlaubt nach `END_OF_CONTACTS`, nach `APP_START` oder nach 15 s ohne Kontakt-Frame.
+  - `CMD_DEVICE_QUERY` geht einmal pro Verbindung raus, erst nach `SELF_INFO` **und** `END_OF_CONTACTS`. Es gibt keinen festen Timer.
+  - Beim Trennen wird alles zurückgesetzt.
+- **Fehlerzuordnung:** Ein `RESP_ERR` (0x01) bricht einen laufenden Login **nur** ab, wenn der zuletzt an den Companion gesendete Befehl `CMD_SEND_LOGIN` war (`errorBelongsToLogin`). Vorher beendete jeder Fehler den Login, auch ein `BAD_STATE` auf `GET_CONTACTS`.
+- **Klartext im System-Protokoll:** `< [Fehler 0x01] Code=4 (BAD_STATE) auf GET_CONTACTS`. Die Namen lauten 1 `UNSUPPORTED_CMD`, 2 `NOT_FOUND`, 3 `TABLE_FULL`, 4 `BAD_STATE`, 5 `FILE_IO_ERROR`, 6 `ILLEGAL_ARG`. Der Login-Status zeigt `Fehler (2 NOT_FOUND)`.
+
+### 3.7 BLE-Stabilität: Bildschirm wach halten & sauberes GATT-Trennen (seit v1.25, verbindlich)
+- **`FLAG_KEEP_SCREEN_ON`:**
+  - `MainActivity` setzt das Flag dynamisch, solange eine Verbindung aufgebaut wird oder steht (USB oder BLE) oder ein Einlesen bzw. BLE-Scan läuft (`ScreenWakeRules.keepScreenOn`).
+  - Das Flag wird per `DisposableEffect` sofort wieder freigegeben (`clearFlags`), sobald nichts mehr läuft.
+  - Grund: Sperrt sich das Smartphone mitten in einer BLE-Sitzung, kappt Android die GATT-Verbindung, und auf dem nRF52-Node bleibt oft ein belegter BLE-Slot hängen.
+- **GATT freigeben (`BleConnectionManager.releaseGatt`):**
+  - Immer `gatt.disconnect()` und danach **immer** `gatt.close()`, jeweils einzeln abgesichert, damit eine Exception in `disconnect()` das `close()` nicht überspringt.
+  - Danach `activeGatt = null`, und die Instanz wird als `closedGatt` gemerkt. Späte Callbacks dieser Instanz werden ignoriert.
+- **Gilt für alle Wege:**
+  - **Trennen** (`disconnect()`): genau ein „Getrennt“-Callback, kein zweiter, wenn nichts mehr offen war.
+  - **Abbruch** (`STATE_DISCONNECTED`): freigegeben wird genau die Instanz des Callbacks, auch wenn `activeGatt` schon `null` ist, und ggf. eine abweichende aktive Instanz.
+  - **Fehler bei der Einrichtung** (`failSetup`): Bleibt der Trenn-Callback 2 s aus, gibt die App die Instanz selbst frei.
+  - **App schließen** (`destroy()` aus `ViewModel.onCleared`): Scan stoppen, laufenden Verbindungsaufbau abbrechen, GATT freigeben.
+  - **Neuverbinden:** Eine alte Instanz wird vorher still freigegeben (`closeGattQuietly`), und die App wartet 400–600 ms, bevor sie neu verbindet.
 
 ## 4. Lokalisierung & Text-Disziplin
 

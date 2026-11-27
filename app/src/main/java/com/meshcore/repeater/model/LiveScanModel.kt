@@ -130,11 +130,14 @@ object LiveScanRules {
     fun keepLearnedName(contact: MeshContact, learned: String?): MeshContact =
         if (learned != null && isPlaceholderName(contact.name, contact.pubKeyHex)) contact.copy(name = learned) else contact
 
-    /** Kontakt für Login-Bereich: bekannter Kontakt behält Name/Pfad und bekommt die Live-Werte, sonst neu (direkt). */
+    /**
+     * Kontakt für Login-Bereich: bekannter Kontakt behält Name/Pfad und bekommt die Live-Werte. Ein neuer Kontakt hat
+     * Pfad „unbekannt“ (-1 = OUT_PATH_UNKNOWN): Der Companion darf den Login fluten und lernt den Pfad aus der Antwort.
+     */
     fun toContact(r: LiveRepeater, known: MeshContact?): MeshContact =
         known?.copy(name = displayName(r, known), snr = r.snr, rssi = r.rssi, lastSeenMillis = r.seenAtMs) ?: MeshContact(
             pubKey = r.pubKey, pubKeyHex = r.pubKeyHex, keyPrefix = r.pubKeyHex.take(12), type = 2,
-            outPathLen = 0, name = displayName(r, null), snr = r.snr, rssi = r.rssi, lastSeenMillis = r.seenAtMs
+            outPathLen = -1, name = displayName(r, null), snr = r.snr, rssi = r.rssi, lastSeenMillis = r.seenAtMs
         )
 
     /** „SNR +11,5 dB“ – Dezimalkomma außer im Englischen. */

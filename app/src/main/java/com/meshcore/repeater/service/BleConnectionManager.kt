@@ -176,18 +176,32 @@ class BleConnectionManager(
         }
     }
 
+    /**
+     * GATT-Objekt vollständig freigeben (v1.25, STYLE_GUIDE §3.7): erst `disconnect()`, dann **immer** `close()` – jeweils
+     * einzeln abgesichert, damit eine Exception in disconnect() das close() nicht überspringt. Das Objekt wird als
+     * [closedGatt] gemerkt: späte Callbacks dieser Instanz werden ignoriert (kein doppeltes "Getrennt").
+     * Danach hält die App keine Referenz mehr (activeGatt = null), sonst bleibt im Android-Stack bzw. auf dem nRF52-Node
+     * ein belegter BLE-Slot hängen.
+     */
+    @SuppressLint("MissingPermission")
+    private fun releaseGatt(g: BluetoothGatt?) {
+        if (g == null) return
+        closedGatt = g
+        try { g.disconnect() } catch (_: Exception) {}
+        try { g.close() } catch (_: Exception) {}
+        if (activeGatt === g) activeGatt = null
+    }
+
     /** Schließt eine evtl. offene GATT-Instanz OHNE onConnectionChanged-Callback (kein falsches "Getrennt" beim Verbinden). */
     @SuppressLint("MissingPermission")
     private fun closeGattQuietly(): Boolean {
         val g = activeGatt ?: return false
         stopWriter()
-        closedGatt = g
         userDisconnect = true
-        activeGatt = null
         rxCharacteristic = null
         linkEstablished = false
-        try { g.disconnect() } catch (_: Exception) {}
-        try { g.close() } catch (_: Exception) {}
+        releaseGatt(g)
+        activeGatt = null
         return true
     }
 
@@ -225,6 +239,16 @@ class BleConnectionManager(
     private fun failSetup(gatt: BluetoothGatt, msg: String) {
         scope.launch(Dispatchers.Main) { onError(msg) }
         try { gatt.disconnect() } catch (_: Exception) {}
+        // Normalerweise schließt der folgende STATE_DISCONNECTED-Callback. Bleibt er aus, nach 2 s selbst freigeben,
+        // damit kein offenes Handle hängen bleibt (ohne Callback: der Nutzer sieht den Fehler bereits).
+        scope.launch(Dispatchers.Main) {
+            delay(2000L)
+            if (activeGatt === gatt) {
+                stopWriter(); linkEstablished = false; readyNotified = false; rxCharacteristic = null
+                releaseGatt(gatt)
+                onConnectionChanged(false, null)
+            }
+        }
     }
 
     private val gattCallback = object : BluetoothGattCallback() {
@@ -248,7 +272,10 @@ class BleConnectionManager(
                 readyNotified = false
                 mtuFallbackJob?.cancel()
                 stopWriter()
-                try { activeGatt?.close() } catch (_: Exception) {}
+                // Genau die Instanz dieses Callbacks freigeben (auch wenn activeGatt schon null ist) und ggf. die aktive
+                val current = activeGatt
+                releaseGatt(gatt)
+                if (current != null && current !== gatt) releaseGatt(current)
                 activeGatt = null
                 rxCharacteristic = null
                 val retryAddr = connectRetryAddress
@@ -438,14 +465,13 @@ class BleConnectionManager(
         readyNotified = false
         connectRetryAddress = null
         userDisconnect = true
+        val wasActive = activeGatt != null || linkEstablished
         linkEstablished = false
-        try {
-            activeGatt?.disconnect()
-            activeGatt?.close()
-        } catch (_: Exception) {}
+        releaseGatt(activeGatt)   // disconnect() + close(), späte Callbacks dieser Instanz werden ignoriert
         activeGatt = null
         rxCharacteristic = null
-        onConnectionChanged(false, null)
+        // Genau ein "Getrennt" pro Verbindung: kein zweites, wenn schon nichts mehr offen war
+        if (wasActive) onConnectionChanged(false, null)
     }
 
     private fun describeGattStatus(status: Int): String = when (status) {
@@ -457,8 +483,10 @@ class BleConnectionManager(
         else -> tr("Bluetooth-Verbindung verloren (Status {0}).", status)
     }
 
+    /** App wird geschlossen (ViewModel.onCleared): Scan stoppen, laufenden Verbindungsaufbau abbrechen, GATT freigeben. */
     fun destroy() {
         stopScan()
+        connectJob?.cancel()
         disconnect()
     }
 }

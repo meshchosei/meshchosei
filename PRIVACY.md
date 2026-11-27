@@ -1,6 +1,6 @@
 # Datenschutz – meshchōsei
 
-Stand: 2026-11-26 (Version 1.20)
+Stand: 2026-11-27 (Version 1.25)
 
 meshchōsei betreibt **keine eigenen Server**, enthält **kein Tracking**, keine Werbung und keine Analyse-Bibliotheken. Die App erhebt keine Nutzungsdaten.
 
@@ -30,6 +30,22 @@ meshchōsei betreibt **keine eigenen Server**, enthält **kein Tracking**, keine
 - Ohne Internet oder bei Fehlern passiert nichts: kein Hinweis, keine Meldung. Ist eine neuere Version verfügbar, zeigt der Verbindungs-Screen einen Hinweis. Die Release-Seite öffnet sich nur, wenn du ihn antippst.
 
 Kartenkacheln und Versions-Check sind die einzigen Internetzugriffe der App (Berechtigung `INTERNET`).
+
+## 5. Debug-Bericht für Fehlermeldungen (optional, seit Version 1.25)
+
+- Unter **„Über & Lizenz“ → „Fehler melden“** kann ein Debug-Bericht erstellt werden. Er entsteht **nur lokal und nur, wenn du den Button „Debug-Informationen sammeln“ antippst**. Es werden **keinerlei Diagnosedaten automatisch übertragen**, auch nicht im Hintergrund.
+- Inhalt: App- und Android-Version, Gerätemodell, gewählte Sprache und Palette, Verbindungsart, die Gerätedaten des **Companion-Nodes** (Name, Modell, Firmware, Build-Datum, Protokollversion, Funkparameter) und des **Ziel-Repeaters** (Board, Funkchip, Firmware, Bootloader-Version, Fähigkeiten), die letzten Status- und Fehlermeldungen sowie das CLI- und System-Protokoll der laufenden Sitzung. Die **BLE-PIN** und die **GPS-Position** des Companion-Nodes werden nie aufgenommen.
+- **Passwörter und Schlüssel werden ausgeschlossen:** Privater Schlüssel (`prv.key`), Admin- und Gast-Passwörter, `wifi.pass` und `mqtt.*.password` werden vor der Anzeige durch `[REDACTED]` ersetzt. Das gilt auch für alle in der App gespeicherten Admin-Passwörter, wo immer sie im Text vorkommen.
+- Der Bericht wird dir vollständig angezeigt. Du entscheidest selbst, ob du ihn **kopierst** oder **als Datei speicherst**, und du kannst vor dem Teilen (z. B. in einem GitHub-Issue) beliebige Zeilen entfernen. Er bleibt im Arbeitsspeicher und wird nicht dauerhaft abgelegt, außer du speicherst ihn selbst.
+
+---
+
+## Debug report (optional, since version 1.25) – English
+
+- Under **“About & license” → “Report a bug”** you can create a debug report. It is created **locally only, and only when you tap “Collect debug information”**. **No diagnostic data is ever transmitted automatically**, not even in the background.
+- Contents: app and Android version, device model, selected language and palette, connection type, the device data of the **companion node** (name, model, firmware, build date, protocol version, radio settings) and of the **target repeater** (board, radio chip, firmware, bootloader version, capabilities), the latest status and error messages, and the CLI and system log of the current session. The companion node's **BLE PIN** and **GPS position** are never included.
+- **Passwords and keys are excluded:** the private key (`prv.key`), admin and guest passwords, `wifi.pass` and `mqtt.*.password` are replaced by `[REDACTED]` before the report is shown. This also applies to every admin password stored in the app, wherever it appears in the text.
+- The full report is shown to you. You decide whether to **copy** it or **save it as a file**, and you can remove any line before sharing it (e.g. in a GitHub issue). It stays in memory and is not stored permanently unless you save it yourself.
 
 ## Kontakt & Quellcode
 

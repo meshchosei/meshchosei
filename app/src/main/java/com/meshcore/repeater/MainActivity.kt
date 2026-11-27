@@ -152,6 +152,17 @@ fun MainAppContent(viewModel: RepeaterViewModel) {
     LaunchedEffect(disclaimerAccepted) { showDisclaimerForced = !disclaimerAccepted }
     var showDisclaimerInfo by remember { mutableStateOf(false) }
     val act = androidx.compose.ui.platform.LocalContext.current.findActivity()
+    // v1.25: Bildschirm wach halten, solange eine Verbindung aufgebaut wird/steht oder eingelesen/gescannt wird –
+    // sonst kappt Android beim Sperren die GATT-Verbindung und auf dem nRF52-Node bleibt ein BLE-Slot hängen.
+    val activeRead by viewModel.activeReadStatusText.collectAsState()
+    val bleScanning by viewModel.isScanningBle.collectAsState()
+    val keepScreenOn = com.meshcore.repeater.model.ScreenWakeRules.keepScreenOn(connectionState, setupReading || activeRead != null || bleScanning)
+    DisposableEffect(keepScreenOn, act) {
+        val w = act?.window
+        if (keepScreenOn) w?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else w?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        onDispose { w?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+    }
     if (showDisclaimerForced) { DisclaimerDialog(isInitialAcceptance = true, onAccept = { viewModel.acceptDisclaimer(); showDisclaimerForced = false }, onDismiss = { act?.finishAffinity() }) }
     if (showDisclaimerInfo) { DisclaimerDialog(isInitialAcceptance = false, onDismiss = { showDisclaimerInfo = false }) }
     // Update-Hinweis (v1.19): zentrierter Dialog, erst wenn kein Haftungsausschluss mehr offen ist
